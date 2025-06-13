@@ -1,6 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
@@ -12,7 +12,13 @@ const firebaseConfig = {
   measurementId: "G-7YT6MMR47X"
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -71,6 +77,7 @@ const errorMessage = document.getElementById('error-message');
 const passwordInput = document.getElementById('password');
 const passwordToggle = document.getElementById('password-toggle');
 const capsLockMessage = document.getElementById('caps-lock-message');
+const modalLoginButton = document.getElementById('modal-login-btn');
 
 if (savedMode === 'dark') {
     body.classList.add('dark-mode');
@@ -103,6 +110,9 @@ closeModalButton.addEventListener('click', () => {
     passwordToggle.classList.remove('fa-eye-slash');
     passwordToggle.classList.add('fa-eye');
     capsLockMessage.classList.add('hidden');
+    modalLoginButton.disabled = false;
+    modalLoginButton.classList.remove('loading');
+    modalLoginButton.textContent = 'Ingresar';
 });
 
 passwordToggle.addEventListener('click', () => {
@@ -140,17 +150,17 @@ const submenuData = {
       js: 'modulos/usuarios/registros/registros.js'
     }
   ],
-    Implantes: [
-        { name: 'Cargos Implantes', icon: 'fa-tooth', html: 'module/implantes/cargosimplantes/cargosimplantes.html', css: 'module/implantes/cargosimplantes/cargosimplantes.css', js: 'module/implantes/cargosimplantes/cargosimplantes.js' },
-        { name: 'Cargos Consignación', icon: 'fa-box', html: 'module/implantes/cargosconsignacion/cargosconsignacion.html', css: 'module/implantes/cargosconsignacion/cargosconsignacion.css', js: 'module/implantes/cargosconsignacion/cargosconsignacion.js' },
-        { name: 'Pacientes Implantes', icon: 'fa-user', html: 'module/implantes/pacientesimplantes/pacientesimplantes.html', css: 'module/implantes/pacientesimplantes/pacientesimplantes.css', js: 'module/implantes/pacientesimplantes/pacientesimplantes.js' },
-        { name: 'Pacientes Consignación', icon: 'fa-user-injured', html: 'module/implantes/pacientesconsignacion/pacientesconsignacion.html', css: 'module/implantes/pacientesconsignacion/pacientesconsignacion.css', js: 'module/implantes/pacientesconsignacion/pacientesconsignacion.js' },
-        { name: 'Referencias', icon: 'fa-link', html: 'module/implantes/referencias/referencias.html', css: 'module/implantes/referencias/referencias.css', js: 'module/implantes/referencias/referencias.js' },
-        { name: 'Paquetización', icon: 'fa-boxes', html: 'module/implantes/paquetizacion/paquetizacion.html', css: 'module/implantes/paquetizacion/paquetizacion.css', js: 'module/implantes/paquetizacion/paquetizacion.js' },
-        { name: 'Mantenedor', icon: 'fa-warehouse', html: 'module/implantes/mantenedor/mantenedor.html', css: 'module/implantes/mantenedor/mantenedor.css', js: 'module/implantes/mantenedor/mantenedor.js' },
-        { name: 'Tránsito', icon: 'fa-route', html: 'module/implantes/transito/transito.html', css: 'module/implantes/transito/transito.css', js: 'module/implantes/transito/transito.js' },
-        { name: 'Contenedores', icon: 'fa-box-archive', html: 'module/implantes/contenedores/contenedores.html', css: 'module/implantes/contenedores/contenedores.css', js: 'module/implantes/contenedores/contenedores.js' }
-    ],
+  Implantes: [
+    { name: 'Cargos Implantes', icon: 'fa-tooth', html: 'module/implantes/cargosimplantes/cargosimplantes.html', css: 'module/implantes/cargosimplantes/cargosimplantes.css', js: 'module/implantes/cargosimplantes/cargosimplantes.js' },
+    { name: 'Cargos Consignación', icon: 'fa-box', html: 'module/implantes/cargosconsignacion/cargosconsignacion.html', css: 'module/implantes/cargosconsignacion/cargosconsignacion.css', js: 'module/implantes/cargosconsignacion/cargosconsignacion.js' },
+    { name: 'Pacientes Implantes', icon: 'fa-user', html: 'module/implantes/pacientesimplantes/pacientesimplantes.html', css: 'module/implantes/pacientesimplantes/pacientesimplantes.css', js: 'module/implantes/pacientesimplantes/pacientesimplantes.js' },
+    { name: 'Pacientes Consignación', icon: 'fa-user-injured', html: 'module/implantes/pacientesconsignacion/pacientesconsignacion.html', css: 'module/implantes/pacientesconsignacion/pacientesconsignacion.css', js: 'module/implantes/pacientesconsignacion/pacientesconsignacion.js' },
+    { name: 'Referencias', icon: 'fa-link', html: 'module/implantes/referencias/referencias.html', css: 'module/implantes/referencias/referencias.css', js: 'module/implantes/referencias/referencias.js' },
+    { name: 'Paquetización', icon: 'fa-boxes', html: 'module/implantes/paquetizacion/paquetizacion.html', css: 'module/implantes/paquetizacion/paquetizacion.css', js: 'module/implantes/paquetizacion/paquetizacion.js' },
+    { name: 'Mantenedor', icon: 'fa-warehouse', html: 'module/implantes/mantenedor/mantenedor.html', css: 'module/implantes/mantenedor/mantenedor.css', js: 'module/implantes/mantenedor/mantenedor.js' },
+    { name: 'Tránsito', icon: 'fa-route', html: 'module/implantes/transito/transito.html', css: 'module/implantes/transito/transito.css', js: 'module/implantes/transito/transito.js' },
+    { name: 'Contenedores', icon: 'fa-box-archive', html: 'module/implantes/contenedores/contenedores.html', css: 'module/implantes/contenedores/contenedores.css', js: 'module/implantes/contenedores/contenedores.js' }
+  ],
   Consignacion: [
     { name: 'Asignación', icon: 'fa-clipboard-list', html: 'modulos/consignacion/asignacion/asignacion.html', css: 'modulos/consignacion/asignacion/asignacion.css', js: 'modulos/consignacion/asignacion/asignacion.js' },
     { name: 'Ficha', icon: 'fa-file-alt', html: 'modulos/consignacion/ficha/ficha.html', css: 'modulos/consignacion/ficha/ficha.css', js: 'modulos/consignacion/ficha/ficha.js' },
@@ -190,15 +200,21 @@ const submenuData = {
   ]
 };
 
-
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    modalLoginButton.disabled = true;
+    modalLoginButton.classList.add('loading');
+    modalLoginButton.textContent = 'Iniciando sesión...';
+
     const username = document.getElementById('username').value.trim();
     const password = passwordInput.value;
 
     if (!username || !password) {
         errorMessage.textContent = 'Por favor, complete todos los campos.';
         errorMessage.classList.remove('hidden');
+        modalLoginButton.disabled = false;
+        modalLoginButton.classList.remove('loading');
+        modalLoginButton.textContent = 'Ingresar';
         return;
     }
 
@@ -209,6 +225,9 @@ loginForm.addEventListener('submit', async (e) => {
         if (!usernameSnap.exists()) {
             errorMessage.textContent = 'Usuario no encontrado.';
             errorMessage.classList.remove('hidden');
+            modalLoginButton.disabled = false;
+            modalLoginButton.classList.remove('loading');
+            modalLoginButton.textContent = 'Ingresar';
             return;
         }
 
@@ -221,6 +240,9 @@ loginForm.addEventListener('submit', async (e) => {
         if (user.uid !== userId) {
             errorMessage.textContent = 'Error: ID de usuario no coincide.';
             errorMessage.classList.remove('hidden');
+            modalLoginButton.disabled = false;
+            modalLoginButton.classList.remove('loading');
+            modalLoginButton.textContent = 'Ingresar';
             return;
         }
 
@@ -229,6 +251,9 @@ loginForm.addEventListener('submit', async (e) => {
         if (!userSnap.exists()) {
             errorMessage.textContent = 'Datos de usuario no encontrados.';
             errorMessage.classList.remove('hidden');
+            modalLoginButton.disabled = false;
+            modalLoginButton.classList.remove('loading');
+            modalLoginButton.textContent = 'Ingresar';
             return;
         }
 
@@ -253,6 +278,9 @@ loginForm.addEventListener('submit', async (e) => {
         passwordToggle.classList.remove('fa-eye-slash');
         passwordToggle.classList.add('fa-eye');
         capsLockMessage.classList.add('hidden');
+        modalLoginButton.disabled = false;
+        modalLoginButton.classList.remove('loading');
+        modalLoginButton.textContent = 'Ingresar';
     } catch (error) {
         console.error('Error en el inicio de sesión:', error.code, error.message);
         let errorText = 'Error al iniciar sesión. Por favor, intenta de nuevo.';
@@ -277,5 +305,8 @@ loginForm.addEventListener('submit', async (e) => {
         }
         errorMessage.textContent = errorText;
         errorMessage.classList.remove('hidden');
+        modalLoginButton.disabled = false;
+        modalLoginButton.classList.remove('loading');
+        modalLoginButton.textContent = 'Ingresar';
     }
 });
