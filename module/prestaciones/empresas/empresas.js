@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, where, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import * as XLSX from "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, where, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
@@ -14,14 +14,23 @@ const firebaseConfig = {
 };
 
 let app;
-if (!getApps().length) {
+try {
+  if (!getApps().length) {
     app = initializeApp(firebaseConfig);
-} else {
+  } else {
     app = getApp();
+  }
+} catch (error) {
+  console.error('Error al inicializar Firebase:', error);
+  throw error;
 }
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.error('Error al configurar persistencia:', error);
+});
 
 const nombreEmpresaInput = document.getElementById('nombre-empresa');
 const rutEmpresaInput = document.getElementById('rut-empresa');
@@ -127,21 +136,28 @@ async function getNextEmpresaId() {
 }
 
 function showModal(modal, progressElement, percentage) {
+  if (!modal) return;
   modal.style.display = 'flex';
-  if (progressElement) {
+  if (progressElement && percentage !== null) {
     progressElement.textContent = `${percentage}%`;
   }
 }
 
 function hideModal(modal) {
+  if (!modal) return;
   modal.style.display = 'none';
 }
 
 function showSuccessMessage(message, isSuccess = true) {
+  if (!successModal || !successIcon || !successMessage) {
+    console.warn('Elementos de éxito no encontrados');
+    alert(message);
+    return;
+  }
   successModal.className = `modal ${isSuccess ? 'success' : 'error'}`;
   successIcon.className = `fas ${isSuccess ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
   successMessage.textContent = message;
-  successModal.style.display = 'flex';
+  showModal(successModal);
   setTimeout(() => hideModal(successModal), 2000);
 }
 
@@ -172,6 +188,7 @@ async function loadEmpresas() {
     tableContainer.style.display = 'block';
     hideModal(loadingModal);
   } catch (error) {
+    console.error('Error al cargar empresas:', error);
     showSuccessMessage('Error al cargar empresas: ' + error.message, false);
     hideModal(loadingModal);
   }
@@ -218,7 +235,6 @@ function renderTable() {
     empresasTableBody.appendChild(tr);
   });
 
-  // Actualizar íconos de filtro según el estado de filters
   document.querySelectorAll('.filter-icon').forEach(icon => {
     const column = icon.dataset.column;
     if (filters[column]) {
@@ -232,40 +248,46 @@ function renderTable() {
 }
 
 function updatePagination() {
+  if (!pageInfo) return;
   pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
   prevBtn.disabled = currentPage === 1;
   nextBtn.disabled = currentPage === totalPages;
 }
 
 async function loadLogs(empresaId) {
-  const logsCollection = collection(db, 'empresas', empresaId, 'logs');
-  const logsQuery = query(logsCollection, orderBy('timestamp', 'desc'));
-  const logsSnapshot = await getDocs(logsQuery);
-  logContent.innerHTML = '';
-  if (logsSnapshot.empty) {
-    logContent.innerHTML = '<p>No hay registros de cambios.</p>';
-  } else {
-    logsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      const timestamp = data.timestamp && typeof data.timestamp.toDate === 'function'
-        ? data.timestamp.toDate()
-        : data.timestamp instanceof Date
-        ? data.timestamp
-        : null;
-      const fechaDisplay = timestamp && !isNaN(timestamp)
-        ? timestamp.toLocaleString('es-ES')
-        : 'Sin fecha';
-      const logEntry = document.createElement('div');
-      logEntry.className = 'log-entry';
-      logEntry.innerHTML = `
-        <strong>${data.action === 'created' ? 'Creado' : 'Modificado'}</strong>: 
-        ${data.details}<br>
-        <small>Fecha: ${fechaDisplay} | Usuario: ${data.user}</small>
-      `;
-      logContent.appendChild(logEntry);
-    });
+  try {
+    const logsCollection = collection(db, 'empresas', empresaId, 'logs');
+    const logsQuery = query(logsCollection, orderBy('timestamp', 'desc'));
+    const logsSnapshot = await getDocs(logsQuery);
+    logContent.innerHTML = '';
+    if (logsSnapshot.empty) {
+      logContent.innerHTML = '<p>No hay registros de cambios.</p>';
+    } else {
+      logsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const timestamp = data.timestamp && typeof data.timestamp.toDate === 'function'
+          ? data.timestamp.toDate()
+          : data.timestamp instanceof Date
+          ? data.timestamp
+          : null;
+        const fechaDisplay = timestamp && !isNaN(timestamp)
+          ? timestamp.toLocaleString('es-ES')
+          : 'Sin fecha';
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `
+          <strong>${data.action === 'created' ? 'Creado' : data.action === 'modified' ? 'Modificado' : 'Eliminado'}</strong>: 
+          ${data.details}<br>
+          <small>Fecha: ${fechaDisplay} | Usuario: ${data.user}</small>
+        `;
+        logContent.appendChild(logEntry);
+      });
+    }
+    showModal(logModal);
+  } catch (error) {
+    console.error('Error al cargar logs:', error);
+    showSuccessMessage('Error al cargar historial: ' + error.message, false);
   }
-  showModal(logModal);
 }
 
 async function init() {
@@ -275,343 +297,364 @@ async function init() {
     return;
   }
 
-  onAuthStateChanged(auth, async (user) => {
+  try {
+    const user = await new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          unsubscribe();
+          resolve(user);
+        } else {
+          setTimeout(() => {
+            if (auth.currentUser) {
+              unsubscribe();
+              resolve(auth.currentUser);
+            } else {
+              unsubscribe();
+              resolve(null);
+            }
+          }, 2000); // Esperar 2 segundos para sincronización
+        }
+      }, (error) => {
+        console.error('Error en onAuthStateChanged:', error);
+        unsubscribe();
+        reject(error);
+      });
+    });
+
     if (!user) {
+      console.error('No hay usuario autenticado');
       container.innerHTML = '<p>Error: No estás autenticado. Por favor, inicia sesión nuevamente.</p>';
-      window.location.href = 'main.html?error=auth-required';
+      setTimeout(() => {
+        window.location.href = 'main.html?error=auth-required';
+      }, 2000);
       return;
     }
 
-    try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        container.innerHTML = '<p>Error: Tu cuenta no está registrada en la base de datos. Contacta al administrador.</p>';
-        return;
-      }
-
-      const userData = userDoc.data();
-      const hasAccess = userData.role === 'Administrador' ||
-                        (userData.permissions && userData.permissions.includes('Prestaciones:Empresas'));
-      if (!hasAccess) {
-        container.innerHTML = '<p>Acceso denegado. No tienes permisos para acceder a este módulo.</p>';
-        return;
-      }
-
-      loadEmpresas();
-
-      registrarBtn.addEventListener('click', async () => {
-        const nombreEmpresa = nombreEmpresaInput.value.trim();
-        const rutEmpresa = rutEmpresaInput.value.trim();
-        
-        if (!nombreEmpresa || !rutEmpresa) {
-          showSuccessMessage('Por favor, complete todos los campos', false);
-          return;
-        }
-        
-        if (!validateRUT(rutEmpresa)) {
-          showSuccessMessage('RUT inválido', false);
-          return;
-        }
-        
-        try {
-          showModal(registerModal, registerProgress, 0);
-          
-          const duplicateCheck = await checkDuplicate(nombreEmpresa, rutEmpresa);
-          if (duplicateCheck.isDuplicate) {
-            showSuccessMessage(`Error: Ya existe una empresa con ${duplicateCheck.field === 'nombreEmpresa' ? 'el nombre' : 'el RUT'} "${duplicateCheck.value}"`, false);
-            hideModal(registerModal);
-            return;
-          }
-          
-          const user = auth.currentUser;
-          if (!user) throw new Error('Usuario no autenticado');
-          
-          const fullName = await getUserFullName();
-          const empresaId = await getNextEmpresaId();
-          const fechaCreacion = new Date();
-          
-          const empresaRef = doc(collection(db, 'empresas'));
-          const empresaData = {
-            empresaId,
-            nombreEmpresa,
-            rutEmpresa,
-            estado: 'Activo',
-            fechaCreacion,
-            usuario: fullName,
-            uid: user.uid
-          };
-          const batch = writeBatch(db);
-          batch.set(empresaRef, empresaData);
-          const logRef = doc(collection(db, 'empresas', empresaRef.id, 'logs'));
-          batch.set(logRef, {
-            action: 'created',
-            details: `Empresa "${nombreEmpresa}" creada`,
-            timestamp: new Date(),
-            user: fullName,
-            uid: user.uid
-          });
-          
-          await batch.commit();
-          
-          showModal(registerModal, registerProgress, 100);
-          setTimeout(() => {
-            hideModal(registerModal);
-            showSuccessMessage('Empresa registrada exitosamente');
-            nombreEmpresaInput.value = '';
-            rutEmpresaInput.value = '';
-            empresas.push({ docId: empresaRef.id, ...empresaData });
-            renderTable();
-          }, 300);
-        } catch (error) {
-          showSuccessMessage('Error al registrar empresa: ' + error.message, false);
-          hideModal(registerModal);
-        }
-      });
-
-      saveEditBtn.addEventListener('click', async () => {
-        const nombreEmpresa = editNombreEmpresaInput.value.trim();
-        const rutEmpresa = editRutEmpresaInput.value.trim();
-        const estado = editEstadoActivo.checked ? 'Activo' : 'Inactivo';
-        
-        if (!nombreEmpresa || !rutEmpresa) {
-          showSuccessMessage('Por favor, complete todos los campos', false);
-          return;
-        }
-        
-        if (!validateRUT(rutEmpresa)) {
-          showSuccessMessage('RUT inválido', false);
-          return;
-        }
-        
-        try {
-          const duplicateCheck = await checkDuplicate(nombreEmpresa, rutEmpresa, currentEditId);
-          if (duplicateCheck.isDuplicate) {
-            showSuccessMessage(`Error: Ya existe una empresa con ${duplicateCheck.field === 'nombreEmpresa' ? 'el nombre' : 'el RUT'} "${duplicateCheck.value}"`, false);
-            return;
-          }
-          
-          const empresaRef = doc(db, 'empresas', currentEditId);
-          const empresaSnap = await getDoc(empresaRef);
-          const oldData = empresaSnap.data();
-          
-          const changes = [];
-          if (oldData.nombreEmpresa !== nombreEmpresa) {
-            changes.push(`Nombre cambiado de "${oldData.nombreEmpresa}" a "${nombreEmpresa}"`);
-          }
-          if (oldData.rutEmpresa !== rutEmpresa) {
-            changes.push(`RUT cambiado de "${oldData.rutEmpresa}" a "${rutEmpresa}"`);
-          }
-          if (oldData.estado !== estado) {
-            changes.push(`Estado cambiado de "${oldData.estado}" a "${estado}"`);
-          }
-          
-          const fullName = await getUserFullName();
-          
-          const batch = writeBatch(db);
-          batch.update(empresaRef, {
-            nombreEmpresa,
-            rutEmpresa,
-            estado,
-            usuario: fullName,
-            fechaActualizacion: new Date()
-          });
-          
-          if (changes.length > 0) {
-            const logRef = doc(collection(db, 'empresas', currentEditId, 'logs'));
-            batch.set(logRef, {
-              action: 'modified',
-              details: changes.join('; '),
-              timestamp: new Date(),
-              user: fullName,
-              uid: auth.currentUser.uid
-            });
-          }
-          
-          await batch.commit();
-          
-          hideModal(editModal);
-          showSuccessMessage('Empresa actualizada exitosamente');
-          
-          const index = empresas.findIndex(emp => emp.docId === currentEditId);
-          if (index !== -1) {
-            empresas[index] = { ...empresas[index], nombreEmpresa, rutEmpresa, estado, usuario: fullName, fechaActualizacion: new Date() };
-            renderTable();
-          }
-        } catch (error) {
-          showSuccessMessage('Error al actualizar empresa: ' + error.message, false);
-        }
-      });
-
-      cancelEditBtn.addEventListener('click', () => {
-        hideModal(editModal);
-      });
-
-      confirmDeleteBtn.addEventListener('click', async () => {
-        const id = confirmDeleteBtn.dataset.id;
-        try {
-          const empresaRef = doc(db, 'empresas', id);
-          const fullName = await getUserFullName();
-          const batch = writeBatch(db);
-          batch.delete(empresaRef);
-          const logRef = doc(collection(db, 'empresas', id, 'logs'));
-          batch.set(logRef, {
-            action: 'deleted',
-            details: `Empresa eliminada`,
-            timestamp: new Date(),
-            user: fullName,
-            uid: auth.currentUser.uid
-          });
-          await batch.commit();
-          hideModal(deleteModal);
-          showSuccessMessage('Empresa eliminada exitosamente');
-          empresas = empresas.filter(emp => emp.docId !== id);
-          renderTable();
-          totalRecords.textContent = `Total de registros: ${empresas.length}`;
-          totalPages = Math.ceil(empresas.length / recordsPerPage);
-          updatePagination();
-        } catch (error) {
-          showSuccessMessage('Error al eliminar empresa: ' + error.message, false);
-        }
-      });
-
-      cancelDeleteBtn.addEventListener('click', () => {
-        hideModal(deleteModal);
-      });
-
-      empresasTableBody.addEventListener('click', (e) => {
-        const id = e.target.dataset.id;
-        const empresa = empresas.find(emp => emp.docId === id);
-        if (!empresa) return;
-        
-        if (e.target.classList.contains('fa-edit')) {
-          openEditModal(empresa);
-        } else if (e.target.classList.contains('fa-trash')) {
-          openDeleteModal(empresa);
-        } else if (e.target.classList.contains('fa-eye')) {
-          const fechaCreacion = empresa.fechaCreacion && typeof empresa.fechaCreacion.toDate === 'function'
-            ? empresa.fechaCreacion.toDate()
-            : empresa.fechaCreacion instanceof Date
-            ? empresa.fechaCreacion
-            : null;
-          const fechaDisplay = fechaCreacion && !isNaN(fechaCreacion)
-            ? fechaCreacion.toLocaleString('es-ES')
-            : 'Sin fecha';
-          showSuccessMessage(`Detalles de la empresa:\nID: ${empresa.empresaId}\nNombre: ${empresa.nombreEmpresa}\nRUT: ${empresa.rutEmpresa}\nEstado: ${empresa.estado || 'Activo'}\nCreada: ${fechaDisplay}\nUsuario: ${empresa.usuario}`);
-        } else if (e.target.classList.contains('fa-history')) {
-          loadLogs(empresa.docId);
-        }
-      });
-
-      closeLogBtn.addEventListener('click', () => {
-        hideModal(logModal);
-      });
-
-      prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-          currentPage--;
-          lastVisible = firstVisible;
-          loadEmpresas();
-        }
-      });
-
-      nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-          currentPage++;
-          loadEmpresas();
-        }
-      });
-
-      exportExcelBtn.addEventListener('click', () => {
-        if (typeof window.XLSX === 'undefined' || !window.XLSX.utils || !window.XLSX.utils.json_to_sheet) {
-          console.error('La biblioteca SheetJS no está cargada.');
-          showSuccessMessage('Error: No se pudo cargar la biblioteca para exportar a Excel.', false);
-          return;
-        }
-        const data = empresas.map(empresa => {
-          const fechaCreacion = empresa.fechaCreacion && typeof empresa.fechaCreacion.toDate === 'function'
-            ? empresa.fechaCreacion.toDate()
-            : empresa.fechaCreacion instanceof Date
-            ? empresa.fechaCreacion
-            : null;
-          return {
-            ID: empresa.empresaId,
-            'Nombre de la Empresa': empresa.nombreEmpresa,
-            'RUT de la Empresa': empresa.rutEmpresa,
-            'Estado': empresa.estado || 'Activo',
-            'Fecha de Creación': fechaCreacion && !isNaN(fechaCreacion)
-              ? fechaCreacion.toLocaleString('es-ES')
-              : 'Sin fecha',
-            Usuario: empresa.usuario
-          };
-        });
-        const worksheet = window.XLSX.utils.json_to_sheet(data);
-        const workbook = window.XLSX.utils.book_new();
-        window.XLSX.utils.book_append_sheet(workbook, worksheet, 'Empresas');
-        window.XLSX.writeFile(workbook, 'empresas.xlsx');
-      });
-
-      document.querySelectorAll('.filter-icon').forEach(icon => {
-        icon.addEventListener('click', (e) => {
-          const column = e.target.dataset.column;
-          if (column === 'acciones') return;
-
-          // Si el ícono indica un filtro activo, limpiarlo
-          if (e.target.classList.contains('fa-filter-circle-xmark')) {
-            delete filters[column];
-            renderTable();
-            return;
-          }
-
-          // Remueve cualquier contenedor de filtro existente
-          document.querySelectorAll('.filter-input-container').forEach(input => input.remove());
-
-          // Crea el nuevo contenedor de filtro
-          const container = document.createElement('div');
-          container.className = 'filter-input-container';
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.placeholder = `Filtrar por ${column}`;
-          input.value = filters[column] || '';
-          input.addEventListener('input', () => {
-            const value = input.value.trim();
-            if (value) {
-              filters[column] = value;
-            } else {
-              delete filters[column];
-            }
-            renderTable();
-          });
-          container.appendChild(input);
-          e.target.parentElement.appendChild(container);
-          input.focus();
-        });
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('fa-filter') && !e.target.classList.contains('fa-filter-circle-xmark') && !e.target.closest('.filter-input-container')) {
-          document.querySelectorAll('.filter-input-container').forEach(input => input.remove());
-        }
-      });
-
-    } catch (error) {
-      container.innerHTML = `<p>Error al verificar permisos: ${error.message}</p>`;
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      console.error('Documento de usuario no encontrado');
+      container.innerHTML = '<p>Error: Tu cuenta no está registrada en la base de datos. Contacta al administrador.</p>';
+      return;
     }
-  });
+
+    const userData = userDoc.data();
+    const hasAccess = userData.role === 'Administrador' ||
+      (userData.permissions && userData.permissions.includes('Prestaciones:Empresas'));
+    if (!hasAccess) {
+      console.error('Acceso denegado');
+      container.innerHTML = '<p>Acceso denegado. No tienes permisos para acceder a este módulo.</p>';
+      return;
+    }
+
+    await loadEmpresas();
+
+    registrarBtn.addEventListener('click', async () => {
+      const nombreEmpresa = nombreEmpresaInput.value.trim();
+      const rutEmpresa = rutEmpresaInput.value.trim();
+      
+      if (!nombreEmpresa || !rutEmpresa) {
+        showSuccessMessage('Por favor, complete todos los campos', false);
+        return;
+      }
+      
+      if (!validateRUT(rutEmpresa)) {
+        showSuccessMessage('RUT inválido', false);
+        return;
+      }
+      
+      try {
+        showModal(registerModal, registerProgress, 0);
+        
+        const duplicateCheck = await checkDuplicate(nombreEmpresa, rutEmpresa);
+        if (duplicateCheck.isDuplicate) {
+          showSuccessMessage(`Error: Ya existe una empresa con ${duplicateCheck.field === 'nombreEmpresa' ? 'el nombre' : 'el RUT'} "${duplicateCheck.value}"`, false);
+          hideModal(registerModal);
+          return;
+        }
+        
+        const fullName = await getUserFullName();
+        const empresaId = await getNextEmpresaId();
+        const fechaCreacion = new Date();
+        
+        const empresaRef = doc(collection(db, 'empresas'));
+        const empresaData = {
+          empresaId,
+          nombreEmpresa,
+          rutEmpresa,
+          estado: 'Activo',
+          fechaCreacion,
+          usuario: fullName,
+          uid: user.uid
+        };
+        const batch = writeBatch(db);
+        batch.set(empresaRef, empresaData);
+        const logRef = doc(collection(db, 'empresas', empresaRef.id, 'logs'));
+        batch.set(logRef, {
+          action: 'created',
+          details: `Empresa "${nombreEmpresa}" creada`,
+          timestamp: new Date(),
+          user: fullName,
+          uid: user.uid
+        });
+        
+        await batch.commit();
+        
+        showModal(registerModal, registerProgress, 100);
+        setTimeout(() => {
+          hideModal(registerModal);
+          showSuccessMessage('Empresa registrada exitosamente');
+          nombreEmpresaInput.value = '';
+          rutEmpresaInput.value = '';
+          empresas.push({ docId: empresaRef.id, ...empresaData });
+          renderTable();
+        }, 300);
+      } catch (error) {
+        console.error('Error al registrar empresa:', error);
+        showSuccessMessage('Error al registrar empresa: ' + error.message, false);
+        hideModal(registerModal);
+      }
+    });
+
+    saveEditBtn.addEventListener('click', async () => {
+      const nombreEmpresa = editNombreEmpresaInput.value.trim();
+      const rutEmpresa = editRutEmpresaInput.value.trim();
+      const estado = editEstadoActivo.checked ? 'Activo' : 'Inactivo';
+      
+      if (!nombreEmpresa || !rutEmpresa) {
+        showSuccessMessage('Por favor, complete todos los campos', false);
+        return;
+      }
+      
+      if (!validateRUT(rutEmpresa)) {
+        showSuccessMessage('RUT inválido', false);
+        return;
+      }
+      
+      try {
+        const duplicateCheck = await checkDuplicate(nombreEmpresa, rutEmpresa, currentEditId);
+        if (duplicateCheck.isDuplicate) {
+          showSuccessMessage(`Error: Ya existe una empresa con ${duplicateCheck.field === 'nombreEmpresa' ? 'el nombre' : 'el RUT'} "${duplicateCheck.value}"`, false);
+          return;
+        }
+        
+        const empresaRef = doc(db, 'empresas', currentEditId);
+        const empresaSnap = await getDoc(empresaRef);
+        const oldData = empresaSnap.data();
+        
+        const changes = [];
+        if (oldData.nombreEmpresa !== nombreEmpresa) {
+          changes.push(`Nombre cambiado de "${oldData.nombreEmpresa}" a "${nombreEmpresa}"`);
+        }
+        if (oldData.rutEmpresa !== rutEmpresa) {
+          changes.push(`RUT cambiado de "${oldData.rutEmpresa}" a "${rutEmpresa}"`);
+        }
+        if (oldData.estado !== estado) {
+          changes.push(`Estado cambiado de "${oldData.estado}" a "${estado}"`);
+        }
+        
+        const fullName = await getUserFullName();
+        
+        const batch = writeBatch(db);
+        batch.update(empresaRef, {
+          nombreEmpresa,
+          rutEmpresa,
+          estado,
+          usuario: fullName,
+          fechaActualizacion: new Date()
+        });
+        
+        if (changes.length > 0) {
+          const logRef = doc(collection(db, 'empresas', currentEditId, 'logs'));
+          batch.set(logRef, {
+            action: 'modified',
+            details: changes.join('; '),
+            timestamp: new Date(),
+            user: fullName,
+            uid: user.uid
+          });
+        }
+        
+        await batch.commit();
+        
+        hideModal(editModal);
+        showSuccessMessage('Empresa actualizada exitosamente');
+        
+        const index = empresas.findIndex(emp => emp.docId === currentEditId);
+        if (index !== -1) {
+          empresas[index] = { ...empresas[index], nombreEmpresa, rutEmpresa, estado, usuario: fullName, fechaActualizacion: new Date() };
+          renderTable();
+        }
+      } catch (error) {
+        console.error('Error al actualizar empresa:', error);
+        showSuccessMessage('Error al actualizar empresa: ' + error.message, false);
+      }
+    });
+
+    cancelEditBtn.addEventListener('click', () => {
+      hideModal(editModal);
+    });
+
+    confirmDeleteBtn.addEventListener('click', async () => {
+      const id = confirmDeleteBtn.dataset.id;
+      try {
+        const empresaRef = doc(db, 'empresas', id);
+        const fullName = await getUserFullName();
+        const batch = writeBatch(db);
+        batch.delete(empresaRef);
+        const logRef = doc(collection(db, 'empresas', id, 'logs'));
+        batch.set(logRef, {
+          action: 'deleted',
+          details: `Empresa eliminada`,
+          timestamp: new Date(),
+          user: fullName,
+          uid: user.uid
+        });
+        await batch.commit();
+        hideModal(deleteModal);
+        showSuccessMessage('Empresa eliminada exitosamente');
+        empresas = empresas.filter(emp => emp.docId !== id);
+        renderTable();
+        totalRecords.textContent = `Total de registros: ${empresas.length}`;
+        totalPages = Math.ceil(empresas.length / recordsPerPage);
+        updatePagination();
+      } catch (error) {
+        console.error('Error al eliminar empresa:', error);
+        showSuccessMessage('Error al eliminar empresa: ' + error.message, false);
+      }
+    });
+
+    cancelDeleteBtn.addEventListener('click', () => {
+      hideModal(deleteModal);
+    });
+
+    empresasTableBody.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      const empresa = empresas.find(emp => emp.docId === id);
+      if (!empresa) return;
+      
+      if (e.target.classList.contains('fa-edit')) {
+        openEditModal(empresa);
+      } else if (e.target.classList.contains('fa-trash')) {
+        openDeleteModal(empresa);
+      } else if (e.target.classList.contains('fa-eye')) {
+        const fechaCreacion = empresa.fechaCreacion && typeof empresa.fechaCreacion.toDate === 'function'
+          ? empresa.fechaCreacion.toDate()
+          : empresa.fechaCreacion instanceof Date
+          ? empresa.fechaCreacion
+          : null;
+        const fechaDisplay = fechaCreacion && !isNaN(fechaCreacion)
+          ? fechaCreacion.toLocaleString('es-ES')
+          : 'Sin fecha';
+        showSuccessMessage(`Detalles de la empresa:\nID: ${empresa.empresaId}\nNombre: ${empresa.nombreEmpresa}\nRUT: ${empresa.rutEmpresa}\nEstado: ${empresa.estado || 'Activo'}\nCreada: ${fechaDisplay}\nUsuario: ${empresa.usuario}`);
+      } else if (e.target.classList.contains('fa-history')) {
+        loadLogs(empresa.docId);
+      }
+    });
+
+    closeLogBtn.addEventListener('click', () => {
+      hideModal(logModal);
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        lastVisible = firstVisible;
+        loadEmpresas();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadEmpresas();
+      }
+    });
+
+    exportExcelBtn.addEventListener('click', () => {
+      const data = empresas.map(empresa => {
+        const fechaCreacion = empresa.fechaCreacion && typeof empresa.fechaCreacion.toDate === 'function'
+          ? empresa.fechaCreacion.toDate()
+          : empresa.fechaCreacion instanceof Date
+          ? empresa.fechaCreacion
+          : null;
+        return {
+          ID: empresa.empresaId,
+          'Nombre de la Empresa': empresa.nombreEmpresa,
+          'RUT de la Empresa': empresa.rutEmpresa,
+          'Estado': empresa.estado || 'Activo',
+          'Fecha de Creación': fechaCreacion && !isNaN(fechaCreacion)
+            ? fechaCreacion.toLocaleString('es-ES')
+            : 'Sin fecha',
+          Usuario: empresa.usuario
+        };
+      });
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Empresas');
+      XLSX.write(workbook, 'empresas.xlsx');
+    });
+
+    document.querySelectorAll('.filter-icon').forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        const column = e.target.dataset.column;
+        if (column === 'acciones') return;
+
+        if (e.target.classList.contains('fa-filter-circle-xmark')) {
+          delete filters[column];
+          renderTable();
+          return;
+        }
+
+        document.querySelectorAll('.filter-input-container').forEach(input => input.remove());
+
+        const container = document.createElement('div');
+        container.className = 'filter-input-container';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `Filtrar por ${column}`;
+        input.value = filters[column] || '';
+        input.addEventListener('input', () => {
+          const value = input.value.trim();
+          if (value) {
+            filters[column] = value;
+          } else {
+            delete filters[column];
+          }
+          renderTable();
+        });
+        container.appendChild(input);
+        e.target.parentElement.appendChild(container);
+        input.focus();
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('fa-filter') && !e.target.classList.contains('fa-filter-circle-xmark') && !e.target.closest('.filter-input-container')) {
+        document.querySelectorAll('.filter-input-container').forEach(input => input.remove());
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en init:', error);
+    container.innerHTML = `<p>Error al verificar permisos: ${error.message}</p>`;
+  }
 }
 
 function openEditModal(empresa) {
+  if (!editModal) return;
   currentEditId = empresa.docId;
   editNombreEmpresaInput.value = empresa.nombreEmpresa;
   editRutEmpresaInput.value = empresa.rutEmpresa;
   editEstadoActivo.checked = (empresa.estado || 'Activo') === 'Activo';
   editEstadoInactivo.checked = (empresa.estado || 'Activo') === 'Inactivo';
-  editModal.style.display = 'flex';
+  showModal(editModal);
 }
 
 function openDeleteModal(empresa) {
+  if (!deleteMessage) return;
   deleteMessage.textContent = `¿Estás seguro de que deseas eliminar la empresa "${empresa.nombreEmpresa}" (ID: ${empresa.empresaId})?`;
   confirmDeleteBtn.dataset.id = empresa.docId;
-  deleteModal.style.display = 'flex';
+  showModal(deleteModal);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -619,5 +662,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  init();
+  setTimeout(() => init(), 1);
 }
