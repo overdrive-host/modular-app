@@ -315,6 +315,7 @@ body.dark-mode .caps-lock-message {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 body.dark-mode .modal-login-btn {
@@ -341,6 +342,25 @@ body.dark-mode .modal-login-btn:hover {
 .modal-login-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.modal-login-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .close-modal {
