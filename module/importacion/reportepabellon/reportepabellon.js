@@ -1,6 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-import { getFirestore, collection, doc, addDoc, updateDoc, getDocs, query, where, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
+import { getFirestore, collection, doc, addDoc, updateDoc, getDocs, query, where, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
 const firebaseConfig = {
@@ -13,9 +13,19 @@ const firebaseConfig = {
   measurementId: "G-7YT6MMR47X"
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.error('Error al configurar persistencia:', error);
+});
 
 const filterYear = document.getElementById('filter-year');
 const filterMonth = document.getElementById('filter-month');
@@ -336,7 +346,7 @@ async function importReportes(file) {
                 const reportesSnapshot = await getDocs(query(collection(db, 'reportesPabellon'), where('uid', '==', user.uid)));
                 reportesSnapshot.forEach(doc => {
                     const reporte = doc.data();
-                    existingReportes[reporte.fecha + reporte.admision] = { id: doc.id, ...reporte };
+                    existingReportes[formatDate(reporte.fecha) + reporte.admision] = { id: doc.id, ...reporte };
                 });
 
                 let created = 0, updated = 0;
@@ -537,7 +547,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-auth.onAuthStateChanged(user => {
+onAuthStateChanged(auth, user => {
     if (user) {
         loadYearsAndMonths();
         loadReportes();
