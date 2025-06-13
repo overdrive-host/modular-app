@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, getIdToken } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
@@ -72,7 +73,6 @@ const submenuData = {
         css: 'module/implantes/pacientesconsignacion/pacientesconsignacion.css',
         js: 'module/implantes/pacientesconsignacion/pacientesconsignacion.js'
     },
-
     {
       name: 'Referencias',
       icon: 'fa-link', 
@@ -80,7 +80,6 @@ const submenuData = {
       css: 'module/implantes/referencias/referencias.css',
       js: 'module/implantes/referencias/referencias.js'
     },
-
     { 
       name: 'Paquetización', 
       icon: 'fa-boxes', 
@@ -88,7 +87,6 @@ const submenuData = {
       css: 'module/implantes/paquetizacion/paquetizacion.css', 
       js: 'module/implantes/paquetizacion/paquetizacion.js' 
     },
-
     {
       name: 'Mantenedor',
       icon: 'fa-warehouse',
@@ -96,7 +94,6 @@ const submenuData = {
       css: 'module/implantes/mantenedor/mantenedor.css',
       js: 'module/implantes/mantenedor/mantenedor.js'
     },
-
     {
       name: 'Tránsito',
       icon: 'fa-route',
@@ -104,7 +101,6 @@ const submenuData = {
       css: 'module/implantes/transito/transito.css',
       js: 'module/implantes/transito/transito.js'
     },
-
     {
       name: 'Contenedores',
       icon: 'fa-box-archive',
@@ -112,7 +108,6 @@ const submenuData = {
       css: 'module/implantes/contenedores/contenedores.css',
       js: 'module/implantes/contenedores/contenedores.js'
     }
-    
   ],
   Consignacion: [
     {
@@ -167,7 +162,6 @@ const submenuData = {
       js: 'module/corporativo/ro-2025/ro-2025.js'
     }
   ],
-
   Laboratorio: [
     {
       name: 'Facturación',
@@ -184,38 +178,36 @@ const submenuData = {
       js: 'module/laboratorio/detalles/detalles.js'
     }
   ],
-  
   Resumen: [
-  {
-    name: 'Visor',
-    icon: 'fa-eye',
-    html: 'module/resumen/visor/visor.html',
-    css: 'module/resumen/visor/visor.css',
-    js: 'module/resumen/visor/visor.js'
-  },
-  {
-    name: 'ImplanteView',
-    icon: 'fa-syringe',
-    html: 'module/resumen/implanteview/implanteview.html',
-    css: 'module/resumen/implanteview/implanteview.css',
-    js: 'module/resumen/implanteview/implanteview.js'
-  },
-  {
-    name: 'Consigna',
-    icon: 'fa-dolly-flatbed',
-    html: 'module/resumen/consigna/consigna.html',
-    css: 'module/resumen/consigna/consigna.css',
-    js: 'module/resumen/consigna/consigna.js'
-  },
-  {
-    name: 'FactuView',
-    icon: 'fa-file-invoice',
-    html: 'module/resumen/factuview/factuview.html',
-    css: 'module/resumen/factuview/factuview.css',
-    js: 'module/resumen/factuview/factuview.js'
-  }
+    {
+      name: 'Visor',
+      icon: 'fa-eye',
+      html: 'module/resumen/visor/visor.html',
+      css: 'module/resumen/visor/visor.css',
+      js: 'module/resumen/visor/visor.js'
+    },
+    {
+      name: 'ImplanteView',
+      icon: 'fa-syringe',
+      html: 'module/resumen/implanteview/implanteview.html',
+      css: 'module/resumen/implanteview/implanteview.css',
+      js: 'module/resumen/implanteview/implanteview.js'
+    },
+    {
+      name: 'Consigna',
+      icon: 'fa-dolly-flatbed',
+      html: 'module/resumen/consigna/consigna.html',
+      css: 'module/resumen/consigna/consigna.css',
+      js: 'module/resumen/consigna/consigna.js'
+    },
+    {
+      name: 'FactuView',
+      icon: 'fa-file-invoice',
+      html: 'module/resumen/factuview/factuview.html',
+      css: 'module/resumen/factuview/factuview.css',
+      js: 'module/resumen/factuview/factuview.js'
+    }
   ],
-
   Prestaciones: [
     {
       name: 'Empresas',
@@ -260,7 +252,7 @@ const submenuData = {
       js: 'module/prestaciones/cts-clinico/cts-clinico.js'
     }
   ],
-    Importacion: [
+  Importacion: [
     {
       name: 'Reporte Pabellón',
       icon: 'fa-notes-medical', 
@@ -302,6 +294,8 @@ const submenuData = {
     }
   ]
 };
+
+let currentSubmenuItem = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -404,8 +398,16 @@ function attachMenuListeners() {
       subItems.forEach((subItem, index) => {
         const li = document.createElement('li');
         li.classList.add('submenu-item');
+        li.setAttribute('data-html', subItem.html);
         li.innerHTML = `<i class="fas ${subItem.icon} submenu-icon"></i><span class="submenu-text">${subItem.name}</span>`;
-        li.addEventListener('click', () => loadContent(subItem.html, subItem.css, subItem.js));
+        li.addEventListener('click', () => {
+          if (currentSubmenuItem) {
+            currentSubmenuItem.classList.remove('submenu-item-active');
+          }
+          li.classList.add('submenu-item-active');
+          currentSubmenuItem = li;
+          loadContent(subItem.html, subItem.css, subItem.js);
+        });
         submenu.appendChild(li);
         if (subItem.name === 'Áreas Clínicas' && index + 1 < subItems.length && subItems[index + 1].name === 'CTS Proveedores') {
           const divider = document.createElement('li');
@@ -495,6 +497,10 @@ async function loadContent(htmlFile, cssFile, jsFile) {
 function showModulesInfo() {
   if (submenuContainer) submenuContainer.style.display = 'none';
   if (sidebarMenu) sidebarMenu.style.display = 'block';
+  if (currentSubmenuItem) {
+    currentSubmenuItem.classList.remove('submenu-item-active');
+    currentSubmenuItem = null;
+  }
   loadContent(
     'module/info/informaciones/informaciones.html',
     'module/info/informaciones/informaciones.css',
@@ -548,17 +554,25 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
     const action = item.getAttribute('data-action');
     switch (action) {
       case 'personal-data':
+        if (currentSubmenuItem) {
+          currentSubmenuItem.classList.remove('submenu-item-active');
+          currentSubmenuItem = null;
+        }
         loadContent(
-          'module/info/datos-personales/datos_personales.html',
-          'module/info/datos-personales/datos_personales.css',
-          'module/info/datos-personales/datos_personales.js'
+          'module/info/datos-personales/datos-personales.html',
+          'module/info/datos-personales/datos-personales.css',
+          'module/info/datos-personales/datos-personales.js'
         );
         break;
       case 'change-password':
+        if (currentSubmenuItem) {
+          currentSubmenuItem.classList.remove('submenu-item-active');
+          currentSubmenuItem = null;
+        }
         loadContent(
-          'module/info/cambiar-contrasena/cambiar_contrasena.html',
-          'module/info/cambiar-contrasena/cambiar_contrasena.css',
-          'module/info/cambiar-contrasena/cambiar_contrasena.js'
+          'module/info/cambiar-contrasena/cambiar-contrasena.html',
+          'module/info/cambiar-contrasena/cambiar-contrasena.css',
+          'module/info/cambiar-contrasena/cambiar-contrasena.js'
         );
         break;
       case 'logout':
@@ -569,13 +583,18 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
   });
 });
 
-if (sidebarTitle) sidebarTitle.addEventListener('click', showModulesInfo);
+if (sidebarTitle) {
+  sidebarTitle.addEventListener('click', showModulesInfo);
+}
 
 if (backButton) {
   backButton.addEventListener('click', () => {
     if (submenuContainer) submenuContainer.style.display = 'none';
     if (sidebarMenu) sidebarMenu.style.display = 'block';
-    // No limpiar .content ni eliminar estilos/scripts
+    if (currentSubmenuItem) {
+      currentSubmenuItem.classList.remove('submenu-item-active');
+      currentSubmenuItem = null;
+    }
   });
 }
 
