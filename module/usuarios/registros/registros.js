@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, updatePassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, updatePassword, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
@@ -12,9 +12,24 @@ const firebaseConfig = {
   measurementId: "G-7YT6MMR47X"
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+try {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
+} catch (error) {
+  console.error('Error al inicializar Firebase:', error);
+  throw error;
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.error('Error al configurar persistencia:', error);
+});
 
 const submenuData = {
   Usuarios: [
@@ -73,7 +88,7 @@ const submenuData = {
 const registerForm = document.getElementById('registrar-btn');
 const roleSelect = document.getElementById('role');
 const successModal = document.getElementById('success-modal');
-const successMessage = successModal.querySelector('.success-message');
+const successMessage = successModal ? successModal.querySelector('.success-message') : null;
 const successIcon = document.getElementById('success-icon');
 const loadingModal = document.getElementById('loading-modal');
 const closeModalButtons = document.querySelectorAll('.close-modal');
@@ -81,6 +96,105 @@ const editForm = document.getElementById('edit-form');
 const editModulesContainer = document.getElementById('edit-modulesContainer');
 const editPermisosContainer = document.getElementById('edit-permisos-container');
 let selectedPermissions = [];
+
+function showModal(type, message) {
+  if (!successModal || !successIcon || !successMessage) {
+    console.warn('Elementos de modal no encontrados');
+    alert(message);
+    return;
+  }
+  successModal.className = `modal ${type}`;
+  successMessage.textContent = message;
+  successIcon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
+  successModal.style.display = 'flex';
+  setTimeout(() => {
+    successModal.style.display = 'none';
+  }, 2000);
+}
+
+function hideModal(modal) {
+  if (!modal) return;
+  modal.style.display = 'none';
+}
+
+function toggleLoading(show) {
+  if (loadingModal) {
+    loadingModal.style.display = show ? 'flex' : 'none';
+  }
+}
+
+function getAllPermissions() {
+  const permissions = [];
+  Object.keys(submenuData).forEach(module => {
+    submenuData[module].forEach(sub => {
+      permissions.push(`${module}:${sub.name}`);
+    });
+  });
+  return permissions;
+}
+
+function populatePermissions(container, selectedPermissions = []) {
+  if (!container) return;
+  container.innerHTML = '<p>Seleccione los permisos:</p>';
+  Object.keys(submenuData).forEach(module => {
+    const moduleDiv = document.createElement('div');
+    moduleDiv.classList.add('module-permisos');
+    moduleDiv.innerHTML = `<h3>${module}</h3>`;
+    submenuData[module].forEach(sub => {
+      const label = document.createElement('label');
+      const isChecked = selectedPermissions.includes(`${module}:${sub.name}`);
+      label.innerHTML = `
+        <input type="checkbox" name="permissions" value="${module}:${sub.name}" ${isChecked ? 'checked' : ''}>
+        ${sub.name}
+      `;
+      moduleDiv.appendChild(label);
+    });
+    container.appendChild(moduleDiv);
+  });
+}
+
+function formatDateForDisplay(dateStr) {
+  if (!dateStr) return 'Sin fecha';
+  const date = new Date(dateStr);
+  if (isNaN(date)) return 'Fecha inválida';
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${day}-${month}-${year}`;
+}
+
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date)) return '';
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+async function logAction(userId, action, details = {}) {
+  try {
+    const fullName = await getUserFullName(auth.currentUser);
+    await addDoc(collection(db, `users/${userId}/logs`), {
+      action,
+      details: JSON.stringify(details),
+      timestamp: serverTimestamp(),
+      user: fullName,
+      uid: auth.currentUser.uid
+    });
+  } catch (error) {
+    console.error('Error al registrar log:', error);
+  }
+}
+
+async function getUserFullName(user) {
+  if (!user) throw new Error('No se encontró el usuario autenticado');
+  const userRef = doc(db, 'users', user.uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) throw new Error('No se encontró el documento del usuario');
+  return userSnap.data().fullName || 'Usuario Desconocido';
+}
 
 async function checkAdminAccess() {
   const user = auth.currentUser;
@@ -94,17 +208,6 @@ async function checkAdminAccess() {
     return false;
   }
   return true;
-}
-
-async function init() {
-  const container = document.querySelector('.registros-container');
-  if (!container) return;
-  const isAdmin = await checkAdminAccess();
-  if (!isAdmin) {
-    container.innerHTML = '<p>Acceso denegado. Solo los administradores pueden acceder a este módulo.</p>';
-    return;
-  }
-  loadUsers();
 }
 
 function validateRUT(rut) {
@@ -149,7 +252,10 @@ function validateForm(data) {
     showModal('error', 'El nombre de usuario debe tener al menos 3 caracteres.');
     return false;
   }
-  if (!data.password || data.password.length < 6) {
+  if (!data.password && !data.confirmPassword) {
+    return true; // Allow empty passwords during edit
+  }
+  if (data.password && data.password.length < 6) {
     showModal('error', 'La contraseña debe tener al menos 6 caracteres.');
     return false;
   }
@@ -164,67 +270,6 @@ function validateForm(data) {
   return true;
 }
 
-function showModal(type, message) {
-  successModal.className = `modal ${type}`;
-  successMessage.textContent = message;
-  successIcon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
-  successModal.style.display = 'flex';
-  setTimeout(() => {
-    successModal.style.display = 'none';
-  }, 3000);
-}
-
-function toggleLoading(show) {
-  loadingModal.style.display = show ? 'flex' : 'none';
-}
-
-function getAllPermissions() {
-  const permissions = [];
-  Object.keys(submenuData).forEach(module => {
-    submenuData[module].forEach(sub => {
-      permissions.push(`${module}:${sub.name}`);
-    });
-  });
-  return permissions;
-}
-
-function populatePermissions(container, selectedPermissions = []) {
-  container.innerHTML = '<p>Seleccione los permisos:</p>';
-  Object.keys(submenuData).forEach(module => {
-    const moduleDiv = document.createElement('div');
-    moduleDiv.classList.add('module-permisos');
-    moduleDiv.innerHTML = `<h3>${module}</h3>`;
-    submenuData[module].forEach(sub => {
-      const label = document.createElement('label');
-      const isChecked = selectedPermissions.includes(`${module}:${sub.name}`);
-      label.innerHTML = `
-        <input type="checkbox" name="permissions" value="${module}:${sub.name}" ${isChecked ? 'checked' : ''}>
-        ${sub.name}
-      `;
-      moduleDiv.appendChild(label);
-    });
-    container.appendChild(moduleDiv);
-  });
-}
-
-function formatDateForDisplay(dateStr) {
-  if (!dateStr) return 'Sin fecha';
-  const date = new Date(dateStr);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${day}-${month}-${year}`;
-}
-
-function formatDateForInput(dateStr) {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 async function loadUsers(page = 1, pageSize = 10) {
   const tableContainer = document.getElementById('table-container');
   const tableBody = document.querySelector('#registros-table tbody');
@@ -233,6 +278,7 @@ async function loadUsers(page = 1, pageSize = 10) {
   const pageInfo = document.getElementById('page-info');
   const totalRecords = document.getElementById('total-records');
   if (!tableContainer || !tableBody || !prevBtn || !nextBtn || !pageInfo || !totalRecords) {
+    showModal('error', 'Elementos de la tabla no encontrados.');
     toggleLoading(false);
     return;
   }
@@ -352,6 +398,7 @@ async function loadUsers(page = 1, pageSize = 10) {
     prevBtn.onclick = () => loadUsers(page - 1, pageSize);
     nextBtn.onclick = () => loadUsers(page + 1, pageSize);
   } catch (error) {
+    console.error('Error al cargar usuarios:', error);
     tableBody.innerHTML = `<tr><td colspan="10">Error al cargar usuarios: ${error.message}</td></tr>`;
     tableContainer.style.display = 'block';
   } finally {
@@ -359,216 +406,309 @@ async function loadUsers(page = 1, pageSize = 10) {
   }
 }
 
-roleSelect.addEventListener('change', (e) => {
-  if (e.target.value === 'Operador') {
-    const permissionsSelectionModal = document.getElementById('permissions-selection-modal');
-    const permissionsSelectionContainer = document.getElementById('permissions-selection-container');
-    if (!permissionsSelectionModal || !permissionsSelectionContainer) return;
-    populatePermissions(permissionsSelectionContainer, selectedPermissions);
-    permissionsSelectionModal.style.display = 'flex';
-  } else {
-    selectedPermissions = getAllPermissions();
-  }
-});
-
-registerForm.addEventListener('click', async (e) => {
-  e.preventDefault();
-  toggleLoading(true);
-  const data = {
-    fullName: document.getElementById('fullName').value.trim(),
-    rut: document.getElementById('rut').value.trim(),
-    gender: document.getElementById('gender').value,
-    birthDate: document.getElementById('birthDate').value,
-    email: document.getElementById('email').value.trim().toLowerCase(),
-    username: document.getElementById('username').value.trim().toLowerCase(),
-    password: document.getElementById('password').value,
-    confirmPassword: document.getElementById('confirmPassword').value,
-    role: document.getElementById('role').value
-  };
-  if (!validateForm(data)) {
-    toggleLoading(false);
+async function init() {
+  const container = document.querySelector('.registros-container');
+  if (!container) {
+    console.error('Contenedor .registros-container no encontrado');
     return;
   }
-  try {
-    const usernameRef = doc(db, 'usernames', data.username);
-    const usernameSnap = await getDoc(usernameRef);
-    if (usernameSnap.exists()) {
-      showModal('error', 'El nombre de usuario ya está en uso.');
-      toggleLoading(false);
-      return;
-    }
-    const adminEmail = auth.currentUser ? auth.currentUser.email : null;
-    const adminPassword = localStorage.getItem('adminPassword');
-    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-    const user = userCredential.user;
-    if (adminEmail && adminPassword) {
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-    }
-    const permissions = data.role === 'Administrador' ? getAllPermissions() : selectedPermissions;
-    await setDoc(doc(db, 'users', user.uid), {
-      fullName: data.fullName,
-      rut: data.rut,
-      gender: data.gender,
-      birthDate: data.birthDate,
-      email: data.email,
-      username: data.username,
-      role: data.role,
-      permissions,
-      createdAt: new Date()
-    });
-    await setDoc(doc(db, 'usernames', data.username), {
-      email: data.email,
-      userId: user.uid
-    });
-    showModal('success', 'Usuario registrado exitosamente.');
-    document.getElementById('fullName').value = '';
-    document.getElementById('rut').value = '';
-    document.getElementById('gender').value = '';
-    document.getElementById('birthDate').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    document.getElementById('confirmPassword').value = '';
-    document.getElementById('role').value = '';
-    selectedPermissions = [];
-    loadUsers();
-  } catch (error) {
-    let errorMessage = 'Error al registrar el usuario.';
-    if (error.code === 'auth/email-already-in-use') {
-      errorMessage = 'El correo electrónico ya está en uso.';
-    } else if (error.code === 'auth/invalid-email') {
-      errorMessage = 'El correo electrónico no es válido.';
-    }
-    showModal('error', errorMessage);
-  } finally {
-    toggleLoading(false);
-  }
-});
 
-editForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  toggleLoading(true);
-  const data = {
-    fullName: document.getElementById('edit-fullName').value.trim(),
-    rut: document.getElementById('edit-rut').value.trim(),
-    gender: document.getElementById('edit-gender').value,
-    birthDate: document.getElementById('edit-birthDate').value,
-    email: document.getElementById('edit-email').value.trim().toLowerCase(),
-    username: document.getElementById('edit-username').value.trim().toLowerCase(),
-    password: document.getElementById('edit-password').value,
-    role: document.getElementById('edit-role').value
-  };
-  if (!validateForm({ ...data, confirmPassword: data.password || 'dummy' })) {
-    toggleLoading(false);
-    return;
-  }
   try {
-    const uid = editForm.dataset.uid;
-    const usernameRef = doc(db, 'usernames', data.username);
-    const usernameSnap = await getDoc(usernameRef);
-    if (usernameSnap.exists() && usernameSnap.data().userId !== uid) {
-      showModal('error', 'El nombre de usuario ya está en uso.');
-      toggleLoading(false);
+    const user = await new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          unsubscribe();
+          resolve(user);
+        } else {
+          setTimeout(() => {
+            if (auth.currentUser) {
+              unsubscribe();
+              resolve(auth.currentUser);
+            } else {
+              unsubscribe();
+              resolve(null);
+            }
+          }, 2000);
+        }
+      }, (error) => {
+        console.error('Error en onAuthStateChanged:', error);
+        unsubscribe();
+        reject(error);
+      });
+    });
+
+    if (!user) {
+      console.error('No hay usuario autenticado');
+      container.innerHTML = '<p>Error: No estás autenticado. Por favor, inicia sesión nuevamente.</p>';
+      setTimeout(() => {
+        window.location.href = 'main.html?error=auth-required';
+      }, 2000);
       return;
     }
-    let permissions = [];
-    if (data.role === 'Administrador') {
-      permissions = getAllPermissions();
-    } else {
-      document.querySelectorAll('#edit-permisos-container input[name="permissions"]:checked').forEach(checkbox => {
-        permissions.push(checkbox.value);
+
+    const isAdmin = await checkAdminAccess();
+    if (!isAdmin) {
+      container.innerHTML = '<p>Acceso denegado. Solo los administradores pueden acceder a este módulo.</p>';
+      return;
+    }
+
+    await loadUsers();
+
+    if (roleSelect) {
+      roleSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'Operador') {
+          const permissionsSelectionModal = document.getElementById('permissions-selection-modal');
+          const permissionsSelectionContainer = document.getElementById('permissions-selection-container');
+          if (!permissionsSelectionModal || !permissionsSelectionContainer) return;
+          populatePermissions(permissionsSelectionContainer, selectedPermissions);
+          permissionsSelectionModal.style.display = 'flex';
+        } else {
+          selectedPermissions = getAllPermissions();
+        }
       });
     }
-    const userData = {
-      fullName: data.fullName,
-      rut: data.rut,
-      gender: data.gender,
-      birthDate: data.birthDate,
-      email: data.email,
-      username: data.username,
-      role: data.role,
-      permissions,
-      updatedAt: new Date()
-    };
-    await updateDoc(doc(db, 'users', uid), userData);
-    await setDoc(doc(db, 'usernames', data.username), {
-      email: data.email,
-      userId: uid
+
+    if (registerForm) {
+      registerForm.addEventListener('click', async (e) => {
+        e.preventDefault();
+        toggleLoading(true);
+        const data = {
+          fullName: document.getElementById('fullName')?.value.trim(),
+          rut: document.getElementById('rut')?.value.trim(),
+          gender: document.getElementById('gender')?.value,
+          birthDate: document.getElementById('birthDate')?.value,
+          email: document.getElementById('email')?.value.trim().toLowerCase(),
+          username: document.getElementById('username')?.value.trim().toLowerCase(),
+          password: document.getElementById('password')?.value,
+          confirmPassword: document.getElementById('confirmPassword')?.value,
+          role: document.getElementById('role')?.value
+        };
+        if (!validateForm(data)) {
+          toggleLoading(false);
+          return;
+        }
+        try {
+          const usernameRef = doc(db, 'usernames', data.username);
+          const usernameSnap = await getDoc(usernameRef);
+          if (usernameSnap.exists()) {
+            showModal('error', 'El nombre de usuario ya está en uso.');
+            toggleLoading(false);
+            return;
+          }
+          const adminEmail = auth.currentUser ? auth.currentUser.email : null;
+          const adminPassword = localStorage.getItem('adminPassword');
+          const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+          const user = userCredential.user;
+          if (adminEmail && adminPassword) {
+            await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+          }
+          const permissions = data.role === 'Administrador' ? getAllPermissions() : selectedPermissions;
+          const userData = {
+            fullName: data.fullName,
+            rut: data.rut,
+            gender: data.gender,
+            birthDate: data.birthDate,
+            email: data.email,
+            username: data.username,
+            role: data.role,
+            permissions,
+            createdAt: serverTimestamp()
+          };
+          await setDoc(doc(db, 'users', user.uid), userData);
+          await setDoc(doc(db, 'usernames', data.username), {
+            email: data.email,
+            userId: user.uid
+          });
+          await logAction(user.uid, 'created', userData);
+          showModal('success', 'Usuario registrado exitosamente.');
+          document.getElementById('fullName').value = '';
+          document.getElementById('rut').value = '';
+          document.getElementById('gender').value = '';
+          document.getElementById('birthDate').value = '';
+          document.getElementById('email').value = '';
+          document.getElementById('username').value = '';
+          document.getElementById('password').value = '';
+          document.getElementById('confirmPassword').value = '';
+          document.getElementById('role').value = '';
+          selectedPermissions = [];
+          await loadUsers();
+        } catch (error) {
+          console.error('Error al registrar usuario:', error);
+          let errorMessage = 'Error al registrar el usuario.';
+          if (error.code === 'auth/email-already-in-use') {
+            errorMessage = 'El correo electrónico ya está en uso.';
+          } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'El correo electrónico no es válido.';
+          }
+          showModal('error', errorMessage);
+        } finally {
+          toggleLoading(false);
+        }
+      });
+    }
+
+    if (editForm) {
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        toggleLoading(true);
+        const data = {
+          fullName: document.getElementById('edit-fullName')?.value.trim(),
+          rut: document.getElementById('edit-rut')?.value.trim(),
+          gender: document.getElementById('edit-gender')?.value,
+          birthDate: document.getElementById('edit-birthDate')?.value,
+          email: document.getElementById('edit-email')?.value.trim().toLowerCase(),
+          username: document.getElementById('edit-username')?.value.trim().toLowerCase(),
+          password: document.getElementById('edit-password')?.value,
+          role: document.getElementById('edit-role')?.value
+        };
+        if (!validateForm({ ...data, confirmPassword: data.password || 'dummy' })) {
+          toggleLoading(false);
+          return;
+        }
+        try {
+          const uid = editForm.dataset.uid;
+          const usernameRef = doc(db, 'usernames', data.username);
+          const usernameSnap = await getDoc(usernameRef);
+          if (usernameSnap.exists() && usernameSnap.data().userId !== uid) {
+            showModal('error', 'El nombre de usuario ya está en uso.');
+            toggleLoading(false);
+            return;
+          }
+          let permissions = [];
+          if (data.role === 'Administrador') {
+            permissions = getAllPermissions();
+          } else {
+            document.querySelectorAll('#edit-permisos-container input[name="permissions"]:checked').forEach(checkbox => {
+              permissions.push(checkbox.value);
+            });
+          }
+          const userData = {
+            fullName: data.fullName,
+            rut: data.rut,
+            gender: data.gender,
+            birthDate: data.birthDate,
+            email: data.email,
+            username: data.username,
+            role: data.role,
+            permissions,
+            updatedAt: serverTimestamp()
+          };
+          await updateDoc(doc(db, 'users', uid), userData);
+          await setDoc(doc(db, 'usernames', data.username), {
+            email: data.email,
+            userId: uid
+          });
+          await logAction(uid, 'modified', userData);
+          if (data.password) {
+            const currentUser = auth.currentUser;
+            if (currentUser && currentUser.uid === uid) {
+              await updatePassword(currentUser, data.password);
+            } else {
+              throw new Error('No tienes permisos para cambiar la contraseña de este usuario');
+            }
+          }
+          showModal('success', 'Usuario actualizado exitosamente.');
+          hideModal(document.getElementById('edit-modal'));
+          await loadUsers();
+        } catch (error) {
+          console.error('Error al actualizar usuario:', error);
+          let errorMessage = 'Error al actualizar el usuario.';
+          if (error.code === 'auth/invalid-email') {
+            errorMessage = 'El correo electrónico no es válido.';
+          }
+          showModal('error', errorMessage);
+        } finally {
+          toggleLoading(false);
+        }
+      });
+    }
+
+    const editRoleSelect = document.getElementById('edit-role');
+    if (editRoleSelect) {
+      editRoleSelect.addEventListener('change', (e) => {
+        editModulesContainer.style.display = e.target.value === 'Operador' ? 'block' : 'none';
+        if (e.target.value === 'Operador') {
+          populatePermissions(editPermisosContainer);
+        } else {
+          editPermisosContainer.innerHTML = '<p>Seleccione los permisos:</p>';
+        }
+      });
+    }
+
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', () => {
+        hideModal(document.getElementById('edit-modal'));
+      });
+    }
+
+    const confirmPermissionsBtn = document.getElementById('confirm-permissions-btn');
+    if (confirmPermissionsBtn) {
+      confirmPermissionsBtn.addEventListener('click', () => {
+        selectedPermissions = [];
+        document.querySelectorAll('#permissions-selection-container input[name="permissions"]:checked').forEach(checkbox => {
+          selectedPermissions.push(checkbox.value);
+        });
+        hideModal(document.getElementById('permissions-selection-modal'));
+        registerForm.click();
+      });
+    }
+
+    const cancelPermissionsBtn = document.getElementById('cancel-permissions-btn');
+    if (cancelPermissionsBtn) {
+      cancelPermissionsBtn.addEventListener('click', () => {
+        hideModal(document.getElementById('permissions-selection-modal'));
+        selectedPermissions = [];
+      });
+    }
+
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.addEventListener('click', async () => {
+        const deleteModal = document.getElementById('delete-modal');
+        if (!deleteModal) return;
+        const uid = deleteModal.dataset.uid;
+        const username = deleteModal.dataset.username;
+        try {
+          await deleteDoc(doc(db, 'users', uid));
+          await deleteDoc(doc(db, 'usernames', username));
+          await logAction(uid, 'deleted', { username });
+          showModal('success', 'Usuario eliminado exitosamente.');
+          hideModal(deleteModal);
+          await loadUsers();
+        } catch (error) {
+          console.error('Error al eliminar usuario:', error);
+          showModal('error', `Error al eliminar: ${error.message}`);
+        }
+      });
+    }
+
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    if (cancelDeleteBtn) {
+      cancelDeleteBtn.addEventListener('click', () => {
+        hideModal(document.getElementById('delete-modal'));
+      });
+    }
+
+    closeModalButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        hideModal(button.closest('.modal'));
+      });
     });
-    if (data.password) {
-      const currentUser = auth.currentUser;
-      if (currentUser && currentUser.uid === uid) {
-        await updatePassword(currentUser, data.password);
-      } else {
-        throw new Error('No tienes permisos para cambiar la contraseña de este usuario');
-      }
-    }
-    showModal('success', 'Usuario actualizado exitosamente.');
-    document.getElementById('edit-modal').style.display = 'none';
-    loadUsers();
+
+    window.addEventListener('moduleCleanup', () => {
+      hideModal(successModal);
+      hideModal(loadingModal);
+      hideModal(document.getElementById('edit-modal'));
+      hideModal(document.getElementById('delete-modal'));
+      hideModal(document.getElementById('permissions-selection-modal'));
+      hideModal(document.getElementById('permissions-modal'));
+    });
   } catch (error) {
-    let errorMessage = 'Error al actualizar el usuario.';
-    if (error.code === 'auth/invalid-email') {
-      errorMessage = 'El correo electrónico no es válido.';
-    }
-    showModal('error', errorMessage);
-  } finally {
-    toggleLoading(false);
+    console.error('Error al inicializar el módulo:', error);
+    container.innerHTML = `<p>Error al inicializar el módulo: ${error.message}</p>`;
   }
-});
-
-document.getElementById('edit-role').addEventListener('change', (e) => {
-  editModulesContainer.style.display = e.target.value === 'Operador' ? 'block' : 'none';
-  if (e.target.value === 'Operador') {
-    populatePermissions(editPermisosContainer);
-  } else {
-    editPermisosContainer.innerHTML = '<p>Seleccione los permisos:</p>';
-  }
-});
-
-document.getElementById('cancel-edit-btn').addEventListener('click', () => {
-  document.getElementById('edit-modal').style.display = 'none';
-});
-
-document.getElementById('confirm-permissions-btn').addEventListener('click', () => {
-  selectedPermissions = [];
-  document.querySelectorAll('#permissions-selection-container input[name="permissions"]:checked').forEach(checkbox => {
-    selectedPermissions.push(checkbox.value);
-  });
-  document.getElementById('permissions-selection-modal').style.display = 'none';
-  registerForm.click();
-});
-
-document.getElementById('cancel-permissions-btn').addEventListener('click', () => {
-  document.getElementById('permissions-selection-modal').style.display = 'none';
-  selectedPermissions = [];
-});
-
-document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-  const deleteModal = document.getElementById('delete-modal');
-  if (!deleteModal) return;
-  const uid = deleteModal.dataset.uid;
-  const username = deleteModal.dataset.username;
-  try {
-    await deleteDoc(doc(db, 'users', uid));
-    await deleteDoc(doc(db, 'usernames', username));
-    showModal('success', 'Usuario eliminado exitosamente.');
-    document.getElementById('delete-modal').style.display = 'none';
-    loadUsers();
-  } catch (error) {
-    showModal('error', `Error al eliminar: ${error.message}`);
-  }
-});
-
-document.getElementById('cancel-delete-btn').addEventListener('click', () => {
-  document.getElementById('delete-modal').style.display = 'none';
-});
-
-closeModalButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    button.closest('.modal').style.display = 'none';
-  });
-});
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
