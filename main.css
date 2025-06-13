@@ -1,3 +1,4 @@
+
 * {
     margin: 0;
     padding: 0;
@@ -568,6 +569,32 @@ body.dark-mode .submenu-item:hover .submenu-text {
 
 body.dark-mode .submenu-item:hover .submenu-icon {
     color: #3182ce;
+}
+
+.submenu-item-active {
+    background-color: #e6f3ff;
+    border-radius: 10px;
+}
+
+body.dark-mode .submenu-item-active {
+    background-color: #4c5a74;
+}
+
+.submenu-item-active .submenu-text {
+    color: #3182ce;
+    font-weight: bold;
+}
+
+body.dark-mode .submenu-item-active .submenu-text {
+    color: #63b3ed;
+}
+
+.submenu-item-active .submenu-icon {
+    color: #3182ce;
+}
+
+body.dark-mode .submenu-item-active .submenu-icon {
+    color: #63b3ed;
 }
 
 .sidebar-version {
