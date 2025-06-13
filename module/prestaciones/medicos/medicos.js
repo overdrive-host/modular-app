@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, where, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-import * as XLSX from "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter, where, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
@@ -12,15 +12,25 @@ const firebaseConfig = {
   appId: "1:271561966774:web:e197c00e2abd67b4f0d217",
   measurementId: "G-7YT6MMR47X"
 };
+
 let app;
-if (!getApps().length) {
+try {
+  if (!getApps().length) {
     app = initializeApp(firebaseConfig);
-} else {
+  } else {
     app = getApp();
+  }
+} catch (error) {
+  console.error('Error al inicializar Firebase:', error);
+  throw error;
 }
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.error('Error al configurar persistencia:', error);
+});
 
 const nombreMedicoInput = document.getElementById('nombre-medico');
 const registrarBtn = document.getElementById('registrar-btn');
