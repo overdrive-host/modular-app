@@ -44,7 +44,8 @@ const submenuData = {
     { name: 'Paquetización' },
     { name: 'Mantenedor' },
     { name: 'Tránsito' },
-    { name: 'Contenedores' }
+    { name: 'Contenedores' },
+    { name: 'Exportar' }  
   ],
   Consignacion: [
     { name: 'Asignación' },
@@ -84,6 +85,7 @@ const submenuData = {
     { name: 'FactuView' }
   ]
 };
+
 
 const registerForm = document.getElementById('registrar-btn');
 const roleSelect = document.getElementById('role');
