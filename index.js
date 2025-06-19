@@ -141,64 +141,265 @@ passwordInput.addEventListener('keyup', (e) => {
 });
 
 const submenuData = {
+  Implantes: [
+    {
+        name: 'Cargos Implantes',
+        icon: 'fa-tooth',
+        html: 'module/implantes/cargosimplantes/cargosimplantes.html',
+        css: 'module/implantes/cargosimplantes/cargosimplantes.css',
+        js: 'module/implantes/cargosimplantes/cargosimplantes.js'
+    },
+    {
+        name: 'Pacientes Implantes',
+        icon: 'fa-user',
+        html: 'module/implantes/pacientesimplantes/pacientesimplantes.html',
+        css: 'module/implantes/pacientesimplantes/pacientesimplantes.css',
+        js: 'module/implantes/pacientesimplantes/pacientesimplantes.js'
+    },
+    {
+        name: 'Cargos Consignación',
+        icon: 'fa-box',
+        html: 'module/implantes/cargosconsignacion/cargosconsignacion.html',
+        css: 'module/implantes/cargosconsignacion/cargosconsignacion.css',
+        js: 'module/implantes/cargosconsignacion/cargosconsignacion.js'
+    },
+    {
+        name: 'Pacientes Consignación',
+        icon: 'fa-user-injured',
+        html: 'module/implantes/pacientesconsignacion/pacientesconsignacion.html',
+        css: 'module/implantes/pacientesconsignacion/pacientesconsignacion.css',
+        js: 'module/implantes/pacientesconsignacion/pacientesconsignacion.js'
+    },
+    {
+      name: 'Referencias',
+      icon: 'fa-link', 
+      html: 'module/implantes/referencias/referencias.html',
+      css: 'module/implantes/referencias/referencias.css',
+      js: 'module/implantes/referencias/referencias.js'
+    },
+    { 
+      name: 'Paquetización', 
+      icon: 'fa-boxes', 
+      html: 'module/implantes/paquetizacion/paquetizacion.html', 
+      css: 'module/implantes/paquetizacion/paquetizacion.css', 
+      js: 'module/implantes/paquetizacion/paquetizacion.js' 
+    },
+    {
+      name: 'Mantenedor',
+      icon: 'fa-warehouse',
+      html: 'module/implantes/mantenedor/mantenedor.html',
+      css: 'module/implantes/mantenedor/mantenedor.css',
+      js: 'module/implantes/mantenedor/mantenedor.js'
+    },
+    {
+      name: 'Tránsito',
+      icon: 'fa-route',
+      html: 'module/implantes/transito/transito.html',
+      css: 'module/implantes/transito/transito.css',
+      js: 'module/implantes/transito/transito.js'
+    },
+    {
+      name: 'Contenedores',
+      icon: 'fa-box-archive',
+      html: 'module/implantes/contenedores/contenedores.html',
+      css: 'module/implantes/contenedores/contenedores.css',
+      js: 'module/implantes/contenedores/contenedores.js'
+    },
+    {
+      name: 'Listado de Precios',
+      icon: 'fa-clipboard',
+      html: 'module/implantes/listadoprecios/listadoprecios.html',
+      css: 'module/implantes/listadoprecios/listadoprecios.css',
+      js: 'module/implantes/listadoprecios/listadoprecios.js'
+    },{
+      name: 'Exportar',
+      icon: 'fa-file-export', 
+      html: 'module/implantes/exportar/exportar.html',
+      css: 'module/implantes/exportar/exportar.css',
+      js: 'module/implantes/exportar/exportar.js'
+    }
+
+  ],
+  Consignacion: [
+    {
+      name: 'Asignación',
+      icon: 'fa-clipboard-list',
+      html: 'module/consignacion/asignacion/asignacion.html',
+      css: 'module/consignacion/asignacion/asignacion.css',
+      js: 'module/consignacion/asignacion/asignacion.js'
+    },
+    {
+      name: 'Ficha',
+      icon: 'fa-file-alt',
+      html: 'module/consignacion/ficha/ficha.html',
+      css: 'module/consignacion/ficha/ficha.css',
+      js: 'module/consignacion/ficha/ficha.js'
+    },
+    {
+      name: 'Lotes',
+      icon: 'fa-boxes',
+      html: 'module/consignacion/lotes/lotes.html',
+      css: 'module/consignacion/lotes/lotes.css',
+      js: 'module/consignacion/lotes/lotes.js'
+    }
+  ],
+  Corporativo: [
+    {
+      name: 'Reporte 2024',
+      icon: 'fa-chart-bar',
+      html: 'module/corporativo/reporte-2024/reporte-2024.html',
+      css: 'module/corporativo/reporte-2024/reporte-2024.css',
+      js: 'module/corporativo/reporte-2024/reporte-2024.js'
+    },
+    {
+      name: 'Reporte 2025',
+      icon: 'fa-chart-bar',
+      html: 'module/corporativo/reporte-2025/reporte-2025.html',
+      css: 'module/corporativo/reporte-2025/reporte-2025.css',
+      js: 'module/corporativo/reporte-2025/reporte-2025.js'
+    },
+    {
+      name: 'RP 2024',
+      icon: 'fa-file-excel',
+      html: 'module/corporativo/rp-2024/rp-2024.html',
+      css: 'module/corporativo/rp-2024/rp-2024.css',
+      js: 'module/corporativo/rp-2024/rp-2024.js'
+    },
+    {
+      name: 'RO 2025',
+      icon: 'fa-file-excel',
+      html: 'module/corporativo/ro-2025/ro-2025.html',
+      css: 'module/corporativo/ro-2025/ro-2025.css',
+      js: 'module/corporativo/ro-2025/ro-2025.js'
+    }
+  ],
+  Laboratorio: [
+    {
+      name: 'Facturación',
+      icon: 'fa-money-bill',
+      html: 'module/laboratorio/facturacion/facturacion.html',
+      css: 'module/laboratorio/facturacion/facturacion.css',
+      js: 'module/laboratorio/facturacion/facturacion.js'
+    },
+    {
+      name: 'Detalles',
+      icon: 'fa-info-circle',
+      html: 'module/laboratorio/detalles/detalles.html',
+      css: 'module/laboratorio/detalles/detalles.css',
+      js: 'module/laboratorio/detalles/detalles.js'
+    }
+  ],
+  Visualización: [
+    {
+      name: 'Pacientes',
+      icon: 'fa-user-injured',
+      html: 'module/resumen/pacientes/pacientes.html',
+      css: 'module/resumen/pacientes/pacientes.css',
+      js: 'module/resumen/pacientes/pacientes.js'
+    },
+    {
+      name: 'Cargos Generales',
+      icon: 'fa-boxes-packing',
+      html: 'module/resumen/cgo-generales/cgo-generales.html',
+      css: 'module/resumen/cgo-generales/cgo-generalescss',
+      js: 'module/resumen/cgo-generales/cgo-generales.js'
+    },
+    {
+      name: 'Consigna',
+      icon: 'fa-clipboard-check', 
+      html: 'module/resumen/consigna/consigna.html',
+      css: 'module/resumen/consigna/consigna.css',
+      js: 'module/resumen/consigna/consigna.js'
+    }
+
+  ],
+  Prestaciones: [
+    {
+      name: 'Empresas',
+      icon: 'fa-building',
+      html: 'module/prestaciones/empresas/empresas.html',
+      css: 'module/prestaciones/empresas/empresas.css',
+      js: 'module/prestaciones/empresas/empresas.js'
+    },
+    {
+      name: 'Médicos',
+      icon: 'fa-user-md',
+      html: 'module/prestaciones/medicos/medicos.html',
+      css: 'module/prestaciones/medicos/medicos.css',
+      js: 'module/prestaciones/medicos/medicos.js'
+    },
+    {
+      name: 'Previsiones',
+      icon: 'fa-shield-alt',
+      html: 'module/prestaciones/previsiones/previsiones.html',
+      css: 'module/prestaciones/previsiones/previsiones.css',
+      js: 'module/prestaciones/previsiones/previsiones.js'
+    },
+    {
+      name: 'Áreas Clínicas',
+      icon: 'fa-hospital',
+      html: 'module/prestaciones/areas-clinicas/areas-clinicas.html',
+      css: 'module/prestaciones/areas-clinicas/areas-clinicas.css',
+      js: 'module/prestaciones/areas-clinicas/areas-clinicas.js'
+    },
+    {
+      name: 'CTS Proveedores',
+      icon: 'fa-truck-loading',
+      html: 'module/prestaciones/cts-proveedores/cts-proveedores.html',
+      css: 'module/prestaciones/cts-proveedores/cts-proveedores.css',
+      js: 'module/prestaciones/cts-proveedores/cts-proveedores.js'
+    },
+    {
+      name: 'CTS Clínico',
+      icon: 'fa-stethoscope',
+      html: 'module/prestaciones/cts-clinico/cts-clinico.html',
+      css: 'module/prestaciones/cts-clinico/cts-clinico.css',
+      js: 'module/prestaciones/cts-clinico/cts-clinico.js'
+    }
+  ],
+  Importacion: [
+    {
+      name: 'Reporte Pabellón',
+      icon: 'fa-notes-medical', 
+      html: 'module/importacion/reportepabellon/reportepabellon.html',
+      css: 'module/importacion/reportepabellon/reportepabellon.css',
+      js: 'module/importacion/reportepabellon/reportepabellon.js'
+    },
+    {
+      name: 'Órdenes de Compra',
+      icon: 'fa-shopping-cart',
+      html: 'module/laboratorio/ordenes-compra/ordenes-compra.html',
+      css: 'module/laboratorio/ordenes-compra/ordenes-compra.css',
+      js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
+    },
+  ],
+  Apuntes: [
+    {
+      name: 'Notas',
+      icon: 'fa-sticky-note',
+      html: 'module/apuntes/notas/notas.html',
+      css: 'module/apuntes/notas/notas.css',
+      js: 'module/apuntes/notas/notas.js'
+    },
+    {
+      name: 'Bloc',
+      icon: 'fa-calendar',
+      html: 'module/apuntes/bloc/bloc.html',
+      css: 'module/apuntes/bloc/bloc.css',
+      js: 'module/apuntes/bloc/bloc.js'
+    }
+  ],
   Usuarios: [
     {
       name: 'Registros',
       icon: 'fa-user-plus',
-      html: 'modulos/usuarios/registros/registros.html',
-      css: 'modulos/usuarios/registros/registros.css',
-      js: 'modulos/usuarios/registros/registros.js'
+      html: 'module/usuarios/registros/registros.html',
+      css: 'module/usuarios/registros/registros.css',
+      js: 'module/usuarios/registros/registros.js'
     }
-  ],
-  Implantes: [
-    { name: 'Cargos Implantes', icon: 'fa-tooth', html: 'module/implantes/cargosimplantes/cargosimplantes.html', css: 'module/implantes/cargosimplantes/cargosimplantes.css', js: 'module/implantes/cargosimplantes/cargosimplantes.js' },
-    { name: 'Cargos Consignación', icon: 'fa-box', html: 'module/implantes/cargosconsignacion/cargosconsignacion.html', css: 'module/implantes/cargosconsignacion/cargosconsignacion.css', js: 'module/implantes/cargosconsignacion/cargosconsignacion.js' },
-    { name: 'Pacientes Implantes', icon: 'fa-user', html: 'module/implantes/pacientesimplantes/pacientesimplantes.html', css: 'module/implantes/pacientesimplantes/pacientesimplantes.css', js: 'module/implantes/pacientesimplantes/pacientesimplantes.js' },
-    { name: 'Pacientes Consignación', icon: 'fa-user-injured', html: 'module/implantes/pacientesconsignacion/pacientesconsignacion.html', css: 'module/implantes/pacientesconsignacion/pacientesconsignacion.css', js: 'module/implantes/pacientesconsignacion/pacientesconsignacion.js' },
-    { name: 'Referencias', icon: 'fa-link', html: 'module/implantes/referencias/referencias.html', css: 'module/implantes/referencias/referencias.css', js: 'module/implantes/referencias/referencias.js' },
-    { name: 'Paquetización', icon: 'fa-boxes', html: 'module/implantes/paquetizacion/paquetizacion.html', css: 'module/implantes/paquetizacion/paquetizacion.css', js: 'module/implantes/paquetizacion/paquetizacion.js' },
-    { name: 'Mantenedor', icon: 'fa-warehouse', html: 'module/implantes/mantenedor/mantenedor.html', css: 'module/implantes/mantenedor/mantenedor.css', js: 'module/implantes/mantenedor/mantenedor.js' },
-    { name: 'Tránsito', icon: 'fa-route', html: 'module/implantes/transito/transito.html', css: 'module/implantes/transito/transito.css', js: 'module/implantes/transito/transito.js' },
-    { name: 'Contenedores', icon: 'fa-box-archive', html: 'module/implantes/contenedores/contenedores.html', css: 'module/implantes/contenedores/contenedores.css', js: 'module/implantes/contenedores/contenedores.js' }
-  ],
-  Consignacion: [
-    { name: 'Asignación', icon: 'fa-clipboard-list', html: 'modulos/consignacion/asignacion/asignacion.html', css: 'modulos/consignacion/asignacion/asignacion.css', js: 'modulos/consignacion/asignacion/asignacion.js' },
-    { name: 'Ficha', icon: 'fa-file-alt', html: 'modulos/consignacion/ficha/ficha.html', css: 'modulos/consignacion/ficha/ficha.css', js: 'modulos/consignacion/ficha/ficha.js' },
-    { name: 'Lotes', icon: 'fa-boxes', html: 'modulos/consignacion/lotes/lotes.html', css: 'modulos/consignacion/lotes/lotes.css', js: 'modulos/consignacion/lotes/lotes.js' }
-  ],
-  Corporativo: [
-    { name: 'Reporte 2024', icon: 'fa-chart-bar', html: 'modulos/corporativo/reporte-2024/reporte-2024.html', css: 'modulos/corporativo/reporte-2024/reporte-2024.css', js: 'modulos/corporativo/reporte-2024/reporte-2024.js' },
-    { name: 'Reporte 2025', icon: 'fa-chart-bar', html: 'modulos/corporativo/reporte-2025/reporte-2025.html', css: 'modulos/corporativo/reporte-2025/reporte-2025.css', js: 'modulos/corporativo/reporte-2025/reporte-2025.js' },
-    { name: 'RP 2024', icon: 'fa-file-excel', html: 'modulos/corporativo/rp-2024/rp-2024.html', css: 'modulos/corporativo/rp-2024/rp-2024.css', js: 'modulos/corporativo/rp-6060.js' },
-    { name: 'RO 2025', icon: 'fa-file-excel', html: 'modulos/corporativo/ro-2025/ro-2025.html', css: 'modulos/corporativo/ro-2025/ro-2025.css', js: 'modulos/corporativo/ro-2025/ro-2025.js' }
-  ],
-  Laboratorio: [
-    { name: 'Facturación', icon: 'fa-money-bill', html: 'modulos/laboratorio/facturacion/facturacion.html', css: 'modulos/laboratorio/facturacion/facturacion.css', js: 'modulos/laboratorio/facturacion/facturacion.js' },
-    { name: 'Detalles', icon: 'fa-info-circle', html: 'modulos/laboratorio/detalles/detalles.html', css: 'modulos/laboratorio/detalles/detalles.css', js: 'modulos/laboratorio/detalles/detalles.js' }
-  ],
-  Resumen: [
-    { name: 'Visor', icon: 'fa-eye', html: 'modulos/resumen/visor/visor.html', css: 'modulos/resumen/visor/visor.css', js: 'modulos/resumen/visor/visor.js' },
-    { name: 'ImplanteView', icon: 'fa-syringe', html: 'modulos/resumen/implanteview/implanteview.html', css: 'modulos/resumen/implanteview/implanteview.css', js: 'modulos/resumen/implanteview/implanteview.js' },
-    { name: 'Consigna', icon: 'fa-dolly-flatbed', html: 'modulos/resumen/consigna/consigna.html', css: 'modulos/resumen/consigna/consigna.css', js: 'modulos/resumen/consigna/consigna.js' },
-    { name: 'FactuView', icon: 'fa-file-invoice', html: 'modulos/resumen/factuview/factuview.html', css: 'modulos/resumen/factuview/factuview.css', js: 'modulos/resumen/factuview/factuview.js' }
-  ],
-  Prestaciones: [
-    { name: 'Empresas', icon: 'fa-building', html: 'modulos/prestaciones/empresas/empresas.html', css: 'modulos/prestaciones/empresas/empresas.css', js: 'modulos/prestaciones/empresas/empresas.js' },
-    { name: 'Médicos', icon: 'fa-user-md', html: 'modulos/prestaciones/medicos/medicos.html', css: 'modulos/prestaciones/medicos/medicos.css', js: 'modulos/prestaciones/medicos/medicos.js' },
-    { name: 'Previsiones', icon: 'fa-shield-alt', html: 'modulos/prestaciones/previsiones/previsiones.html', css: 'modulos/prestaciones/previsiones/previsiones.css', js: 'modulos/prestaciones/previsiones/previsiones.js' },
-    { name: 'Áreas Clínicas', icon: 'fa-hospital', html: 'modulos/prestaciones/areas-clinicas/areas-clinicas.html', css: 'modulos/prestaciones/areas-clinicas/areas-clinicas.css', js: 'modulos/prestaciones/areas-clinicas/areas-clinicas.js' },
-    { name: 'CTS Proveedores', icon: 'fa-truck-loading', html: 'modulos/prestaciones/cts-proveedores/cts-proveedores.html', css: 'modulos/prestaciones/cts-proveedores/cts-proveedores.css', js: 'modulos/prestaciones/cts-proveedores/cts-proveedores.js' },
-    { name: 'CTS Clínico', icon: 'fa-stethoscope', html: 'modulos/prestaciones/cts-clinico/cts-clinico.html', css: 'modulos/prestaciones/cts-clinico/cts-clinico.css', js: 'modulos/prestaciones/cts-clinico/cts-clinico.js' }
-  ],
-  Importacion: [
-    { name: 'Reporte Pabellón', icon: 'fa-notes-medical', html: 'modulos/importacion/reportepabellon/reportepabellon.html', css: 'modulos/importacion/reportepabellon/reportepabellon.css', js: 'modulos/importacion/reportepabellon/reportepabellon.js' },
-    { name: 'Órdenes de Compra', icon: 'fa-shopping-cart', html: 'modulos/laboratorio/ordenes-compra/ordenes-compra.html', css: 'modulos/laboratorio/ordenes-compra/ordenes-compra.css', js: 'modulos/laboratorio/ordenes-compra/ordenes-compra.js' }
-  ],
-  Apuntes: [
-    { name: 'Notas', icon: 'fa-sticky-note', html: 'modulos/apuntes/notas/notas.html', css: 'modulos/apuntes/notas/notas.css', js: 'modulos/apuntes/notas/notas.js' },
-    { name: 'Bloc', icon: 'fa-calendar', html: 'modulos/apuntes/bloc/bloc.html', css: 'modulos/apuntes/bloc/bloc.css', js: 'modulos/apuntes/bloc/bloc.js' }
   ]
 };
+
 
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
