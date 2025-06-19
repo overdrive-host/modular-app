@@ -201,6 +201,32 @@ const showSuccessMessage = (message, isSuccess = true) => {
     }
 };
 
+const parseOCDate = (dateInput) => {
+    if (!dateInput) return null;
+    let date;
+    try {
+        if (dateInput.toDate) {
+            date = dateInput.toDate();
+        } else if (typeof dateInput === 'string') {
+            const ddmmyyyy = dateInput.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+            if (ddmmyyyy) {
+                const [_, day, month, year] = ddmmyyyy;
+                date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00Z`);
+            } else {
+                date = new Date(dateInput);
+            }
+        } else if (dateInput instanceof Date) {
+            date = dateInput;
+        } else {
+            return null;
+        }
+        return isNaN(date.getTime()) ? null : date;
+    } catch (error) {
+        console.error('Error parsing OC date:', error);
+        return null;
+    }
+};
+
 const fetchOCData = async (oc) => {
     if (!oc || oc.trim() === '') {
         return null;
@@ -211,8 +237,8 @@ const fetchOCData = async (oc) => {
         if (!ocSnapshot.empty) {
             const ocData = ocSnapshot.docs[0].data();
             return {
-                generacion: ocData.generacion || ocData.fecha, // Usa generacion, con fallback a fecha
-                proveedorId: ocData.proveedorId || '' // Usa proveedorId
+                generacion: parseOCDate(ocData.generacion || ocData.fecha),
+                proveedorId: ocData.proveedorId || ''
             };
         } else {
             showSuccessMessage(`Orden de compra ${oc} no encontrada`, false);
@@ -234,12 +260,15 @@ const updateOCFields = async (ocInputElement, fechaOCInputElement, proveedorInpu
     }
 
     const ocData = await fetchOCData(oc);
-    if (ocData) {
+    if (ocData && ocData.generacion) {
         fechaOCInputElement.value = formatDateTimeForInput(ocData.generacion);
         proveedorInputElement.value = ocData.proveedorId;
     } else {
         fechaOCInputElement.value = '';
         proveedorInputElement.value = '';
+        if (ocData) {
+            showSuccessMessage('La orden de compra no tiene una fecha válida.', false);
+        }
     }
 };
 
@@ -549,6 +578,10 @@ async function init() {
                     return;
                 }
 
+                // Establecer la fecha de hoy como predeterminada para fechaSalidaInput y fechaIngresoInput
+                if (fechaSalidaInput) fechaSalidaInput.value = formatDateTimeForInput(new Date());
+                if (fechaIngresoInput) fechaIngresoInput.value = formatDateTimeForInput(new Date());
+
                 await normalizeOCField();
                 await loadFacturas();
                 setupColumnResizing();
@@ -630,7 +663,7 @@ async function init() {
                                 fechaFactura: new Date(fechaFacturaInput.value).toISOString(),
                                 montoFactura,
                                 oc: oc.trim(),
-                                fechaOC: ocData ? ocData.generacion.toISOString() : null,
+                                fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : null,
                                 proveedor: ocData?.proveedorId || null,
                                 acta: actaInput?.value.trim() || null,
                                 fechaSalida: fechaSalidaInput?.value ? new Date(fechaSalidaInput.value).toISOString() : null,
@@ -670,9 +703,10 @@ async function init() {
                                 fechaOCInput.value = '';
                                 if (proveedorInput) proveedorInput.value = '';
                                 if (actaInput) actaInput.value = '';
-                                if (fechaSalidaInput) fechaSalidaInput.value = '';
                                 if (salidaInput) salidaInput.value = '';
-                                fechaIngresoInput.value = '';
+                                // Restablecer fechas a la fecha de hoy
+                                if (fechaSalidaInput) fechaSalidaInput.value = formatDateTimeForInput(new Date());
+                                if (fechaIngresoInput) fechaIngresoInput.value = formatDateTimeForInput(new Date());
                                 facturas.push({ docId: facturaRef.id, ...facturaData });
                                 renderTable();
                             }, 300);
@@ -742,7 +776,7 @@ async function init() {
                                 fechaFactura,
                                 montoFactura,
                                 oc,
-                                fechaOC: ocData ? formatDateTimeForInput(ocData.generacion) : null,
+                                fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : null,
                                 proveedor: ocData ? ocData.proveedorId || null : null,
                                 acta,
                                 fechaSalida,
@@ -1020,7 +1054,7 @@ async function init() {
                                     fechaFactura: fechaFactura ? fechaFactura.toISOString() : null,
                                     montoFactura: parseCurrency(row['Monto']) || 0,
                                     oc: row['OC'].toString().trim(),
-                                    fechaOC: ocData ? formatDateTimeForInput(ocData.generacion) : (fechaOC ? fechaOC.toISOString() : null),
+                                    fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : (fechaOC ? fechaOC.toISOString() : null),
                                     proveedor: ocData?.proveedorId || row['Proveedor'] || '',
                                     acta: row['Acta'] || '',
                                     fechaSalida: fechaSalida ? fechaSalida.toISOString() : null,
@@ -1122,7 +1156,7 @@ async function init() {
                                     icon.classList.add('fa-filter');
                                 }
                             });
-                    }
+                        }
                 });
 
             } catch (error) {
