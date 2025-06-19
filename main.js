@@ -53,18 +53,18 @@ const submenuData = {
         js: 'module/implantes/cargosimplantes/cargosimplantes.js'
     },
     {
-        name: 'Cargos Consignación',
-        icon: 'fa-box',
-        html: 'module/implantes/cargosconsignacion/cargosconsignacion.html',
-        css: 'module/implantes/cargosconsignacion/cargosconsignacion.css',
-        js: 'module/implantes/cargosconsignacion/cargosconsignacion.js'
-    },
-    {
         name: 'Pacientes Implantes',
         icon: 'fa-user',
         html: 'module/implantes/pacientesimplantes/pacientesimplantes.html',
         css: 'module/implantes/pacientesimplantes/pacientesimplantes.css',
         js: 'module/implantes/pacientesimplantes/pacientesimplantes.js'
+    },
+    {
+        name: 'Cargos Consignación',
+        icon: 'fa-box',
+        html: 'module/implantes/cargosconsignacion/cargosconsignacion.html',
+        css: 'module/implantes/cargosconsignacion/cargosconsignacion.css',
+        js: 'module/implantes/cargosconsignacion/cargosconsignacion.js'
     },
     {
         name: 'Pacientes Consignación',
@@ -107,7 +107,21 @@ const submenuData = {
       html: 'module/implantes/contenedores/contenedores.html',
       css: 'module/implantes/contenedores/contenedores.css',
       js: 'module/implantes/contenedores/contenedores.js'
+    },
+    {
+      name: 'Listado de Precios',
+      icon: 'fa-clipboard',
+      html: 'module/implantes/listadoprecios/listadoprecios.html',
+      css: 'module/implantes/listadoprecios/listadoprecios.css',
+      js: 'module/implantes/listadoprecios/listadoprecios.js'
+    },{
+      name: 'Exportar',
+      icon: 'fa-file-export', 
+      html: 'module/implantes/exportar/exportar.html',
+      css: 'module/implantes/exportar/exportar.css',
+      js: 'module/implantes/exportar/exportar.js'
     }
+
   ],
   Consignacion: [
     {
@@ -178,35 +192,29 @@ const submenuData = {
       js: 'module/laboratorio/detalles/detalles.js'
     }
   ],
-  Resumen: [
+  Visualización: [
     {
-      name: 'Visor',
-      icon: 'fa-eye',
-      html: 'module/resumen/visor/visor.html',
-      css: 'module/resumen/visor/visor.css',
-      js: 'module/resumen/visor/visor.js'
+      name: 'Pacientes',
+      icon: 'fa-user-injured',
+      html: 'module/resumen/pacientes/pacientes.html',
+      css: 'module/resumen/pacientes/pacientes.css',
+      js: 'module/resumen/pacientes/pacientes.js'
     },
     {
-      name: 'ImplanteView',
-      icon: 'fa-syringe',
-      html: 'module/resumen/implanteview/implanteview.html',
-      css: 'module/resumen/implanteview/implanteview.css',
-      js: 'module/resumen/implanteview/implanteview.js'
+      name: 'Cargos Generales',
+      icon: 'fa-boxes-packing',
+      html: 'module/resumen/cgo-generales/cgo-generales.html',
+      css: 'module/resumen/cgo-generales/cgo-generalescss',
+      js: 'module/resumen/cgo-generales/cgo-generales.js'
     },
     {
       name: 'Consigna',
-      icon: 'fa-dolly-flatbed',
+      icon: 'fa-clipboard-check', 
       html: 'module/resumen/consigna/consigna.html',
       css: 'module/resumen/consigna/consigna.css',
       js: 'module/resumen/consigna/consigna.js'
-    },
-    {
-      name: 'FactuView',
-      icon: 'fa-file-invoice',
-      html: 'module/resumen/factuview/factuview.html',
-      css: 'module/resumen/factuview/factuview.css',
-      js: 'module/resumen/factuview/factuview.js'
     }
+
   ],
   Prestaciones: [
     {
