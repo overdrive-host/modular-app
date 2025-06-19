@@ -97,7 +97,23 @@ const getUserFullName = async (uid) => {
     }
 };
 
-const formatDate = (dateInput, includeTime = false) => {
+const createLocalDate = (dateInput) => {
+    if (!dateInput) return null;
+    let date;
+    if (dateInput.toDate) {
+        date = dateInput.toDate();
+    } else if (typeof dateInput === 'string') {
+        date = new Date(dateInput);
+    } else if (dateInput instanceof Date) {
+        date = dateInput;
+    } else {
+        return null;
+    }
+    if (isNaN(date.getTime())) return null;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+};
+
+const formatDate = (dateInput, includeTime = false, isIngresoOrSalida = false) => {
     if (!dateInput) return '';
     let date;
     try {
@@ -114,7 +130,7 @@ const formatDate = (dateInput, includeTime = false) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        if (includeTime) {
+        if (includeTime && !isIngresoOrSalida) {
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -170,7 +186,7 @@ const parseFilterDate = (dateStr) => {
     const ddmmyyyy = dateStr.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
     if (ddmmyyyy) {
         const [_, day, month, year] = ddmmyyyy;
-        return new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00Z`);
+        return new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
     }
     const parsedDate = new Date(dateStr);
     return isNaN(parsedDate.getTime()) ? null : parsedDate;
@@ -211,7 +227,7 @@ const parseOCDate = (dateInput) => {
             const ddmmyyyy = dateInput.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
             if (ddmmyyyy) {
                 const [_, day, month, year] = ddmmyyyy;
-                date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00Z`);
+                date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
             } else {
                 date = new Date(dateInput);
             }
@@ -389,7 +405,7 @@ function renderTable() {
                 <i class="fas fa-trash action-icon" data-id="${factura.docId}" title="Eliminar"></i>
                 <i class="fas fa-history action-icon" data-id="${factura.docId}" title="Historial"></i>
             </td>
-            <td title="${formatDate(factura.fechaIngreso, true)}">${formatDate(factura.fechaIngreso, true)}</td>
+            <td title="${formatDate(factura.fechaIngreso, true, true)}">${formatDate(factura.fechaIngreso, true, true)}</td>
             <td title="${factura.numeroFactura}">${factura.numeroFactura}</td>
             <td title="${formatDate(factura.fechaFactura)}">${formatDate(factura.fechaFactura)}</td>
             <td title="${formatCurrency(factura.montoFactura)}">${formatCurrency(factura.montoFactura)}</td>
@@ -397,7 +413,7 @@ function renderTable() {
             <td title="${formatDate(factura.fechaOC)}">${formatDate(factura.fechaOC)}</td>
             <td title="${factura.proveedor || ''}">${factura.proveedor || ''}</td>
             <td title="${factura.acta || ''}">${factura.acta || ''}</td>
-            <td title="${formatDate(factura.fechaSalida)}">${formatDate(factura.fechaSalida)}</td>
+            <td title="${formatDate(factura.fechaSalida, true, true)}">${formatDate(factura.fechaSalida, true, true)}</td>
             <td title="${formatCurrency(factura.salida)}">${formatCurrency(factura.salida)}</td>
             <td title="${factura.mesIngreso}">${factura.mesIngreso}</td>
             <td title="${factura.anioIngreso}">${factura.anioIngreso}</td>
@@ -654,25 +670,26 @@ async function init() {
                                 hideModal(registerModal);
                                 return;
                             }
-                            const fechaIngreso = new Date(fechaIngresoInput.value);
+                            const fechaIngreso = createLocalDate(fechaIngresoInput.value);
+                            const fechaSalida = fechaSalidaInput?.value ? createLocalDate(fechaSalidaInput.value) : null;
 
                             const facturaData = {
                                 facturaId,
                                 facturaIdNumeric: parseInt(facturaId),
                                 numeroFactura: numeroFacturaInput.value.toLowerCase().trim(),
-                                fechaFactura: new Date(fechaFacturaInput.value).toISOString(),
+                                fechaFactura: createLocalDate(fechaFacturaInput.value).toISOString(),
                                 montoFactura,
                                 oc: oc.trim(),
-                                fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : null,
+                                fechaOC: ocData && ocData.generacion ? createLocalDate(ocData.generacion).toISOString() : null,
                                 proveedor: ocData?.proveedorId || null,
                                 acta: actaInput?.value.trim() || null,
-                                fechaSalida: fechaSalidaInput?.value ? new Date(fechaSalidaInput.value).toISOString() : null,
+                                fechaSalida: fechaSalida ? fechaSalida.toISOString() : null,
                                 salida: parseCurrency(salidaInput?.value) || null,
                                 fechaIngreso: fechaIngreso.toISOString(),
                                 mesIngreso: fechaIngreso.toLocaleString('es', { month: 'long' }).toLowerCase(),
                                 anioIngreso: fechaIngreso.getFullYear(),
-                                mesSalida: fechaSalidaInput?.value ? new Date(fechaSalidaInput.value).toLocaleString('es', { month: 'long' }).toLowerCase() : null,
-                                anioSalida: fechaSalidaInput?.value ? new Date(fechaSalidaInput.value).getFullYear() : null,
+                                mesSalida: fechaSalida ? fechaSalida.toLocaleString('es', { month: 'long' }).toLowerCase() : null,
+                                anioSalida: fechaSalida ? fechaSalida.getFullYear() : null,
                                 uid: auth.currentUser.uid,
                                 userName: fullName
                             };
@@ -726,9 +743,9 @@ async function init() {
                         const montoFactura = parseCurrency(editMontoFacturaInput?.value);
                         const oc = editOCInput?.value.trim();
                         const acta = editActaInput?.value.trim() || null;
-                        const fechaSalida = editFechaSalidaInput?.value || null;
+                        const fechaSalida = editFechaSalidaInput?.value ? createLocalDate(editFechaSalidaInput.value) : null;
                         const salida = parseCurrency(editSalidaInput?.value);
-                        const fechaIngreso = editFechaIngresoInput?.value ? new Date(editFechaIngresoInput.value) : null;
+                        const fechaIngreso = editFechaIngresoInput?.value ? createLocalDate(editFechaIngresoInput.value) : null;
 
                         if (!numeroFactura || !fechaFactura || montoFactura === null || !oc || !fechaIngreso) {
                             showSuccessMessage('Por favor, completa todos los campos requeridos', false);
@@ -756,14 +773,14 @@ async function init() {
                             if (oldData.acta !== acta) {
                                 changes.push(`Acta cambiado de "${oldData.acta || ''}" a "${acta || ''}"`);
                             }
-                            if (oldData.fechaSalida !== fechaSalida) {
-                                changes.push(`Fecha de salida cambiado de "${formatDate(oldData.fechaSalida) || ''}" a "${formatDate(fechaSalida) || ''}"`);
+                            if (oldData.fechaSalida !== (fechaSalida ? fechaSalida.toISOString() : null)) {
+                                changes.push(`Fecha de salida cambiado de "${formatDate(oldData.fechaSalida, true, true) || ''}" a "${formatDate(fechaSalida, true, true) || ''}"`);
                             }
                             if (oldData.salida !== salida) {
                                 changes.push(`Salida cambiado de "${formatCurrency(oldData.salida) || ''}" a "${formatCurrency(salida) || ''}"`);
                             }
-                            if (formatDate(oldData.fechaIngreso) !== formatDate(fechaIngreso)) {
-                                changes.push(`Fecha de ingreso cambiado de "${formatDate(oldData.fechaIngreso)}" a "${formatDate(fechaIngreso)}"`);
+                            if (oldData.fechaIngreso !== fechaIngreso.toISOString()) {
+                                changes.push(`Fecha de ingreso cambiado de "${formatDate(oldData.fechaIngreso, true, true)}" a "${formatDate(fechaIngreso, true, true)}"`);
                             }
 
                             const fullName = await getUserFullName(auth.currentUser.uid);
@@ -773,19 +790,19 @@ async function init() {
                                 numeroFactura,
                                 facturaId: oldData.facturaId,
                                 facturaIdNumeric: parseInt(oldData.facturaId),
-                                fechaFactura,
+                                fechaFactura: createLocalDate(fechaFactura).toISOString(),
                                 montoFactura,
                                 oc,
-                                fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : null,
+                                fechaOC: ocData && ocData.generacion ? createLocalDate(ocData.generacion).toISOString() : null,
                                 proveedor: ocData ? ocData.proveedorId || null : null,
                                 acta,
-                                fechaSalida,
+                                fechaSalida: fechaSalida ? fechaSalida.toISOString() : null,
                                 salida,
                                 fechaIngreso: fechaIngreso.toISOString(),
                                 mesIngreso: fechaIngreso.toLocaleString('es', { month: 'long' }).toLowerCase(),
                                 anioIngreso: fechaIngreso.getFullYear(),
-                                mesSalida: fechaSalida ? new Date(fechaSalida).toLocaleString('es', { month: 'long' }).toLowerCase() : null,
-                                anioSalida: fechaSalida ? new Date(fechaSalida).getFullYear() : null,
+                                mesSalida: fechaSalida ? fechaSalida.toLocaleString('es', { month: 'long' }).toLowerCase() : null,
+                                anioSalida: fechaSalida ? fechaSalida.getFullYear() : null,
                                 uid: oldData.uid,
                                 userName: fullName
                             };
@@ -921,7 +938,7 @@ async function init() {
                         }
                         const data = facturas.map(factura => ({
                             ID: factura.facturaId,
-                            'Fecha de Ingreso': formatDate(factura.fechaIngreso, true).replace(/\//g, '-'),
+                            'Fecha de Ingreso': formatDate(factura.fechaIngreso, true, true).replace(/\//g, '-'),
                             'Número de Factura': factura.numeroFactura,
                             'Fecha de Factura': formatDate(factura.fechaFactura).replace(/\//g, '-'),
                             'Monto': formatCurrency(factura.montoFactura),
@@ -929,7 +946,7 @@ async function init() {
                             'Fecha de OC': formatDate(factura.fechaOC).replace(/\//g, '-'),
                             'Proveedor': factura.proveedor || '',
                             'Acta': factura.acta || '',
-                            'Fecha de Salida': formatDate(factura.fechaSalida).replace(/\//g, '-'),
+                            'Fecha de Salida': formatDate(factura.fechaSalida, true, true).replace(/\//g, '-'),
                             'Salida': formatCurrency(factura.salida),
                             'Mes de Ingreso': factura.mesIngreso,
                             'Año de Ingreso': factura.anioIngreso,
@@ -1023,20 +1040,20 @@ async function init() {
                                     const ddmmyyyy = strValue.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
                                     if (ddmmyyyy) {
                                         const [_, day, month, year] = ddmmyyyy;
-                                        const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-                                        return isNaN(date.getTime()) ? null : date;
+                                        const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
+                                        return isNaN(date.getTime()) ? null : createLocalDate(date);
                                     }
                                     if (!isNaN(strValue) && Number(strValue) > 0) {
                                         const excelEpoch = new Date(1899, 11, 30);
                                         const days = Number(strValue);
                                         const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
-                                        return isNaN(date.getTime()) ? null : date;
+                                        return isNaN(date.getTime()) ? null : createLocalDate(date);
                                     }
                                     const date = new Date(strValue);
-                                    return isNaN(date.getTime()) ? null : date;
+                                    return isNaN(date.getTime()) ? null : createLocalDate(date);
                                 };
 
-                                const fechaIngreso = parseDate(row['Fecha de Ingreso']) || new Date();
+                                const fechaIngreso = parseDate(row['Fecha de Ingreso']) || createLocalDate(new Date());
                                 const fechaFactura = parseDate(row['Fecha de Factura']);
                                 const fechaOC = parseDate(row['Fecha de OC']);
                                 const fechaSalida = parseDate(row['Fecha de Salida']);
@@ -1054,7 +1071,7 @@ async function init() {
                                     fechaFactura: fechaFactura ? fechaFactura.toISOString() : null,
                                     montoFactura: parseCurrency(row['Monto']) || 0,
                                     oc: row['OC'].toString().trim(),
-                                    fechaOC: ocData && ocData.generacion ? ocData.generacion.toISOString() : (fechaOC ? fechaOC.toISOString() : null),
+                                    fechaOC: ocData && ocData.generacion ? createLocalDate(ocData.generacion).toISOString() : (fechaOC ? fechaOC.toISOString() : null),
                                     proveedor: ocData?.proveedorId || row['Proveedor'] || '',
                                     acta: row['Acta'] || '',
                                     fechaSalida: fechaSalida ? fechaSalida.toISOString() : null,
@@ -1198,6 +1215,14 @@ async function init() {
                     batch.update(doc.ref, { oc: String(data.oc).trim() });
                     updateCount++;
                 }
+                if (data.fechaIngreso) {
+                    batch.update(doc.ref, { fechaIngreso: createLocalDate(data.fechaIngreso).toISOString() });
+                    updateCount++;
+                }
+                if (data.fechaSalida) {
+                    batch.update(doc.ref, { fechaSalida: createLocalDate(data.fechaSalida).toISOString() });
+                    updateCount++;
+                }
             });
 
             if (updateCount > 0) {
@@ -1240,7 +1265,7 @@ async function createTestFactura() {
             facturaId,
             facturaIdNumeric: parseInt(facturaId),
             numeroFactura: 'TEST123',
-            fechaFactura: new Date().toISOString(),
+            fechaFactura: createLocalDate(new Date()).toISOString(),
             montoFactura: 1000000,
             oc: '5009',
             fechaOC: null,
@@ -1248,7 +1273,7 @@ async function createTestFactura() {
             acta: null,
             fechaSalida: null,
             salida: null,
-            fechaIngreso: new Date().toISOString(),
+            fechaIngreso: createLocalDate(new Date()).toISOString(),
             mesIngreso: new Date().toLocaleString('es', { month: 'long' }).toLowerCase(),
             anioIngreso: new Date().getFullYear(),
             mesSalida: null,
