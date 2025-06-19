@@ -3,6 +3,10 @@
     <hr class="divider">
     <form class="form-container">
         <div class="form-group">
+            <label for="fecha-ingreso">Fecha de Ingreso</label>
+            <input type="date" id="fecha-ingreso" required autocomplete="off">
+        </div>
+        <div class="form-group">
             <label for="numero-factura">Número de Factura</label>
             <input type="text" id="numero-factura" required autocomplete="off">
         </div>
@@ -19,6 +23,15 @@
             <input type="text" id="oc" required autocomplete="off">
         </div>
         <div class="form-group">
+            <label for="acta">Acta</label>
+            <input type="text" id="acta" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="salida">Salida</label>
+            <input type="number" id="salida" min="0" step="1" autocomplete="off">
+        </div>
+
+        <div class="form-group">
             <label for="fecha-oc">Fecha de OC</label>
             <input type="date" id="fecha-oc" readonly autocomplete="off">
         </div>
@@ -26,22 +39,13 @@
             <label for="proveedor">Proveedor</label>
             <input type="text" id="proveedor" readonly autocomplete="off">
         </div>
-        <div class="form-group">
-            <label for="acta">Acta</label>
-            <input type="text" id="acta" autocomplete="off">
-        </div>
+
         <div class="form-group">
             <label for="fecha-salida">Fecha de Salida</label>
             <input type="date" id="fecha-salida" autocomplete="off">
         </div>
-        <div class="form-group">
-            <label for="salida">Salida</label>
-            <input type="number" id="salida" min="0" step="1" autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label for="fecha-ingreso">Fecha de Ingreso</label>
-            <input type="date" id="fecha-ingreso" required autocomplete="off">
-        </div>
+
+
         <div class="form-group-button">
             <button id="ingresar-btn">Ingresar</button>
         </div>
@@ -151,21 +155,33 @@
             <thead>
                 <tr>
                     <th class="resizeable">ID <i class="fas fa-filter filter-icon" data-column="facturaId"></i></th>
-                    <th class="resizeable">Acciones <i class="fas fa-filter filter-icon" data-column="acciones"></i></th>
-                    <th class="resizeable">Fecha de Ingreso <i class="fas fa-filter filter-icon" data-column="fechaIngreso"></i></th>
-                    <th class="resizeable">Número de Factura <i class="fas fa-filter filter-icon" data-column="numeroFactura"></i></th>
-                    <th class="resizeable">Fecha de Factura <i class="fas fa-filter filter-icon" data-column="fechaFactura"></i></th>
-                    <th class="resizeable">Monto <i class="fas fa-filter filter-icon" data-column="montoFactura"></i></th>
+                    <th class="resizeable">Acciones <i class="fas fa-filter filter-icon" data-column="acciones"></i>
+                    </th>
+                    <th class="resizeable">Fecha de Ingreso <i class="fas fa-filter filter-icon"
+                            data-column="fechaIngreso"></i></th>
+                    <th class="resizeable">Número de Factura <i class="fas fa-filter filter-icon"
+                            data-column="numeroFactura"></i></th>
+                    <th class="resizeable">Fecha de Factura <i class="fas fa-filter filter-icon"
+                            data-column="fechaFactura"></i></th>
+                    <th class="resizeable">Monto <i class="fas fa-filter filter-icon" data-column="montoFactura"></i>
+                    </th>
                     <th class="resizeable">OC <i class="fas fa-filter filter-icon" data-column="oc"></i></th>
-                    <th class="resizeable">Fecha de OC <i class="fas fa-filter filter-icon" data-column="fechaOC"></i></th>
-                    <th class="resizeable">Proveedor <i class="fas fa-filter filter-icon" data-column="proveedor"></i></th>
+                    <th class="resizeable">Fecha de OC <i class="fas fa-filter filter-icon" data-column="fechaOC"></i>
+                    </th>
+                    <th class="resizeable">Proveedor <i class="fas fa-filter filter-icon" data-column="proveedor"></i>
+                    </th>
                     <th class="resizeable">Acta <i class="fas fa-filter filter-icon" data-column="acta"></i></th>
-                    <th class="resizeable">Fecha de Salida <i class="fas fa-filter filter-icon" data-column="fechaSalida"></i></th>
+                    <th class="resizeable">Fecha de Salida <i class="fas fa-filter filter-icon"
+                            data-column="fechaSalida"></i></th>
                     <th class="resizeable">Salida <i class="fas fa-filter filter-icon" data-column="salida"></i></th>
-                    <th class="resizeable">Mes de Ingreso <i class="fas fa-filter filter-icon" data-column="mesIngreso"></i></th>
-                    <th class="resizeable">Año de Ingreso <i class="fas fa-filter filter-icon" data-column="anioIngreso"></i></th>
-                    <th class="resizeable">Mes de Salida <i class="fas fa-filter filter-icon" data-column="mesSalida"></i></th>
-                    <th class="resizeable">Año de Salida <i class="fas fa-filter filter-icon" data-column="anioSalida"></i></th>
+                    <th class="resizeable">Mes de Ingreso <i class="fas fa-filter filter-icon"
+                            data-column="mesIngreso"></i></th>
+                    <th class="resizeable">Año de Ingreso <i class="fas fa-filter filter-icon"
+                            data-column="anioIngreso"></i></th>
+                    <th class="resizeable">Mes de Salida <i class="fas fa-filter filter-icon"
+                            data-column="mesSalida"></i></th>
+                    <th class="resizeable">Año de Salida <i class="fas fa-filter filter-icon"
+                            data-column="anioSalida"></i></th>
                     <th class="resizeable">Usuario <i class="fas fa-filter filter-icon" data-column="usuario"></i></th>
                 </tr>
             </thead>
