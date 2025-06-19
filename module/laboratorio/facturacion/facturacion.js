@@ -202,11 +202,18 @@ const showSuccessMessage = (message, isSuccess = true) => {
 };
 
 const fetchOCData = async (oc) => {
+    if (!oc || oc.trim() === '') {
+        return null;
+    }
     try {
         const ocQuery = query(collection(db, 'ordenesCompra'), where('codigo', '==', oc.trim()));
         const ocSnapshot = await getDocs(ocQuery);
         if (!ocSnapshot.empty) {
-            return ocSnapshot.docs[0].data();
+            const ocData = ocSnapshot.docs[0].data();
+            return {
+                generacion: ocData.generacion || ocData.fecha, // Usa generacion, con fallback a fecha
+                proveedorId: ocData.proveedorId || '' // Usa proveedorId
+            };
         } else {
             showSuccessMessage(`Orden de compra ${oc} no encontrada`, false);
             return null;
@@ -220,28 +227,34 @@ const fetchOCData = async (oc) => {
 
 const updateOCFields = async (ocInputElement, fechaOCInputElement, proveedorInputElement) => {
     const oc = ocInputElement.value.trim();
-    if (oc) {
-        const ocData = await fetchOCData(oc);
-        if (ocData) {
-            fechaOCInputElement.value = formatDateTimeForInput(ocData.fecha);
-            proveedorInputElement.value = ocData.proveedor || '';
-        } else {
-            fechaOCInputElement.value = '';
-            proveedorInputElement.value = '';
-        }
+    if (!oc) {
+        fechaOCInputElement.value = '';
+        proveedorInputElement.value = '';
+        return;
+    }
+
+    const ocData = await fetchOCData(oc);
+    if (ocData) {
+        fechaOCInputElement.value = formatDateTimeForInput(ocData.generacion);
+        proveedorInputElement.value = ocData.proveedorId;
     } else {
         fechaOCInputElement.value = '';
         proveedorInputElement.value = '';
     }
 };
 
+// Event listeners for OC input in main form
 if (ocInput && fechaOCInput && proveedorInput) {
-    ocInput.addEventListener('input', () => updateOCFields(ocInput, fechaOCInput, proveedorInput));
-    ocInput.addEventListener('change', () => updateOCFields(ocInput, fechaOCInput, proveedorInput));
+    const handleOCInput = () => updateOCFields(ocInput, fechaOCInput, proveedorInput);
+    ocInput.addEventListener('input', handleOCInput);
+    ocInput.addEventListener('change', handleOCInput);
 }
+
+// Event listeners for OC input in edit modal
 if (editOCInput && editFechaOCInput && editProveedorInput) {
-    editOCInput.addEventListener('input', () => updateOCFields(editOCInput, editFechaOCInput, editProveedorInput));
-    editOCInput.addEventListener('change', () => updateOCFields(editOCInput, editFechaOCInput, editProveedorInput));
+    const handleEditOCInput = () => updateOCFields(editOCInput, editFechaOCInput, editProveedorInput);
+    editOCInput.addEventListener('input', handleEditOCInput);
+    editOCInput.addEventListener('change', handleEditOCInput);
 }
 
 async function getNextFacturaId() {
@@ -287,8 +300,6 @@ async function loadFacturas() {
                 if (['numeroFactura', 'oc', 'proveedor', 'acta', 'mesIngreso', 'anioIngreso', 'mesSalida', 'anioSalida', 'userName'].includes(column)) {
                     const value = String(filters[column]).trim().toLowerCase();
                     q = query(q, where(column, '>=', value), where(column, '<=', value + '\uf8ff'));
-                    if (column === 'oc') {
-                    }
                 } else if (['montoFactura', 'salida'].includes(column)) {
                     const numericValue = parseCurrency(filters[column]);
                     if (numericValue !== null) {
@@ -317,7 +328,6 @@ async function loadFacturas() {
             data.userName = data.userName || await getUserFullName(data.uid);
             facturas.push(data);
         }
-        const ocValues = new Set(facturas.map(f => f.oc));
         if (facturas.length > 0) {
             lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
             firstVisible = querySnapshot.docs[0];
@@ -497,7 +507,6 @@ async function normalizeOCField() {
 
         if (updatedCount > 0) {
             await batch.commit();
-        } else {
         }
     } catch (error) {
         console.error('Error al normalizar campo oc:', error);
@@ -556,11 +565,33 @@ async function init() {
                         }
 
                         const missingFields = [];
-                        if (!numeroFacturaInput?.value) missingFields.push('Número de factura');
-                        if (!fechaFacturaInput?.value) missingFields.push('Fecha de factura');
-                        if (!montoFacturaInput?.value) missingFields.push('Monto');
-                        if (!ocInput?.value) missingFields.push('OC');
-                        if (!fechaIngresoInput?.value) missingFields.push('Fecha de ingreso');
+                        const resetFieldStyles = () => {
+                            [numeroFacturaInput, fechaFacturaInput, montoFacturaInput, ocInput, fechaIngresoInput].forEach(input => {
+                                if (input) input.style.border = '';
+                            });
+                        };
+
+                        resetFieldStyles();
+                        if (!numeroFacturaInput?.value) {
+                            missingFields.push('Número de factura');
+                            numeroFacturaInput.style.border = '2px solid red';
+                        }
+                        if (!fechaFacturaInput?.value) {
+                            missingFields.push('Fecha de factura');
+                            fechaFacturaInput.style.border = '2px solid red';
+                        }
+                        if (!montoFacturaInput?.value) {
+                            missingFields.push('Monto');
+                            montoFacturaInput.style.border = '2px solid red';
+                        }
+                        if (!ocInput?.value) {
+                            missingFields.push('OC');
+                            ocInput.style.border = '2px solid red';
+                        }
+                        if (!fechaIngresoInput?.value) {
+                            missingFields.push('Fecha de ingreso');
+                            fechaIngresoInput.style.border = '2px solid red';
+                        }
 
                         if (missingFields.length > 0) {
                             showSuccessMessage(`Faltan los siguientes campos: ${missingFields.join(', ')}`, false);
@@ -570,6 +601,7 @@ async function init() {
                         const montoFactura = parseCurrency(montoFacturaInput.value);
                         if (!montoFactura) {
                             showSuccessMessage('El monto de la factura debe ser un número válido.', false);
+                            montoFacturaInput.style.border = '2px solid red';
                             return;
                         }
 
@@ -598,8 +630,8 @@ async function init() {
                                 fechaFactura: new Date(fechaFacturaInput.value).toISOString(),
                                 montoFactura,
                                 oc: oc.trim(),
-                                fechaOC: ocData ? ocData.fecha.toISOString() : null,
-                                proveedor: ocData?.proveedor || null,
+                                fechaOC: ocData ? ocData.generacion.toISOString() : null,
+                                proveedor: ocData?.proveedorId || null,
                                 acta: actaInput?.value.trim() || null,
                                 fechaSalida: fechaSalidaInput?.value ? new Date(fechaSalidaInput.value).toISOString() : null,
                                 salida: parseCurrency(salidaInput?.value) || null,
@@ -630,6 +662,7 @@ async function init() {
                             setTimeout(() => {
                                 hideModal(registerModal);
                                 showSuccessMessage('Factura registrada exitosamente');
+                                resetFieldStyles();
                                 numeroFacturaInput.value = '';
                                 fechaFacturaInput.value = '';
                                 montoFacturaInput.value = '';
@@ -709,8 +742,8 @@ async function init() {
                                 fechaFactura,
                                 montoFactura,
                                 oc,
-                                fechaOC: ocData ? formatDateTimeForInput(ocData.fecha) : null,
-                                proveedor: ocData ? ocData.proveedor || null : null,
+                                fechaOC: ocData ? formatDateTimeForInput(ocData.generacion) : null,
+                                proveedor: ocData ? ocData.proveedorId || null : null,
                                 acta,
                                 fechaSalida,
                                 salida,
@@ -987,8 +1020,8 @@ async function init() {
                                     fechaFactura: fechaFactura ? fechaFactura.toISOString() : null,
                                     montoFactura: parseCurrency(row['Monto']) || 0,
                                     oc: row['OC'].toString().trim(),
-                                    fechaOC: ocData ? formatDateTimeForInput(ocData.fecha) : (fechaOC ? fechaOC.toISOString() : null),
-                                    proveedor: ocData?.proveedor || row['Proveedor'] || '',
+                                    fechaOC: ocData ? formatDateTimeForInput(ocData.generacion) : (fechaOC ? fechaOC.toISOString() : null),
+                                    proveedor: ocData?.proveedorId || row['Proveedor'] || '',
                                     acta: row['Acta'] || '',
                                     fechaSalida: fechaSalida ? fechaSalida.toISOString() : null,
                                     salida: parseCurrency(row['Salida']) || null,
@@ -1135,7 +1168,6 @@ async function init() {
 
             if (updateCount > 0) {
                 await batch.commit();
-            } else {
             }
         } catch (error) {
             console.error('Error al actualizar facturas:', error);
