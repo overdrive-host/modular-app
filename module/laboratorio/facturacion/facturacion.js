@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, query, orderBy, limit, startAfter, writeBatch, where } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, query, orderBy, limit, startAfter, writeBatch, where } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
