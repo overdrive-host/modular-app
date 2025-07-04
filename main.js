@@ -29,6 +29,8 @@ const loadingScreen = document.getElementById('loadingScreen');
 const headerDate = document.querySelector('.header-date');
 const userName = document.getElementById('userName');
 const userLogo = document.getElementById('userLogo');
+const userRoleBadge = document.getElementById('user-role');
+const sessionStatus = document.getElementById('session-status');
 const userDropdown = document.getElementById('userDropdown');
 const toggleModeBtn = document.getElementById('toggle-mode');
 const sidebarMenu = document.querySelector('.sidebar-menu');
@@ -310,6 +312,28 @@ const submenuData = {
 
 let currentSubmenuItem = null;
 
+const updateSessionStatus = (lastLoginTimestamp, sessionStatusElement) => {
+  if (!sessionStatusElement) return;
+  const now = new Date();
+  const lastLogin = lastLoginTimestamp ? new Date(lastLoginTimestamp) : null;
+  const diffMinutes = lastLogin ? (now - lastLogin) / (1000 * 60) : 0;
+
+  if (diffMinutes < 5) {
+    sessionStatusElement.textContent = 'Conectado';
+    sessionStatusElement.style.backgroundColor = '#2f855a';
+    sessionStatusElement.style.color = '#ffffff';
+  } else {
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = Math.floor(diffMinutes % 60);
+    let timeString = 'Último acceso: ';
+    if (hours > 0) timeString += `${hours} hora${hours > 1 ? 's' : ''} `;
+    timeString += `${minutes} min`;
+    sessionStatusElement.textContent = timeString;
+    sessionStatusElement.style.backgroundColor = '#a0aec0';
+    sessionStatusElement.style.color = '#ffffff';
+  }
+};
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     if (loadingScreen) loadingScreen.style.display = 'flex';
@@ -325,9 +349,12 @@ onAuthStateChanged(auth, async (user) => {
       let userIcon = userDoc.gender === 'Hombre' ? 'img/icono-hombre.png' : userDoc.gender === 'Mujer' ? 'img/icono-mujer.png' : 'img/icono-otro.png';
       let permissions = Array.isArray(userDoc.permissions) ? userDoc.permissions : [];
       let userRole = userDoc.role || '';
+      let lastLogin = userDoc.lastLogin || null;
 
       if (userName) userName.textContent = displayName;
       if (userLogo) userLogo.src = userIcon;
+      if (userRoleBadge) userRoleBadge.textContent = userRole || 'Sin rol';
+      if (sessionStatus) updateSessionStatus(lastLogin, sessionStatus);
       localStorage.setItem('userDocId', user.uid);
 
       const groupedPermissions = {};
@@ -359,6 +386,8 @@ onAuthStateChanged(auth, async (user) => {
       if (loadingScreen) loadingScreen.style.display = 'none';
 
       await getIdToken(user);
+
+      setInterval(() => updateSessionStatus(lastLogin, sessionStatus), 60000);
     } catch (error) {
       if (content) {
         content.innerHTML = `<h2>Error</h2><p>Error al cargar la aplicación: ${error.message}. Contacta al administrador.</p>`;
