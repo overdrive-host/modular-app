@@ -3,13 +3,13 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAdWLsgSF7mtA4moJ4yu9WzrVwfpNqYjXo",
-  authDomain: "respadol-modular.firebaseapp.com",
-  projectId: "respadol-modular",
-  storageBucket: "respadol-modular.firebasestorage.app",
-  messagingSenderId: "458804625858",
-  appId: "1:458804625858:web:5580163bc0736efbf2165b",
-  measurementId: "G-30MEEM4VMZ"
+  apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
+  authDomain: "modular-app-387da.firebaseapp.com",
+  projectId: "modular-app-387da",
+  storageBucket: "modular-app-387da.firebasestorage.app",
+  messagingSenderId: "271561966774",
+  appId: "1:271561966774:web:e197c00e2abd67b4f0d217",
+  measurementId: "G-7YT6MMR47X"
 };
 
 let app;
