@@ -1,4 +1,3 @@
-
 import { getFirestore, collection, getDocs, getDoc, doc, updateDoc, deleteDoc, query, where, Timestamp, writeBatch, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
 import { getApps, initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
@@ -68,6 +67,7 @@ try {
     const filterMonthSelect = document.getElementById('filter-month');
     const showAllBtn = document.getElementById('show-all-btn');
     const stateButtonsContainer = document.getElementById('state-buttons');
+    const loadingSpinner = document.getElementById('loading-spinner');
 
     const elements = {
         container, pacientesTableBody, prevBtn, nextBtn, pageInfo, totalRecords, exportExcelBtn,
@@ -77,7 +77,7 @@ try {
         deleteMessage, confirmDeleteBtn, cancelDeleteBtn, logModal, logContent, closeLogBtn,
         successModal, successIcon, successMessage, changeStateModal, changeStateSelect,
         saveStateBtn, cancelStateBtn, filterYearSelect, filterMonthSelect, showAllBtn,
-        stateButtonsContainer
+        stateButtonsContainer, loadingSpinner
     };
 
     Object.entries(elements).forEach(([key, el]) => {
@@ -115,20 +115,19 @@ try {
         }
         let parsedDate;
         if (typeof date === 'string') {
-            // Validar formato YYYY-MM-DD
             const [year, month, day] = date.split('-');
             if (year && month && day && year.length === 4 && month.length === 2 && day.length === 2) {
                 parsedDate = new Date(year, month - 1, day);
-                parsedDate.setHours(0, 0, 0, 0); // Ajustar a medianoche local
+                parsedDate.setHours(0, 0, 0, 0);
             } else {
                 console.warn('Fecha en formato de cadena inválida:', date);
                 return '';
             }
         } else if (date instanceof Timestamp) {
             parsedDate = date.toDate();
-            parsedDate.setHours(0, 0, 0, 0); // Ajustar a medianoche local
+            parsedDate.setHours(0, 0, 0, 0);
         } else if (date instanceof Date) {
-            parsedDate = new Date(date); // Copiar para evitar modificar el original
+            parsedDate = new Date(date);
             parsedDate.setHours(0, 0, 0, 0);
         } else {
             console.warn('Formato de fecha no reconocido:', date, 'Tipo:', typeof date);
@@ -138,7 +137,7 @@ try {
             console.warn('Fecha parseada inválida:', date, 'Parsed:', parsedDate);
             return '';
         }
-        const formattedDate = parsedDate.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const formattedDate = parsedDate.toISOString().split('T')[0];
         console.debug('Fecha formateada:', formattedDate);
         return formattedDate;
     }
@@ -155,7 +154,6 @@ try {
         modal.style.display = 'flex';
         modal.removeAttribute('hidden');
     }
-
 
     function hideModal(modal) {
         if (!modal) {
@@ -179,12 +177,80 @@ try {
         setTimeout(() => hideModal(successModal), 2000);
     }
 
+    function showSpinner() {
+        if (loadingSpinner) {
+            loadingSpinner.style.display = 'flex';
+            loadingSpinner.removeAttribute('hidden');
+        }
+    }
+
+    function hideSpinner() {
+        if (loadingSpinner) {
+            loadingSpinner.style.display = 'none';
+            loadingSpinner.setAttribute('hidden', true);
+        }
+    }
+
     async function getUserFullName() {
         if (!currentUser) throw new Error('No se encontró el usuario autenticado');
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) throw new Error('No se encontró el documento del usuario');
         return userSnap.data().fullName || 'Usuario Desconocido';
+    }
+
+    async function updatePrevisionFromReportesPabellon() {
+        try {
+            const reportesCollection = collection(db, 'reportesPabellon');
+            const reportesSnapshot = await getDocs(query(reportesCollection, where('uid', '==', currentUser.uid)));
+            const reportes = [];
+            reportesSnapshot.forEach(doc => {
+                const data = doc.data();
+                reportes.push({ id: doc.id, ...data });
+            });
+
+            const batch = writeBatch(db);
+            let updatedCount = 0;
+
+            for (const paciente of pacientes) {
+                if (!paciente.admision) continue;
+
+                const matchingReporte = reportes.find(reporte => reporte.admision === paciente.admision);
+                if (matchingReporte && matchingReporte.isapre && matchingReporte.isapre !== paciente.prevision) {
+                    const pacienteRef = doc(db, 'pacientesconsignacion', paciente.docId);
+                    const newPrevision = matchingReporte.isapre;
+                    const now = Timestamp.fromDate(new Date());
+                    const fullName = await getUserFullName();
+
+                    batch.update(pacienteRef, {
+                        prevision: newPrevision,
+                        usuario: fullName,
+                        fechaActualizada: now,
+                        uid: currentUser.uid
+                    });
+
+                    const logRef = doc(collection(db, 'pacientesconsignacion', paciente.docId, 'logs'));
+                    batch.set(logRef, {
+                        action: `Actualizado: ${formatDate(new Date(now.toMillis()))}`,
+                        details: `Previsión actualizada a ${newPrevision} desde reportesPabellon`,
+                        timestamp: now,
+                        user: fullName,
+                        uid: currentUser.uid
+                    });
+
+                    paciente.prevision = newPrevision;
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0) {
+                await batch.commit();
+                showSuccessMessage(`Se actualizaron ${updatedCount} registros de Previsión desde reportesPabellon.`);
+            }
+        } catch (error) {
+            console.error('Error al actualizar previsión desde reportesPabellon:', error);
+            showSuccessMessage('Error al actualizar previsión desde reportesPabellon: ' + error.message, false);
+        }
     }
 
     function applyFilters(data) {
@@ -220,92 +286,6 @@ try {
             return yearMatch && monthMatch && stateMatch;
         });
     }
-
-    async function inspectPacientesConsignacionData() {
-
-        const pacientesCollection = collection(db, 'pacientesconsignacion');
-        const pacientesSnapshot = await getDocs(pacientesCollection);
-        pacientesSnapshot.forEach(doc => {
-            const data = doc.data();
-        });
-    }
-
-    async function fixPacientesConsignacionDates() {
-        const pacientesCollection = collection(db, 'pacientesconsignacion');
-        const pacientesSnapshot = await getDocs(pacientesCollection);
-        const batch = writeBatch(db);
-
-        pacientesSnapshot.forEach(doc => {
-            const data = doc.data();
-            const updates = {};
-
-            // Corregir fechaIngreso
-            if (!data.fechaIngreso || (typeof data.fechaIngreso === 'string' && isNaN(new Date(data.fechaIngreso)))) {
-                console.warn(`Fecha de Ingreso inválida en paciente ${doc.id}:`, data.fechaIngreso);
-                updates.fechaIngreso = null;
-            } else if (typeof data.fechaIngreso === 'string') {
-                const [year, month, day] = data.fechaIngreso.split('-');
-                if (year && month && day && year.length === 4) {
-                    const fechaIngresoDate = new Date(year, month - 1, day);
-                    if (!isNaN(fechaIngresoDate)) {
-                        fechaIngresoDate.setHours(0, 0, 0, 0);
-                        updates.fechaIngreso = Timestamp.fromDate(fechaIngresoDate);
-                    } else {
-                        console.warn(`Fecha de Ingreso inválida en paciente ${doc.id}:`, data.fechaIngreso);
-                        updates.fechaIngreso = null;
-                    }
-                }
-            }
-
-            // Corregir fechaCX
-            if (!data.fechaCX || (typeof data.fechaCX === 'string' && isNaN(new Date(data.fechaCX)))) {
-                console.warn(`Fecha de Cx inválida en paciente ${doc.id}:`, data.fechaCX);
-                updates.fechaCX = null;
-            } else if (typeof data.fechaCX === 'string') {
-                const [year, month, day] = data.fechaCX.split('-');
-                if (year && month && day && year.length === 4) {
-                    const fechaCXDate = new Date(year, month - 1, day);
-                    if (!isNaN(fechaCXDate)) {
-                        fechaCXDate.setHours(0, 0, 0, 0);
-                        updates.fechaCX = Timestamp.fromDate(fechaCXDate);
-                    } else {
-                        console.warn(`Fecha de Cx inválida en paciente ${doc.id}:`, data.fechaCX);
-                        updates.fechaCX = null;
-                    }
-                }
-            }
-
-            // Corregir fechaCargo
-            if (!data.fechaCargo || (typeof data.fechaCargo === 'string' && isNaN(new Date(data.fechaCargo)))) {
-                console.warn(`Fecha de Cargo inválida en paciente ${doc.id}:`, data.fechaCargo);
-                updates.fechaCargo = null;
-            } else if (typeof data.fechaCargo === 'string') {
-                const [year, month, day] = data.fechaCargo.split('-');
-                if (year && month && day && year.length === 4) {
-                    const fechaCargoDate = new Date(year, month - 1, day);
-                    if (!isNaN(fechaCargoDate)) {
-                        fechaCargoDate.setHours(0, 0, 0, 0);
-                        updates.fechaCargo = Timestamp.fromDate(fechaCargoDate);
-                    } else {
-                        console.warn(`Fecha de Cargo inválida en paciente ${doc.id}:`, data.fechaCargo);
-                        updates.fechaCargo = null;
-                    }
-                }
-            }
-
-            if (Object.keys(updates).length > 0) {
-                batch.update(doc.ref, updates);
-            }
-        });
-
-        await batch.commit();
-    }
-
-    // Ejecutar en la consola
-    await fixPacientesConsignacionDates();
-
-    // Ejecutar en la consola
-    await inspectPacientesConsignacionData();
 
     function updateYearFilter(data) {
         if (!filterYearSelect) return;
@@ -391,8 +371,11 @@ try {
             if (!pacientesTableBody) {
                 console.error('Tabla de pacientes no encontrada');
                 showSuccessMessage('Error: No se encontró la tabla de pacientes', false);
+                hideSpinner();
                 return;
             }
+
+            showSpinner();
 
             const pacientesCollection = collection(db, 'pacientesconsignacion');
             const q = query(pacientesCollection, orderBy('fechaIngreso', 'desc'));
@@ -414,7 +397,10 @@ try {
             if (pacientes.length === 0) {
                 console.warn('No se encontraron documentos en pacientesconsignacion');
                 pacientesTableBody.innerHTML = '<tr><td colspan="13">No hay pacientes disponibles</td></tr>';
+                hideSpinner();
             }
+
+            await updatePrevisionFromReportesPabellon();
 
             updateYearFilter(pacientes);
             updateMonthFilter(pacientes);
@@ -455,9 +441,11 @@ try {
             });
 
             updatePagination(filteredPacientes.length);
+            hideSpinner();
         } catch (error) {
             console.error('Error al cargar pacientes:', error.code, error.message);
             showSuccessMessage('Error al cargar pacientes: ' + error.message, false);
+            hideSpinner();
         }
     }
 
@@ -483,11 +471,11 @@ try {
             paciente: paciente
         });
         currentEditId = paciente.docId;
-        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
         editFechaIngresoInput.value = formatDateOnly(paciente.fechaIngreso) || today;
         editAdmisionInput.value = paciente.admision || '';
         editNombrePacienteInput.value = paciente.nombrePaciente || '';
-        editFechaCXInput.value = formatDateOnly(paciente.fechaCX) || today; // Cambiado de '' a today
+        editFechaCXInput.value = formatDateOnly(paciente.fechaCX) || today;
         editMedicoInput.value = paciente.medico || '';
         editProveedorInput.value = paciente.proveedor || '';
         editPrevisionInput.value = paciente.prevision || '';
@@ -537,7 +525,6 @@ try {
                 logContent.innerHTML = '<p>No hay registros de cambios.</p>';
             } else {
                 logsSnapshot.forEach(doc => {
-                    ഗ
                     const logData = doc.data();
                     const timestamp = logData.timestamp?.toDate?.() || new Date();
                     const fechaDisplay = timestamp ? formatDate(timestamp) : 'Sin fecha';
@@ -804,7 +791,6 @@ try {
                                 const pacienteRef = doc(db, 'pacientesconsignacion', currentEditId);
                                 const batch = writeBatch(db);
 
-                                // Convertir fechas a Timestamp ajustado a medianoche local
                                 let fechaIngresoTimestamp = null;
                                 if (fechaIngreso) {
                                     const [year, month, day] = fechaIngreso.split('-');
