@@ -32,9 +32,7 @@ setPersistence(auth, browserLocalPersistence).catch(error => {
 });
 
 const submenuData = {
-  Usuarios: [
-    { name: 'Registros' }
-  ],
+
   Implantes: [
     { name: 'Cargos Implantes' },
     { name: 'Cargos Consignación' },
@@ -76,6 +74,9 @@ const submenuData = {
     { name: 'Reporte Pabellón' },
     { name: 'Órdenes de Compra' }
   ],
+  Presupuesto: [
+    { name: 'Presupuesto' }
+  ],
   Apuntes: [
     { name: 'Notas' },
     { name: 'Bloc' }
@@ -85,6 +86,14 @@ const submenuData = {
     { name: 'ImplanteView' },
     { name: 'Consigna' },
     { name: 'FactuView' }
+  ],
+  Usuarios: [
+    { name: 'Registros' }
+  ],
+  Herramientas: [
+    { name: 'Presupuesto' },
+    { name: 'Lector' },
+    { name: 'DTE' }
   ]
 };
 
