@@ -26,7 +26,6 @@
     --info: #2196f3;
     --info-hover: #1976d2;
     --state-actualizar-precio-bg: #f7fafc;
-    --state-cargado-bg: #d4edda;
     --state-cargo-pendiente-bg: #ffedec;
     --state-código-pendiente-bg: #ffe6e6;
     --state-cotización-pendiente-bg: #ffcccc;
@@ -58,7 +57,6 @@
     --dark-info: #64b5f6;
     --dark-info-hover: #42a5f5;
     --dark-state-actualizar-precio-bg: #3c4b64;
-    --dark-state-cargado-bg: #276749;
     --dark-state-cargo-pendiente-bg: #5c2a2a;
     --dark-state-código-pendiente-bg: #742a2a;
     --dark-state-cotización-pendiente-bg: #923232;
