@@ -10,7 +10,6 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
 
-
 export function initNotes(user) {
   if (!user) {
     console.error('Usuario no proporcionado');
@@ -29,7 +28,6 @@ export function initNotes(user) {
 
   if (!addInfoBtn) {
     console.error('Botón .add-info-btn no encontrado en el DOM');
-  } else {
   }
 
   async function isAdmin() {
@@ -57,8 +55,6 @@ export function initNotes(user) {
       const isUserAdmin = await isAdmin();
       if (addInfoBtn) {
         addInfoBtn.style.setProperty('display', isUserAdmin ? 'block' : 'none', 'important');
-        setTimeout(() => {
-        }, 100);
       } else {
         console.error('Botón .add-info-btn no encontrado al ejecutar loadInfo');
       }
@@ -91,7 +87,13 @@ export function initNotes(user) {
       saveBtn.textContent = 'Guardar';
       saveBtn.addEventListener('click', () => saveInfo(id, textarea.value, infoContainer));
 
+      const cancelBtn = document.createElement('button');
+      cancelBtn.classList.add('info-btn', 'cancel');
+      cancelBtn.textContent = 'Cancelar';
+      cancelBtn.addEventListener('click', () => infoContainer.remove());
+
       actions.appendChild(saveBtn);
+      actions.appendChild(cancelBtn);
       infoContainer.appendChild(actions);
     } else {
       const infoText = document.createElement('div');
@@ -204,7 +206,36 @@ export function initNotes(user) {
     saveBtn.textContent = 'Guardar';
     saveBtn.addEventListener('click', () => saveInfo(id, textarea.value, infoContainer));
 
+    const cancelBtn = document.createElement('button');
+    cancelBtn.classList.add('info-btn', 'cancel');
+    cancelBtn.textContent = 'Cancelar';
+    cancelBtn.addEventListener('click', () => {
+      infoContainer.innerHTML = '';
+      const infoText = document.createElement('div');
+      infoText.classList.add('info-text');
+      infoText.textContent = content;
+      infoContainer.appendChild(infoText);
+
+      const actions = document.createElement('div');
+      actions.classList.add('info-actions');
+
+      const editBtn = document.createElement('button');
+      editBtn.classList.add('info-btn', 'edit');
+      editBtn.textContent = 'Editar';
+      editBtn.addEventListener('click', () => editInfo(id, content, infoContainer));
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.classList.add('info-btn', 'delete');
+      deleteBtn.textContent = 'Eliminar';
+      deleteBtn.addEventListener('click', () => deleteInfo(id, infoContainer));
+
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      infoContainer.appendChild(actions);
+    });
+
     actions.appendChild(saveBtn);
+    actions.appendChild(cancelBtn);
     infoContainer.appendChild(actions);
   }
 
