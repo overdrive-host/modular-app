@@ -8,6 +8,10 @@
     </div>
     <hr class="divider">
     <div class="table-container">
+        <div id="loading-spinner" class="loading-spinner" hidden>
+            <div class="spinner"></div>
+            <span>Cargando...</span>
+        </div>
         <table id="pacientesconsignacion-table">
             <thead>
                 <tr>
@@ -37,7 +41,6 @@
         <span id="total-records">Total de registros: 0</span>
     </div>
 
-    <!-- Edit Modal -->
     <div id="edit-paciente-modal" class="modal" hidden>
         <div class="modal-content">
             <h3>Editar Paciente</h3>
@@ -77,7 +80,6 @@
         </div>
     </div>
 
-    <!-- Change State Modal -->
     <div id="change-state-modal" class="modal" hidden>
         <div class="modal-content small-modal">
             <h3>Cambiar Estado</h3>
@@ -97,7 +99,6 @@
         </div>
     </div>
 
-    <!-- Delete Modal -->
     <div id="delete-paciente-modal" class="modal" hidden>
         <div class="modal-content">
             <h3>Confirmar Eliminación</h3>
@@ -109,7 +110,6 @@
         </div>
     </div>
 
-    <!-- Log Modal -->
     <div id="log-modal" class="modal" hidden>
         <div class="modal-content">
             <h3>Historial de Cambios</h3>
@@ -120,7 +120,6 @@
         </div>
     </div>
 
-    <!-- Success/Error Modal -->
     <div id="success-modal" class="modal" hidden>
         <div class="modal-content">
             <p><i id="success-icon" class="fas"></i><span id="success-message"></span></p>
