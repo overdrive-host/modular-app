@@ -270,7 +270,7 @@ const submenuData = {
   Herramientas: [
     {
       name: 'Presupuesto',
-      icon: 'fa-file-invoice-dollar', 
+      icon: 'fa-file-invoice-dollar',
       html: 'module/herramientas/presupuesto/presupuesto.html',
       css: 'module/herramientas/presupuesto/presupuesto.css',
       js: 'module/herramientas/presupuesto/presupuesto.js'
@@ -284,7 +284,7 @@ const submenuData = {
     },
     {
       name: 'DTE',
-      icon: 'fa-file-invoice', 
+      icon: 'fa-file-invoice',
       html: 'module/herramientas/dte/dte.html',
       css: 'module/herramientas/dte/dte.css',
       js: 'module/herramientas/dte/dte.js'
@@ -517,19 +517,12 @@ async function loadContent(htmlFile, cssFile, jsFile) {
     const existingScripts = document.querySelectorAll('script[data-submodule]');
     existingScripts.forEach(script => script.remove());
 
-    const cachedHtml = localStorage.getItem(`cached_${htmlFile}`);
-    const cachedCss = localStorage.getItem(`cached_${cssFile}`);
-    let htmlContent, cssContent;
-
-    htmlContent = cachedHtml || await (await fetch(htmlFile)).text();
-    cssContent = cachedCss || await (await fetch(cssFile)).text();
+    let htmlContent = await (await fetch(htmlFile)).text();
+    let cssContent = await (await fetch(cssFile)).text();
 
     if (!htmlContent || !cssContent) {
       throw new Error('Contenido HTML o CSS vacío');
     }
-
-    if (!cachedHtml) localStorage.setItem(`cached_${htmlFile}`, htmlContent);
-    if (!cachedCss) localStorage.setItem(`cached_${cssFile}`, cssContent);
 
     content.innerHTML = htmlContent;
 
@@ -573,6 +566,18 @@ async function loadContent(htmlFile, cssFile, jsFile) {
   } catch (error) {
     content.innerHTML = `<h2>Error</h2><p>No se pudo cargar el contenido: ${error.message}</p>`;
   }
+}
+
+if (confirmLogout) {
+  confirmLogout.addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      window.location.href = 'index.html';
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  });
 }
 
 function showModulesInfo() {
