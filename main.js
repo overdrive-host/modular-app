@@ -683,15 +683,8 @@ if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem('userDocId');
-      localStorage.removeItem('userPermissions');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('cachedSidebarMenu');
-      localStorage.removeItem('cachedPermissions');
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('cached_')) localStorage.removeItem(key);
-      });
+      // Limpiar todas las claves de localStorage
+      localStorage.clear();
       window.location.href = 'index.html';
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
