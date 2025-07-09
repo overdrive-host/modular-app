@@ -26,12 +26,12 @@
     --info: #2196f3;
     --info-hover: #1976d2;
     --state-actualizar-precio-bg: #f7fafc;
+    --state-cargado-bg: #d4edda;
     --state-cargo-pendiente-bg: #ffedec;
     --state-código-pendiente-bg: #ffe6e6;
     --state-cotización-pendiente-bg: #ffcccc;
     --state-cuenta-cerrada-bg: #e2e8f0;
     --state-reposición-bg: #d1ecf1;
-
 
     --dark-bg-color: #2d3748;
     --dark-border-color: #4a5568;
@@ -58,6 +58,7 @@
     --dark-info: #64b5f6;
     --dark-info-hover: #42a5f5;
     --dark-state-actualizar-precio-bg: #3c4b64;
+    --dark-state-cargado-bg: #276749;
     --dark-state-cargo-pendiente-bg: #5c2a2a;
     --dark-state-código-pendiente-bg: #742a2a;
     --dark-state-cotización-pendiente-bg: #923232;
@@ -71,7 +72,6 @@
     padding: 15px;
     margin: 0;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
     background-color: var(--bg-color);
     box-sizing: border-box;
 }
@@ -102,8 +102,7 @@ body.dark-mode .cargosconsignacion-container h2 {
 .quick-filters select {
     padding: 6px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 13px;
+    font-size: 11px;
     background-color: var(--input-bg);
     color: var(--text-color);
     cursor: pointer;
@@ -127,9 +126,8 @@ body.dark-mode .quick-filters select:focus {
 .quick-filters button {
     padding: 6px 12px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     background-color: var(--button-bg);
     color: var(--text-color);
 }
@@ -156,9 +154,8 @@ body.dark-mode .quick-filters button:hover {
 .state-button {
     padding: 6px 12px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-color);
     transition: opacity 0.2s ease;
 }
@@ -239,11 +236,10 @@ body.dark-mode .divider {
 
 .table-container {
     margin-top: 10px;
-    height: 700px;
+    height: 720px;
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -272,8 +268,8 @@ body.dark-mode #cargosconsignacion-table {
     border-bottom: 1px solid var(--border-color);
     color: var(--text-color);
     position: relative;
-    height: 20px;
-    line-height: 20px;
+    height: 14px;
+    line-height: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -396,16 +392,28 @@ body.dark-mode #cargosconsignacion-table tr.sub-row {
     background-color: var(--dark-log-bg);
 }
 
-#cargosconsignacion-table tr.sub-row td {
+#cargosconsignacion-table tr.package-sub-row {
+    background-color: #e6fffa;
+    font-size: 10px;
+    padding-left: 30px;
+}
+
+body.dark-mode #cargosconsignacion-table tr.package-sub-row {
+    background-color: #566068;
+}
+
+#cargosconsignacion-table tr.sub-row td,
+#cargosconsignacion-table tr.package-sub-row td {
     padding-left: 20px;
 }
 
-#cargosconsignacion-table tr.sub-row-hidden {
+#cargosconsignacion-table tr.sub-row-hidden,
+#cargosconsignacion-table tr.package-sub-row-hidden {
     display: none;
 }
 
 #cargosconsignacion-table .fas {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 #cargosconsignacion-table .action-icon {
@@ -513,6 +521,22 @@ body.dark-mode #cargosconsignacion-table .fa-chevron-up:hover {
     color: var(--dark-secondary-hover);
 }
 
+#cargosconsignacion-table .fa-box {
+    color: var(--info);
+}
+
+body.dark-mode #cargosconsignacion-table .fa-box {
+    color: var(--dark-info);
+}
+
+#cargosconsignacion-table .fa-box:hover {
+    color: var(--info-hover);
+}
+
+body.dark-mode #cargosconsignacion-table .fa-box:hover {
+    color: var(--dark-info-hover);
+}
+
 #cargosconsignacion-table .fa-filter,
 #cargosconsignacion-table .fa-filter-circle-xmark {
     color: var(--secondary);
@@ -548,10 +572,9 @@ body.dark-mode #cargosconsignacion-table .fa-filter-circle-xmark.active {
     width: 100%;
     background-color: var(--filter-bg);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    padding: 6px;
+    padding: 4px;
     margin-top: 2px;
 }
 
@@ -564,8 +587,7 @@ body.dark-mode .filter-input-container {
     width: 100%;
     padding: 4px;
     border: none;
-    border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     background-color: transparent;
     color: var(--text-color);
     box-sizing: border-box;
@@ -596,9 +618,8 @@ body.dark-mode .filter-input-container input:focus {
 #export-excel-btn {
     padding: 6px 12px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 #prev-btn,
@@ -652,7 +673,7 @@ body.dark-mode #export-excel-btn:hover {
 
 #page-info,
 #total-records {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-color);
 }
 
@@ -680,90 +701,289 @@ body.dark-mode #total-records {
     display: flex;
 }
 
-.modal-content {
+.edit-cargo-modal-content {
     background-color: var(--modal-bg);
     padding: 2rem;
-    border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    max-width: 900px;
-    width: 90%;
-    max-height: 80vh;
+    width: 800px;
+    max-width: 90%;
+    max-height: 85vh;
     overflow-y: auto;
     position: relative;
     font-family: 'Arial', sans-serif;
 }
 
-body.dark-mode .modal-content {
+body.dark-mode .edit-cargo-modal-content {
     background-color: var(--dark-modal-bg);
     color: var(--dark-text-color);
 }
 
-.modal-content h3 {
-    margin: 0 0 1.5rem;
-    font-size: 1.8rem;
+.change-state-modal-content {
+    background-color: var(--modal-bg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    max-width: 80%;
+    max-height: 60vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .change-state-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.delete-cargo-modal-content {
+    background-color: var(--modal-bg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 85%;
+    max-height: 50vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .delete-cargo-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.log-modal-content {
+    background-color: var(--modal-bg);
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 600px;
+    max-width: 90%;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .log-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.success-modal-content {
+    background-color: var(--success-bg);
+    border: 2px solid var(--success-border);
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    max-width: 80%;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .success-modal-content {
+    background-color: var(--dark-success-bg);
+    border: 2px solid var(--success-border);
+    color: var(--dark-text-color);
+}
+
+.success-modal-content.error {
+    background-color: var(--error-bg);
+    border: 2px solid var(--error-border);
+}
+
+body.dark-mode .success-modal-content.error {
+    background-color: var(--dark-error-bg);
+    border: 2px solid var(--error-border);
+}
+
+.quick-edit-modal-content {
+    background-color: var(--modal-bg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    max-width: 80%;
+    max-height: 60vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .quick-edit-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.package-modal-content {
+    background-color: var(--modal-bg);
+    padding: 1.5rem; 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 900px; 
+    max-width: 90%;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+    font-size: 11PX;
+}
+
+body.dark-mode .package-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.package-item-edit-modal-content {
+    background-color: var(--modal-bg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 85%;
+    max-height: 65vh;
+    overflow-y: auto;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+body.dark-mode .package-item-edit-modal-content {
+    background-color: var(--dark-modal-bg);
+    color: var(--dark-text-color);
+}
+
+.edit-cargo-modal-content h3,
+.change-state-modal-content h3,
+.delete-cargo-modal-content h3,
+.log-modal-content h3,
+.quick-edit-modal-content h3,
+.package-modal-content h3,
+.package-item-edit-modal-content h3 {
+    margin: 0 0 1rem; 
+    font-size: 11px; 
     color: var(--text-color);
     text-align: center;
 }
 
-body.dark-mode .modal-content h3 {
+body.dark-mode .edit-cargo-modal-content h3,
+body.dark-mode .change-state-modal-content h3,
+body.dark-mode .delete-cargo-modal-content h3,
+body.dark-mode .log-modal-content h3,
+body.dark-mode .quick-edit-modal-content h3,
+body.dark-mode .package-modal-content h3,
+body.dark-mode .package-item-edit-modal-content h3 {
     color: var(--dark-text-color);
 }
 
-.modal-content label {
+.edit-cargo-modal-content label,
+.change-state-modal-content label,
+.delete-cargo-modal-content label,
+.log-modal-content label,
+.quick-edit-modal-content label,
+.package-modal-content label,
+.package-item-edit-modal-content label {
     display: block;
-    margin-top: 10px;
+    margin-top: 8px; 
     color: var(--text-color);
-    font-size: 13px;
+    font-size: 9px; 
 }
 
-body.dark-mode .modal-content label {
+body.dark-mode .edit-cargo-modal-content label,
+body.dark-mode .change-state-modal-content label,
+body.dark-mode .delete-cargo-modal-content label,
+body.dark-mode .log-modal-content label,
+body.dark-mode .quick-edit-modal-content label,
+body.dark-mode .package-modal-content label,
+body.dark-mode .package-item-edit-modal-content label {
     color: var(--dark-text-color);
 }
 
-.modal-content input,
-.modal-content select {
+.edit-cargo-modal-content input,
+.edit-cargo-modal-content select,
+.change-state-modal-content input,
+.change-state-modal-content select,
+.delete-cargo-modal-content input,
+.delete-cargo-modal-content select,
+.log-modal-content input,
+.log-modal-content select,
+.quick-edit-modal-content input,
+.quick-edit-modal-content select,
+.package-modal-content input,
+.package-modal-content select,
+.package-item-edit-modal-content input,
+.package-item-edit-modal-content select {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+    padding: 4px; 
+    margin-top: 4px; 
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 13px;
+    font-size: 11px;
     box-sizing: border-box;
     background-color: var(--input-bg);
     color: var(--text-color);
 }
 
-body.dark-mode .modal-content input,
-body.dark-mode .modal-content select {
+body.dark-mode .edit-cargo-modal-content input,
+body.dark-mode .edit-cargo-modal-content select,
+body.dark-mode .change-state-modal-content input,
+body.dark-mode .change-state-modal-content select,
+body.dark-mode .delete-cargo-modal-content input,
+body.dark-mode .delete-cargo-modal-content select,
+body.dark-mode .log-modal-content input,
+body.dark-mode .log-modal-content select,
+body.dark-mode .quick-edit-modal-content input,
+body.dark-mode .quick-edit-modal-content select,
+body.dark-mode .package-modal-content input,
+body.dark-mode .package-modal-content select,
+body.dark-mode .package-item-edit-modal-content input,
+body.dark-mode .package-item-edit-modal-content select {
     border: 1px solid var(--dark-border-color);
     background-color: var(--dark-input-bg);
     color: var(--dark-text-color);
 }
 
-.modal-content input:focus,
-.modal-content select:focus {
+.edit-cargo-modal-content input:focus,
+.edit-cargo-modal-content select:focus,
+.change-state-modal-content input:focus,
+.change-state-modal-content select:focus,
+.delete-cargo-modal-content input:focus,
+.delete-cargo-modal-content select:focus,
+.log-modal-content input:focus,
+.log-modal-content select:focus,
+.quick-edit-modal-content input:focus,
+.quick-edit-modal-content select:focus,
+.package-modal-content input:focus,
+.package-modal-content select:focus,
+.package-item-edit-modal-content input:focus,
+.package-item-edit-modal-content select:focus {
     outline: none;
     border-color: var(--primary);
 }
 
-body.dark-mode .modal-content input:focus,
-body.dark-mode .modal-content select:focus {
+body.dark-mode .edit-cargo-modal-content input:focus,
+body.dark-mode .edit-cargo-modal-content select:focus,
+body.dark-mode .change-state-modal-content input:focus,
+body.dark-mode .change-state-modal-content select:focus,
+body.dark-mode .delete-cargo-modal-content input:focus,
+body.dark-mode .delete-cargo-modal-content select:focus,
+body.dark-mode .log-modal-content input:focus,
+body.dark-mode .log-modal-content select:focus,
+body.dark-mode .quick-edit-modal-content input:focus,
+body.dark-mode .quick-edit-modal-content select:focus,
+body.dark-mode .package-modal-content input:focus,
+body.dark-mode .package-modal-content select:focus,
+body.dark-mode .package-item-edit-modal-content input:focus,
+body.dark-mode .package-item-edit-modal-content select:focus {
     border-color: var(--dark-primary);
 }
 
 .modal-buttons {
-    margin-top: 20px;
+    margin-top: 15px; 
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px; 
 }
 
 .modal-btn {
-    padding: 8px 16px;
+    padding: 6px 12px; 
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 11px; 
     transition: background-color 0.3s, transform 0.1s;
 }
 
@@ -813,30 +1033,6 @@ body.dark-mode .cancel-btn:hover {
     justify-content: flex-end;
 }
 
-#success-modal.success .modal-content {
-    background-color: var(--success-bg);
-    border: 2px solid var(--success-border);
-    width: 300px;
-    padding: 10px;
-}
-
-body.dark-mode #success-modal.success .modal-content {
-    background-color: var(--dark-success-bg);
-    border: 2px solid var(--success-border);
-}
-
-#success-modal.error .modal-content {
-    background-color: var(--error-bg);
-    border: 2px solid var(--error-border);
-    width: 300px;
-    padding: 10px;
-}
-
-body.dark-mode #success-modal.error .modal-content {
-    background-color: var(--dark-error-bg);
-    border: 2px solid var(--error-border);
-}
-
 #success-icon.fa-check-circle {
     color: var(--success);
 }
@@ -868,7 +1064,6 @@ body.dark-mode #success-message {
     margin-top: 10px;
     padding: 10px;
     background-color: var(--log-bg);
-    border-radius: 4px;
 }
 
 body.dark-mode #log-content .log {
@@ -893,7 +1088,7 @@ body.dark-mode .log-entry strong {
     color: var(--dark-text-color);
 }
 
-.log-entry .small {
+.log-entry small {
     color: var(--text-color);
 }
 
@@ -901,22 +1096,10 @@ body.dark-mode .log-entry small {
     color: var(--dark-text-color);
 }
 
-.small-modal .modal-content {
-    width: 250px;
-}
-
-#package-modal .modal-content {
-    width: 960px;
-    max-width: 95%;
-}
-
-body.dark-mode #package-modal .modal-content {
-    background-color: var(--dark-modal-bg);
-}
-
 #package-modal-title {
     color: var(--text-color);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; 
+    font-size: 1.5rem; 
 }
 
 body.dark-mode #package-modal-title {
@@ -924,18 +1107,17 @@ body.dark-mode #package-modal-title {
 }
 
 #package-items-container {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; 
 }
 
 .package-item {
     display: grid;
     grid-template-columns: 1fr 1.5fr 0.8fr 1fr 1fr 0.4fr;
-    gap: 8px;
+    gap: 6px; 
     align-items: start;
-    padding: 0.75rem;
+    padding: 0.5rem; 
     border-bottom: 1px solid var(--border-color);
     background-color: var(--input-bg);
-    border-radius: 8px;
     margin-bottom: 0.5rem;
 }
 
@@ -955,7 +1137,7 @@ body.dark-mode .package-item {
 }
 
 .package-item .field label {
-    font-size: 11px;
+    font-size: 9px; 
     color: var(--text-color);
     margin-bottom: 2px;
     font-weight: 500;
@@ -967,10 +1149,9 @@ body.dark-mode .package-item .field label {
 }
 
 .package-item input {
-    padding: 8px;
-    font-size: 0.95rem;
+    padding: 4px; 
+    font-size: 0.75rem;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
     background-color: var(--input-bg);
@@ -1004,7 +1185,7 @@ body.dark-mode .package-item input:invalid:not(:placeholder-shown) {
 .package-item .remove-item-btn {
     cursor: pointer;
     color: var(--danger);
-    font-size: 1.2rem;
+    font-size: 1rem; 
     text-align: center;
     transition: color 0.3s;
     align-self: center;
@@ -1023,15 +1204,14 @@ body.dark-mode .package-item .remove-item-btn:hover {
 }
 
 #add-item-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 6px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.85rem; 
     background-color: var(--info);
     color: #fff;
     display: block;
-    margin: 0 auto 1rem;
+    margin: 0 auto 0.75rem; 
     transition: background-color 0.3s;
 }
 
@@ -1048,18 +1228,20 @@ body.dark-mode #add-item-btn:hover {
 }
 
 @media (max-width: 768px) {
-    .modal-content {
+    .edit-cargo-modal-content,
+    .change-state-modal-content,
+    .delete-cargo-modal-content,
+    .log-modal-content,
+    .quick-edit-modal-content,
+    .package-modal-content,
+    .package-item-edit-modal-content {
         width: 95%;
         padding: 1rem;
     }
 
-    #package-modal .modal-content {
-        width: 95%;
-    }
-
     .package-item {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px; 
     }
 
     .package-item .field {
@@ -1072,7 +1254,7 @@ body.dark-mode #add-item-btn:hover {
     }
 
     .modal-btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
+        padding: 0.5rem 1rem; 
+        font-size: 0.85rem; 
     }
 }
