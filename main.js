@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, getIdToken } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence, getIdToken } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -22,7 +22,7 @@ if (!getApps().length) {
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-setPersistence(auth, browserLocalPersistence)
+setPersistence(auth, browserSessionPersistence)
   .catch(error => console.error('Error al configurar persistencia:', error));
 
 const loadingScreen = document.getElementById('loadingScreen');
@@ -688,7 +688,6 @@ if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
       await signOut(auth);
-      // Limpiar todas las claves de localStorage
       localStorage.clear();
       window.location.href = 'index.html';
     } catch (error) {
