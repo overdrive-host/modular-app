@@ -157,14 +157,14 @@ const submenuData = {
   Historico: [
     {
       name: 'Datos Historicos',
-      icon: 'fa-database', 
+      icon: 'fa-database',
       html: 'module/historico/datos-historicos/datos-historicos.html',
       css: 'module/historico/datos-historicos/datos-historicos.css',
       js: 'module/historico/datos-historicos/datos-historicos.js'
     },
     {
       name: 'Diferencias',
-      icon: 'fa-exclamation-triangle', 
+      icon: 'fa-exclamation-triangle',
       html: 'module/historico/diferencias/diferencias.html',
       css: 'module/historico/diferencias/diferencias.css',
       js: 'module/historico/diferencias/diferencias.js'
@@ -178,7 +178,7 @@ const submenuData = {
     },
     {
       name: 'Recap',
-      icon: 'fa-clipboard-list', 
+      icon: 'fa-clipboard-list',
       html: 'module/historico/recap/recap.html',
       css: 'module/historico/recap/recap.css',
       js: 'module/historico/recap/recap.js'
@@ -267,6 +267,29 @@ const submenuData = {
       js: 'module/prestaciones/cts-clinico/cts-clinico.js'
     }
   ],
+  Herramientas: [
+    {
+      name: 'Presupuesto',
+      icon: 'fa-file-invoice-dollar', 
+      html: 'module/herramientas/presupuesto/presupuesto.html',
+      css: 'module/herramientas/presupuesto/presupuesto.css',
+      js: 'module/herramientas/presupuesto/presupuesto.js'
+    },
+    {
+      name: 'Lector',
+      icon: 'fa-file-code',
+      html: 'module/herramientas/lector/lector.html',
+      css: 'module/herramientas/lector/lector.css',
+      js: 'module/herramientas/lector/lector.js'
+    },
+    {
+      name: 'DTE',
+      icon: 'fa-file-invoice', 
+      html: 'module/herramientas/dte/dte.html',
+      css: 'module/herramientas/dte/dte.css',
+      js: 'module/herramientas/dte/dte.js'
+    }
+  ],
   Importacion: [
     {
       name: 'Reporte Pabellón',
@@ -275,6 +298,7 @@ const submenuData = {
       css: 'module/importacion/reportepabellon/reportepabellon.css',
       js: 'module/importacion/reportepabellon/reportepabellon.js'
     },
+
     {
       name: 'Órdenes de Compra',
       icon: 'fa-shopping-cart',
@@ -283,6 +307,17 @@ const submenuData = {
       js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
     }
   ],
+
+  Presupuesto: [
+    {
+      name: 'Presupuesto',
+      icon: 'fa-file-invoice-dollar',
+      html: 'module/presupuesto/presupuesto/presupuesto..html',
+      css: 'module/presupuesto/presupuesto/presupuesto.css',
+      js: 'module/presupuesto/presupuesto/presupuesto.js'
+    }
+  ],
+
   Apuntes: [
     {
       name: 'Notas',
@@ -439,7 +474,7 @@ function attachMenuListeners() {
       const permissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
       const userRole = localStorage.getItem('userRole') || '';
       const modulePerms = permissions.filter(p => p.module === section);
-      const allowedPaths = modulePerms.flatMap(p => p.paths); 
+      const allowedPaths = modulePerms.flatMap(p => p.paths);
       const subItems = userRole.toLowerCase() === 'administrador' ? submenuData[section] : submenuData[section].filter(subItem => allowedPaths.includes(subItem.html));
       subItems.forEach((subItem, index) => {
         const li = document.createElement('li');
