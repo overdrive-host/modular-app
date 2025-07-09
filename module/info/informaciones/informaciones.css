@@ -46,7 +46,6 @@ body.dark-mode p {
   background-color: #38a169;
   color: #ffffff;
   border: none;
-  border-radius: 2px;
   padding: 8px 16px;
   font-size: 12px;
   font-weight: 600;
@@ -84,9 +83,8 @@ body.dark-mode .info-container {
 
 .info-textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 200px;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
   padding: 10px;
   font-size: 14px;
   resize: vertical;
@@ -131,7 +129,6 @@ body.dark-mode .info-text {
 .info-btn {
   padding: 8px 12px;
   border: none;
-  border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -186,4 +183,21 @@ body.dark-mode .info-btn.delete {
 
 body.dark-mode .info-btn.delete:hover {
   background-color: #e53e3e;
+}
+
+.info-btn.cancel {
+  background-color: #6b7280;
+  color: #ffffff;
+}
+
+body.dark-mode .info-btn.cancel {
+  background-color: #4b5563;
+}
+
+.info-btn.cancel:hover {
+  background-color: #4b5563;
+}
+
+body.dark-mode .info-btn.cancel:hover {
+  background-color: #374151;
 }
