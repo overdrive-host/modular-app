@@ -566,6 +566,24 @@ try {
         }
     }
 
+    function togglePackageRows(cargoId) {
+        const tbody = document.querySelector('#cargosconsignacion-table tbody');
+        const rows = tbody.querySelectorAll('tr');
+        const rowIndex = Array.from(rows).findIndex(row => row.dataset.cargoId === cargoId);
+        const packageRows = tbody.querySelectorAll(`tr.package-sub-row[data-parent-id="${cargoId}"]`);
+        const toggleIcon = rows[rowIndex].querySelector('.package-toggle');
+
+        const isHidden = packageRows.length > 0 && packageRows[0].classList.contains('package-sub-row-hidden');
+
+        packageRows.forEach(subRow => {
+            subRow.classList.toggle('package-sub-row-hidden', !isHidden);
+        });
+
+        if (toggleIcon) {
+            toggleIcon.className = `fas fa-${isHidden ? 'chevron-up' : 'chevron-down'} action-icon package-toggle`;
+        }
+    }
+
     function applyFilters(data) {
         return data.filter(item => {
             return Object.entries(filters).every(([key, value]) => {
@@ -737,70 +755,63 @@ try {
                 const estadoClass = estado ? `state-${estado.toLowerCase().replace(/\s+/g, '-')}` : '';
                 tr.className = estadoClass;
                 tr.innerHTML = `
-                <td>
-                    <i class="fas fa-edit action-icon" data-id="${cargo.docId}" title="Editar"></i>
-                    <i class="fas fa-trash action-icon" data-id="${cargo.docId}" title="Eliminar"></i>
-                    <i class="fas fa-history action-icon" data-id="${cargo.docId}" title="Historial"></i>
-                    ${isPackage ? `
-                        <i class="fas fa-plus action-icon package-add" data-id="${cargo.docId}" title="Agregar Paquete"></i>
-                    ` : `
-                        <i class="fas fa-plus-circle action-icon quick-add" data-id="${cargo.docId}" title="Editar Lote, Guía y Fecha"></i>
-                    `}
-                </td>
-                <td class="state-cell" data-id="${cargo.docId}">${cargo.estado || '-'}</td>
-                <td>${cargo.admision || '-'}</td>
-                <td>${cargo.COD || '-'}</td>
-                <td>${cargo.CANTID || '-'}</td>
-                <td>${calculateVenta(cargo.modalidad, cargo.precio, calculateMargin(cargo.precio), cargo.cantidad)}</td>
-                <td>${isPackage ? '0' : cargo.nGuia || '-'}</td>
-                <td>${isPackage ? 'PAD' : cargo.lote || '-'}</td>
-                <td>${isPackage ? 'PAD' : formatDateOnly(cargo.fechaVencimiento)}</td>
-                <td>${cargo.estado === 'Cargado' ? cargo.usuario || '-' : '-'}</td>
-                <td>${cargo.estado === 'Cargado' ? formatDateOnly(cargo.fechaCargo) : '-'}</td>
-                <td>${cargo.admision || '-'}</td>
-                <td>${cargo.nombrePaciente || '-'}</td>
-                <td>${cargo.medico || '-'}</td>
-                <td>${formatDateOnly(cargo.fechaCX)}</td>
-                <td>${cargo.proveedor || '-'}</td>
-                <td>${cargo.codigo || '-'}</td>
-                <td>${cargo.descripcion || '-'}</td>
-                <td>${cargo.cantidad || '-'}</td>
-                <td>${formatPrice(cargo.precio)}</td>
-                <td>${cargo.modalidad || '-'}</td>
-                <td>${formatPrice(cargo.total)}</td>
-                <td>${cargo.referencia || '-'}</td>
-                <td>${formatDateOnly(cargo.fechaCreacion)}</td>
-                <td>${formatDateOnly(cargo.fechaTraspaso)}</td>
-                <td>${calculateMargin(cargo.precio)}</td>
-                <td>${cargo.usuario || '-'}</td>
-            `;
+                    <td>
+                        <i class="fas fa-edit action-icon" data-id="${cargo.docId}" title="Editar"></i>
+                        <i class="fas fa-trash action-icon" data-id="${cargo.docId}" title="Eliminar"></i>
+                        <i class="fas fa-history action-icon" data-id="${cargo.docId}" title="Historial"></i>
+                        ${isPackage ? `
+                            <i class="fas fa-plus action-icon package-add" data-id="${cargo.docId}" title="Agregar Paquete"></i>
+                            <i class="fas fa-chevron-down action-icon package-toggle" data-id="${cargo.docId}" title="Ver ítems de paquete"></i>
+                        ` : `
+                            <i class="fas fa-plus-circle action-icon quick-add" data-id="${cargo.docId}" title="Editar Lote, Guía y Fecha"></i>
+                        `}
+                    </td>
+                    <td class="state-cell" data-id="${cargo.docId}">${cargo.estado || '-'}</td>
+                    <td>${cargo.admision || '-'}</td>
+                    <td>${cargo.COD || '-'}</td>
+                    <td>${cargo.CANTID || '-'}</td>
+                    <td>${calculateVenta(cargo.modalidad, cargo.precio, calculateMargin(cargo.precio), cargo.cantidad)}</td>
+                    <td>${isPackage ? '0' : cargo.nGuia || '-'}</td>
+                    <td>${isPackage ? 'PAD' : cargo.lote || '-'}</td>
+                    <td>${isPackage ? 'PAD' : formatDateOnly(cargo.fechaVencimiento)}</td>
+                    <td>${cargo.estado === 'Cargado' ? cargo.usuario || '-' : '-'}</td>
+                    <td>${cargo.estado === 'Cargado' ? formatDateOnly(cargo.fechaCargo) : '-'}</td>
+                    <td>${cargo.admision || '-'}</td>
+                    <td>${cargo.nombrePaciente || '-'}</td>
+                    <td>${cargo.medico || '-'}</td>
+                    <td>${formatDateOnly(cargo.fechaCX)}</td>
+                    <td>${cargo.proveedor || '-'}</td>
+                    <td>${cargo.codigo || '-'}</td>
+                    <td>${cargo.descripcion || '-'}</td>
+                    <td>${cargo.cantidad || '-'}</td>
+                    <td>${formatPrice(cargo.precio)}</td>
+                    <td>${cargo.modalidad || '-'}</td>
+                    <td>${formatPrice(cargo.total)}</td>
+                    <td>${cargo.referencia || '-'}</td>
+                    <td>${formatDateOnly(cargo.fechaCreacion)}</td>
+                    <td>${formatDateOnly(cargo.fechaTraspaso)}</td>
+                    <td>${calculateMargin(cargo.precio)}</td>
+                    <td>${cargo.usuario || '-'}</td>
+                `;
                 fragment.appendChild(tr);
 
                 if (isPackage && packageInfo.items.length > 0) {
-                    const subTr = document.createElement('tr');
-                    subTr.className = 'sub-row';
-                    subTr.dataset.cargoId = cargo.docId;
-                    const subTd = document.createElement('td');
-                    subTd.colSpan = 27;
-                    const itemsList = document.createElement('ul');
-                    itemsList.style.listStyle = 'none';
-                    itemsList.style.padding = '0';
-                    itemsList.style.margin = '0';
                     packageInfo.items.forEach(item => {
-                        const li = document.createElement('li');
-                        li.style.padding = '2px 0';
-                        li.innerHTML = `
-                        <span>Referencia: ${item.referencia || '-'}</span> | 
-                        <span>Descripción: ${item.descripcion || '-'}</span> | 
-                        <span>Cantidad: ${item.cantidad || '1'}</span> | 
-                        <span>Lote: ${item.lote || '-'}</span> | 
-                        <span>Fecha Vencimiento: ${item.fechaVencimiento || '-'}</span>
-                    `;
-                        itemsList.appendChild(li);
+                        const subRow = document.createElement('tr');
+                        subRow.className = 'package-sub-row package-sub-row-hidden';
+                        subRow.dataset.parentId = cargo.docId;
+                        subRow.innerHTML = `
+                            <td colspan="27">
+                                <span>Ítem de Paquete: </span>
+                                <strong>Referencia:</strong> ${item.referencia || '-'}, 
+                                <strong>Descripción:</strong> ${item.descripcion || '-'}, 
+                                <strong>Cantidad:</strong> ${item.cantidad || '1'}, 
+                                <strong>Lote:</strong> ${item.lote || '-'}, 
+                                <strong>Fecha Vencimiento:</strong> ${item.fechaVencimiento || '-'}
+                            </td>
+                        `;
+                        fragment.appendChild(subRow);
                     });
-                    subTd.appendChild(itemsList);
-                    subTr.appendChild(subTd);
-                    fragment.appendChild(subTr);
                 }
             });
 
@@ -1374,6 +1385,8 @@ try {
                 openQuickEditModal(id);
             } else if (target.classList.contains('package-add')) {
                 handlePackageAdd(id);
+            } else if (target.classList.contains('package-toggle')) {
+                togglePackageRows(id);
             } else if (target.classList.contains('state-cell')) {
                 openChangeStateModal(id);
             }
@@ -1420,7 +1433,8 @@ try {
         quickFilters = { year: null, month: null, state: null };
         filterYearSelect.value = '';
         filterMonthSelect.value = '';
-        stateButtonsContainer.innerHTML = '';
+        const stateButtons = stateButtonsContainer.querySelectorAll('.state-button');
+        stateButtons.forEach(btn => btn.classList.remove('active'));
         loadCargos();
     });
 
@@ -1431,54 +1445,7 @@ try {
     if (saveQuickEditBtn) saveQuickEditBtn.addEventListener('click', handleQuickEditSave);
     if (cancelQuickEditBtn) cancelQuickEditBtn.addEventListener('click', () => hideModal(quickEditModal));
 
-    const filterIcons = document.querySelectorAll('.filter-icon');
-    let outsideClickListener;
-    filterIcons.forEach(icon => {
-        icon.addEventListener('click', e => {
-            e.stopPropagation();
-            const column = icon.dataset.column;
-            const existingContainer = document.querySelector('.filter-input-container');
-            if (existingContainer) existingContainer.remove();
-
-            const container = document.createElement('div');
-            container.className = 'filter-input-container';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = `Filtrar por ${column}`;
-            input.value = filters[column] || '';
-            input.addEventListener('input', e => {
-                filters[column] = e.target.value.trim();
-                currentPage = 1;
-                loadCargos();
-            });
-
-            const clearBtn = document.createElement('i');
-            clearBtn.className = 'fas fa-trash';
-            clearBtn.addEventListener('click', e => {
-                e.stopPropagation();
-                delete filters[column];
-                input.value = '';
-                currentPage = 1;
-                loadCargos();
-                container.remove();
-            });
-
-            container.appendChild(input);
-            container.appendChild(clearBtn);
-            icon.parentElement.style.position = 'relative';
-            icon.parentElement.appendChild(container);
-            input.focus();
-
-            document.addEventListener('click', outsideClickListener = e => {
-                if (!container.contains(e.target) && !icon.contains(e.target)) {
-                    container.remove();
-                    document.removeEventListener('click', outsideClickListener);
-                }
-            }, { once: true });
-        });
-    });
-
 } catch (error) {
-    console.error('Error inicializando la aplicación:', error.message);
-    alert('Error al inicializar la aplicación: ' + error.message);
+    console.error('Error en la inicialización del módulo:', error.message);
+    showSuccessMessage('Error al inicializar el módulo: ' + error.message, false);
 }
