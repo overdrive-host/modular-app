@@ -1,10 +1,9 @@
 .pacientesconsignacion-container {
     width: 100%;
     height: 100%;
-    padding: 15px;
+    padding: 10px;
     margin: 0;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
     background-color: #fff;
     box-sizing: border-box;
 }
@@ -16,8 +15,8 @@ body.dark-mode .pacientesconsignacion-container {
 
 .pacientesconsignacion-container h2 {
     color: #2d3748;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
 body.dark-mode .pacientesconsignacion-container h2 {
@@ -27,16 +26,15 @@ body.dark-mode .pacientesconsignacion-container h2 {
 .quick-filters {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
     flex-wrap: wrap;
 }
 
 .quick-filters select {
-    padding: 6px;
+    padding: 4px;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 13px;
+    font-size: 12px;
     background-color: #fff;
     color: #2d3748;
     cursor: pointer;
@@ -58,11 +56,10 @@ body.dark-mode .quick-filters select:focus {
 }
 
 .quick-filters button {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     background-color: #e2e8f0;
     color: #2d3748;
 }
@@ -82,16 +79,15 @@ body.dark-mode .quick-filters button:hover {
 
 #state-buttons {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     flex-wrap: wrap;
 }
 
 .state-button {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     color: #2d3748;
     transition: opacity 0.2s ease;
 }
@@ -155,7 +151,7 @@ body.dark-mode .state-button[data-state="actualizar-precio"] {
 .divider {
     border: 0;
     border-top: 1px solid #e2e8f0;
-    margin: 10px 0;
+    margin: 8px 0;
 }
 
 body.dark-mode .divider {
@@ -163,21 +159,68 @@ body.dark-mode .divider {
 }
 
 .table-container {
-    margin-top: 10px;
-    height: 700px;
+    margin-top: 8px;
+    height: 750px;
     overflow-y: auto;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    position: relative;
 }
 
 body.dark-mode .table-container {
     border-color: #4a5568;
 }
 
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 2;
+}
+
+body.dark-mode .loading-spinner {
+    background-color: rgba(45, 55, 72, 0.8);
+}
+
+.loading-spinner .spinner {
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #3182ce;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+body.dark-mode .loading-spinner .spinner {
+    border: 3px solid #4a5568;
+    border-top: 3px solid #63b3ed;
+}
+
+.loading-spinner span {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #2d3748;
+}
+
+body.dark-mode .loading-spinner span {
+    color: #e2e8f0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 #pacientesconsignacion-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 11px;
     border: 1px solid #e2e8f0;
     background-color: #fff;
 }
@@ -189,13 +232,13 @@ body.dark-mode #pacientesconsignacion-table {
 
 #pacientesconsignacion-table th,
 #pacientesconsignacion-table td {
-    padding: 4px;
+    padding: 2px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
     color: #2d3748;
     position: relative;
-    height: 20px;
-    line-height: 20px;
+    height: 15px;
+    line-height: 15px;
 }
 
 body.dark-mode #pacientesconsignacion-table th,
@@ -219,10 +262,8 @@ body.dark-mode #pacientesconsignacion-table th {
 }
 
 #pacientesconsignacion-table tr {
-    height: 20px;
+    height: 15px;
 }
-
-
 
 #pacientesconsignacion-table tr.state-cargo-pendiente {
     background-color: #FED7D7;
@@ -256,6 +297,14 @@ body.dark-mode #pacientesconsignacion-table tr.state-cuenta-cerrada {
     background-color: #A0AEC0;
 }
 
+#pacientesconsignacion-table tr.state-actualizar-precio {
+    background-color: #F7FAFC;
+}
+
+body.dark-mode #pacientesconsignacion-table tr.state-actualizar-precio {
+    background-color: #3C4B64;
+}
+
 #pacientesconsignacion-table tr:hover {
     background-color: #f7fafc;
 }
@@ -265,12 +314,12 @@ body.dark-mode #pacientesconsignacion-table tr:hover {
 }
 
 #pacientesconsignacion-table .fas {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 #pacientesconsignacion-table .action-icon {
     cursor: pointer;
-    margin: 0 5px;
+    margin: 0 3px;
 }
 
 #pacientesconsignacion-table .fa-edit {
@@ -341,8 +390,8 @@ body.dark-mode #pacientesconsignacion-table .fa-history:hover {
 #pacientesconsignacion-table .fa-filter-circle-xmark {
     color: #6c757d;
     cursor: pointer;
-    margin-left: 5px;
-    font-size: 12px;
+    margin-left: 3px;
+    font-size: 10px;
     transition: color 0.2s ease;
 }
 
@@ -372,10 +421,9 @@ body.dark-mode #pacientesconsignacion-table .fa-filter-circle-xmark.active {
     width: 100%;
     background-color: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    padding: 6px;
+    padding: 4px;
     margin-top: 2px;
 }
 
@@ -386,10 +434,9 @@ body.dark-mode .filter-input-container {
 
 .filter-input-container input {
     width: 100%;
-    padding: 4px;
+    padding: 2px;
     border: none;
-    border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     background-color: transparent;
     color: #2d3748;
     box-sizing: border-box;
@@ -409,20 +456,19 @@ body.dark-mode .filter-input-container input:focus {
 }
 
 .pagination-container {
-    margin-top: 10px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 #prev-btn,
 #next-btn,
 #export-excel-btn {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 #prev-btn,
@@ -476,7 +522,7 @@ body.dark-mode #export-excel-btn:hover {
 
 #page-info,
 #total-records {
-    font-size: 13px;
+    font-size: 12px;
     color: #2d3748;
 }
 
@@ -508,9 +554,8 @@ body.dark-mode #total-records {
 
 .modal-content {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
+    padding: 15px;
+    width: 350px;
     max-width: 90%;
     max-height: 80%;
     overflow-y: auto;
@@ -523,8 +568,8 @@ body.dark-mode .modal-content {
 }
 
 .modal-content.small-modal {
-    width: 300px;
-    padding: 15px;
+    width: 250px;
+    padding: 10px;
 }
 
 body.dark-mode .modal-content.small-modal {
@@ -535,6 +580,7 @@ body.dark-mode .modal-content.small-modal {
 .modal-content h3 {
     margin-top: 0;
     color: #2d3748;
+    font-size: 14px;
 }
 
 body.dark-mode .modal-content h3 {
@@ -543,9 +589,9 @@ body.dark-mode .modal-content h3 {
 
 .modal-content label {
     display: block;
-    margin-top: 10px;
+    margin-top: 8px;
     color: #2d3748;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 body.dark-mode .modal-content label {
@@ -555,11 +601,10 @@ body.dark-mode .modal-content label {
 .modal-content input,
 .modal-content select {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+    padding: 6px;
+    margin-top: 4px;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 13px;
+    font-size: 12px;
     box-sizing: border-box;
     background-color: #fff;
     color: #2d3748;
@@ -584,18 +629,17 @@ body.dark-mode .modal-content select:focus {
 }
 
 .modal-buttons {
-    margin-top: 20px;
+    margin-top: 15px;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
 }
 
 .modal-btn {
-    padding: 8px 16px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .confirm-btn {
@@ -635,8 +679,8 @@ body.dark-mode .cancel-btn:hover {
 
 #success-modal {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 15px;
     left: auto;
     bottom: auto;
     width: auto;
@@ -649,8 +693,8 @@ body.dark-mode .cancel-btn:hover {
 #success-modal.success .modal-content {
     background-color: #e6fffa;
     border: 2px solid #38a169;
-    width: 300px;
-    padding: 10px;
+    width: 250px;
+    padding: 8px;
 }
 
 body.dark-mode #success-modal.success .modal-content {
@@ -661,8 +705,8 @@ body.dark-mode #success-modal.success .modal-content {
 #success-modal.error .modal-content {
     background-color: #fefcbf;
     border: 2px solid #f56565;
-    width: 300px;
-    padding: 10px;
+    width: 250px;
+    padding: 8px;
 }
 
 body.dark-mode #success-modal.error .modal-content {
@@ -687,8 +731,9 @@ body.dark-mode #success-icon.fa-exclamation-circle {
 }
 
 #success-message {
-    margin-left: 10px;
+    margin-left: 8px;
     color: #2d3748;
+    font-size: 12px;
 }
 
 body.dark-mode #success-message {
@@ -696,12 +741,11 @@ body.dark-mode #success-message {
 }
 
 #log-content {
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 8px;
+    padding: 8px;
     background-color: #f7fafc;
-    border-radius: 4px;
 }
 
 body.dark-mode #log-content {
@@ -709,8 +753,8 @@ body.dark-mode #log-content {
 }
 
 .log-entry {
-    margin-bottom: 10px;
-    padding: 8px;
+    margin-bottom: 8px;
+    padding: 6px;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -720,6 +764,7 @@ body.dark-mode .log-entry {
 
 .log-entry strong {
     color: #2d3748;
+    font-size: 12px;
 }
 
 body.dark-mode .log-entry strong {
@@ -728,6 +773,7 @@ body.dark-mode .log-entry strong {
 
 .log-entry small {
     color: #718096;
+    font-size: 11px;
 }
 
 body.dark-mode .log-entry small {
