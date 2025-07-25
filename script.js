@@ -199,6 +199,13 @@ const submenuData = {
       js: 'module/implantes/transito/transito.js'
     },
     {
+      name: 'Consumidos',
+      icon: 'fa-route',
+      html: 'module/implantes/consumidos/consumidos.html',
+      css: 'module/implantes/consumidos/consumidos.css',
+      js: 'module/implantes/consumidos/consumidos.js'
+    },
+    {
       name: 'Contenedores',
       icon: 'fa-box-archive',
       html: 'module/implantes/contenedores/contenedores.html',
@@ -408,19 +415,15 @@ const submenuData = {
       html: 'module/laboratorio/ordenes-compra/ordenes-compra.html',
       css: 'module/laboratorio/ordenes-compra/ordenes-compra.css',
       js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
-    }
-  ],
-
-  Presupuesto: [
+    },
     {
-      name: 'Presupuesto',
-      icon: 'fa-file-invoice-dollar',
-      html: 'module/presupuesto/presupuesto/presupuesto..html',
-      css: 'module/presupuesto/presupuesto/presupuesto.css',
-      js: 'module/presupuesto/presupuesto/presupuesto.js'
+      name: 'Medtronic',
+      icon: 'fa-file-medical',
+      html: 'module/importacion/medtronic/medtronic.html',
+      css: 'module/importacion/medtronic/medtronic.css',
+      js: 'module/importacion/medtronic/medtronic.js'
     }
   ],
-
   Apuntes: [
     {
       name: 'Notas',
