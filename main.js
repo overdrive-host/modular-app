@@ -25,6 +25,31 @@ const db = getFirestore(app);
 setPersistence(auth, browserSessionPersistence)
   .catch(error => console.error('Error al configurar persistencia:', error));
 
+const checkSessionExpiration = async (user) => {
+  const sessionDuration = 5 * 60 * 60 * 1000;
+  const tokenResult = await user.getIdTokenResult();
+  const issuedAtTime = new Date(tokenResult.issuedAtTime).getTime();
+  const now = new Date().getTime();
+  return (now - issuedAtTime) <= sessionDuration;
+};
+
+let inactivityTimeout;
+const resetInactivityTimeout = () => {
+  clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(async () => {
+    try {
+      await signOut(auth);
+      window.location.href = 'index.html?error=' + encodeURIComponent('La sesión ha expirado por inactividad.');
+    } catch (error) {
+      console.error('Error al cerrar sesión por inactividad:', error);
+    }
+  }, 5 * 60 * 60 * 1000);
+};
+
+['click', 'mousemove', 'keydown'].forEach(eventType => {
+  document.addEventListener(eventType, resetInactivityTimeout);
+});
+
 const loadingScreen = document.getElementById('loadingScreen');
 const headerDate = document.querySelector('.header-date');
 const userName = document.getElementById('userName');
@@ -101,6 +126,13 @@ const submenuData = {
       html: 'module/implantes/transito/transito.html',
       css: 'module/implantes/transito/transito.css',
       js: 'module/implantes/transito/transito.js'
+    },
+    {
+      name: 'Consumidos',
+      icon: 'fa-box-open',
+      html: 'module/implantes/consumidos/consumidos.html',
+      css: 'module/implantes/consumidos/consumidos.css',
+      js: 'module/implantes/consumidos/consumidos.js'
     },
     {
       name: 'Contenedores',
@@ -305,26 +337,21 @@ const submenuData = {
       css: 'module/importacion/reportepabellon/reportepabellon.css',
       js: 'module/importacion/reportepabellon/reportepabellon.js'
     },
-
     {
       name: 'OC',
       icon: 'fa-shopping-cart',
       html: 'module/laboratorio/ordenes-compra/ordenes-compra.html',
       css: 'module/laboratorio/ordenes-compra/ordenes-compra.css',
       js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
-    }
-  ],
-
-  Presupuesto: [
+    },
     {
-      name: 'Presupuesto',
-      icon: 'fa-file-invoice-dollar',
-      html: 'module/presupuesto/presupuesto/presupuesto..html',
-      css: 'module/presupuesto/presupuesto/presupuesto.css',
-      js: 'module/presupuesto/presupuesto/presupuesto.js'
+      name: 'Medtronic',
+      icon: 'fa-file-medical',
+      html: 'module/importacion/medtronic/medtronic.html',
+      css: 'module/importacion/medtronic/medtronic.css',
+      js: 'module/importacion/medtronic/medtronic.js'
     }
   ],
-
   Apuntes: [
     {
       name: 'Notas',
@@ -353,13 +380,14 @@ const submenuData = {
 };
 
 let currentSubmenuItem = null;
+let currentUserPermissions = [];
+let currentUserRole = '';
 
 const updateSessionStatus = (lastLoginTimestamp, sessionStatusElement) => {
   if (!sessionStatusElement) return;
   const now = new Date();
   const lastLogin = lastLoginTimestamp ? new Date(lastLoginTimestamp) : null;
   const diffMinutes = lastLogin ? (now - lastLogin) / (1000 * 60) : 0;
-
   if (diffMinutes < 5) {
     sessionStatusElement.textContent = 'Conectado';
     sessionStatusElement.style.backgroundColor = '#2f855a';
@@ -378,6 +406,12 @@ const updateSessionStatus = (lastLoginTimestamp, sessionStatusElement) => {
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+    if (!(await checkSessionExpiration(user))) {
+      await signOut(auth);
+      window.location.href = 'index.html?error=' + encodeURIComponent('La sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+    resetInactivityTimeout();
     if (loadingScreen) loadingScreen.style.display = 'flex';
     try {
       const userRef = doc(db, 'users', user.uid);
@@ -386,19 +420,15 @@ onAuthStateChanged(auth, async (user) => {
         throw new Error('No se encontró el documento del usuario');
       }
       const userDoc = userSnap.data();
-
       let displayName = userDoc.fullName || userDoc.username || user.email.split('@')[0];
       let userIcon = userDoc.gender === 'Hombre' ? 'img/icono-hombre.png' : userDoc.gender === 'Mujer' ? 'img/icono-mujer.png' : 'img/icono-otro.png';
       let permissions = Array.isArray(userDoc.permissions) ? userDoc.permissions : [];
       let userRole = userDoc.role || '';
       let lastLogin = userDoc.lastLogin || null;
-
       if (userName) userName.textContent = displayName;
       if (userLogo) userLogo.src = userIcon;
       if (userRoleBadge) userRoleBadge.textContent = userRole || 'Sin rol';
       if (sessionStatus) updateSessionStatus(lastLogin, sessionStatus);
-      localStorage.setItem('userDocId', user.uid);
-
       const groupedPermissions = {};
       permissions.forEach(perm => {
         const [module, name] = perm.split(':');
@@ -410,25 +440,16 @@ onAuthStateChanged(auth, async (user) => {
           groupedPermissions[module].paths.push(htmlPath);
         }
       });
-      const permissionsArray = Object.values(groupedPermissions);
-      localStorage.setItem('userPermissions', JSON.stringify(permissionsArray));
-      localStorage.setItem('userRole', userRole);
-
-      localStorage.removeItem('cachedSidebarMenu');
-      localStorage.removeItem('cachedPermissions');
-
-      renderSidebarMenu(JSON.stringify(permissionsArray), userRole);
-
+      currentUserPermissions = Object.values(groupedPermissions);
+      currentUserRole = userRole;
+      renderSidebarMenu(currentUserPermissions, userRole);
       await loadContent(
         'module/info/informaciones/informaciones.html',
         'module/info/informaciones/informaciones.css',
         'module/info/informaciones/informaciones.js'
       );
-
       if (loadingScreen) loadingScreen.style.display = 'none';
-
       await getIdToken(user);
-
       setInterval(() => updateSessionStatus(lastLogin, sessionStatus), 60000);
     } catch (error) {
       if (content) {
@@ -441,22 +462,13 @@ onAuthStateChanged(auth, async (user) => {
       }, 3000);
     }
   } else {
-    localStorage.clear();
     window.location.href = 'index.html';
   }
 });
 
 function renderSidebarMenu(permissions, userRole) {
   if (!sidebarMenu) return;
-  let parsedPermissions = [];
-  try {
-    parsedPermissions = JSON.parse(permissions || '[]');
-    if (!Array.isArray(parsedPermissions)) parsedPermissions = [];
-  } catch (e) {
-    parsedPermissions = [];
-  }
-
-  const allowedModules = [...new Set(parsedPermissions.map(p => p.module).filter(Boolean))];
+  const allowedModules = [...new Set(permissions.map(p => p.module).filter(Boolean))];
   sidebarMenu.innerHTML = '';
   Object.keys(submenuData).forEach(section => {
     if (allowedModules.includes(section) || userRole.toLowerCase() === 'administrador') {
@@ -478,11 +490,9 @@ function attachMenuListeners() {
       if (sidebarMenu) sidebarMenu.style.display = 'none';
       if (submenuText) submenuText.textContent = section;
       if (submenu) submenu.innerHTML = '';
-      const permissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
-      const userRole = localStorage.getItem('userRole') || '';
-      const modulePerms = permissions.filter(p => p.module === section);
+      const modulePerms = currentUserPermissions.filter(p => p.module === section);
       const allowedPaths = modulePerms.flatMap(p => p.paths);
-      const subItems = userRole.toLowerCase() === 'administrador' ? submenuData[section] : submenuData[section].filter(subItem => allowedPaths.includes(subItem.html));
+      const subItems = currentUserRole.toLowerCase() === 'administrador' ? submenuData[section] : submenuData[section].filter(subItem => allowedPaths.includes(subItem.html));
       subItems.forEach((subItem, index) => {
         const li = document.createElement('li');
         li.classList.add('submenu-item');
@@ -517,27 +527,21 @@ async function loadContent(htmlFile, cssFile, jsFile) {
     if (!content) throw new Error('Elemento .content no encontrado');
     const cleanupEvent = new CustomEvent('moduleCleanup');
     window.dispatchEvent(cleanupEvent);
-
     content.innerHTML = '';
     const existingStyles = document.querySelectorAll('style[data-submodule]');
     existingStyles.forEach(style => style.remove());
     const existingScripts = document.querySelectorAll('script[data-submodule]');
     existingScripts.forEach(script => script.remove());
-
     let htmlContent = await (await fetch(htmlFile)).text();
     let cssContent = await (await fetch(cssFile)).text();
-
     if (!htmlContent || !cssContent) {
       throw new Error('Contenido HTML o CSS vacío');
     }
-
     content.innerHTML = htmlContent;
-
     const style = document.createElement('style');
     style.setAttribute('data-submodule', htmlFile);
     style.textContent = cssContent;
     document.head.appendChild(style);
-
     await new Promise((resolve, reject) => {
       const maxAttempts = 100;
       let attempts = 0;
@@ -553,7 +557,6 @@ async function loadContent(htmlFile, cssFile, jsFile) {
       };
       checkDOM();
     });
-
     const script = document.createElement('script');
     script.setAttribute('data-submodule', htmlFile);
     script.type = 'module';
@@ -579,7 +582,6 @@ if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
       await signOut(auth);
-      localStorage.clear();
       window.location.href = 'index.html';
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
@@ -619,9 +621,9 @@ if (toggleModeBtn) {
   });
 }
 
-if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  document.body.classList.add('dark-mode');
-  if (toggleModeBtn) toggleModeBtn.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+document.body.classList.remove('dark-mode');
+if (toggleModeBtn) {
+  toggleModeBtn.querySelector('i').classList.replace('fa-moon', 'fa-sun');
 }
 
 if (userLogo) {
@@ -695,7 +697,6 @@ if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
       await signOut(auth);
-      localStorage.clear();
       window.location.href = 'index.html';
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
