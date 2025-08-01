@@ -31,6 +31,20 @@ try {
     let filterTimeout = null;
     let editingCargoId = null;
     let cargoIdToDelete = null;
+    let paquetizationCodes = new Set();
+
+    async function loadPaquetizationCodes() {
+        try {
+            showLoading();
+            const paquetesCollection = collection(db, 'paquetes');
+            const querySnapshot = await getDocs(paquetesCollection);
+            paquetizationCodes = new Set(querySnapshot.docs.map(doc => doc.data().codigo?.trim()));
+        } catch (error) {
+            showMessage(`Error al cargar códigos de paquetes: ${error.message}`, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
 
     function validateDOMElements() {
         const elements = {
@@ -288,6 +302,36 @@ try {
         }
     }
 
+    function checkPaquetizationCode(codigo) {
+        return paquetizationCodes.has(codigo?.trim());
+    }
+
+    async function updateFormFieldsForPaquetization() {
+        const codigo = codigoSpan.textContent.trim();
+        if (!codigo) {
+            loteInput.value = '';
+            vencimientoInput.value = '';
+            loteInput.readOnly = false;
+            vencimientoInput.readOnly = false;
+            return;
+        }
+
+        const isPaquetizationCode = checkPaquetizationCode(codigo);
+        if (isPaquetizationCode && !editingCargoId) { // Solo aplicar PAD si no está editando
+            loteInput.value = 'PAD';
+            vencimientoInput.value = 'PAD';
+            loteInput.readOnly = true;
+            vencimientoInput.readOnly = true;
+        } else {
+            if (!editingCargoId) { // Solo limpiar si no está editando
+                loteInput.value = '';
+                vencimientoInput.value = '';
+            }
+            loteInput.readOnly = false;
+            vencimientoInput.readOnly = false;
+        }
+    }
+
     async function loadImplanteByAdmision(admision, user) {
         try {
             showLoading();
@@ -512,6 +556,7 @@ try {
         ingresoInput.value = getTodayDate();
         editingCargoId = null;
         toggleFormButtons(false);
+        updateFormFieldsForPaquetization();
     }
 
     function toggleFormButtons(isEditing) {
@@ -1251,7 +1296,10 @@ try {
             updatePagination(cargos);
             return;
         }
-        paginatedCargos.forEach((cargo, index) => {
+
+        paginatedCargos.forEach((cargo) => {
+            const isPaquetizationCode = checkPaquetizationCode(cargo.codigo || '');
+            const paquetizationIcon = isPaquetizationCode ? '<i class="fas fa-arrow-down action-icon" title="Código de Paquetización"></i>' : '';
             const row = document.createElement('tr');
             row.dataset.cargoId = cargo.id;
             row.innerHTML = `
@@ -1264,16 +1312,20 @@ try {
                 <td class="estado">${cargo.estado || 'Pendiente'}</td>
                 <td class="fecha-carga">${formatDateForDisplay(cargo.fechaCarga)}</td>
                 <td class="acciones">
-                    <i class="fas fa-edit action-icon" data-cargo-id="${cargo.id}"></i>
-                    <i class="fas fa-trash action-icon" data-cargo-id="${cargo.id}"></i>
+                    <i class="fas fa-edit action-icon edit-icon" data-cargo-id="${cargo.id}"></i>
+                    <i class="fas fa-trash action-icon delete-icon" data-cargo-id="${cargo.id}"></i>
+                    ${paquetizationIcon}
                 </td>
             `;
             tabla1Body.appendChild(row);
         });
+
+        // Asignar event listeners después de renderizar todas las filas
         tabla1Body.querySelectorAll('.row-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', updateActionButtons);
         });
-        tabla1Body.querySelectorAll('.fa-edit').forEach(icon => {
+
+        tabla1Body.querySelectorAll('.edit-icon').forEach(icon => {
             icon.addEventListener('click', async () => {
                 const cargoId = icon.dataset.cargoId;
                 editingCargoId = cargoId;
@@ -1304,21 +1356,25 @@ try {
                     const totalCotizacion = await fetchTotalCotizacionByAdmisionAndProveedor(cargo.admision, cargo.proveedor, auth.currentUser);
                     totalCotizacionSpan.textContent = totalCotizacion !== null ? formatNumberWithThousands(totalCotizacion) : '';
                     toggleFormButtons(true);
+                    await updateFormFieldsForPaquetization();
                 }
             });
         });
-        tabla1Body.querySelectorAll('.fa-trash').forEach(icon => {
+
+        tabla1Body.querySelectorAll('.delete-icon').forEach(icon => {
             icon.addEventListener('click', () => {
                 cargoIdToDelete = icon.dataset.cargoId;
                 deleteModal.classList.add('active');
             });
         });
+
         tabla1Body.querySelectorAll('td.estado').forEach(cell => {
             cell.addEventListener('dblclick', () => {
                 const cargoId = cell.parentElement.dataset.cargoId;
                 showEstadoModal([cargoId]);
             });
         });
+
         updatePagination(cargos);
     }
 
@@ -1470,6 +1526,7 @@ try {
                     totalCotizacionSpan.textContent = '';
                 }
                 calculateTotal();
+                await updateFormFieldsForPaquetization();
             } else {
                 precioSpan.textContent = '';
                 descripcionSpan.textContent = '';
@@ -1479,6 +1536,7 @@ try {
                 totalCotizacionSpan.textContent = '';
                 modalidadSpan.textContent = '';
                 categoriaSpan.textContent = '';
+                await updateFormFieldsForPaquetization();
                 showMessage('Referencia no encontrada.', 'error');
             }
         } else {
@@ -1490,6 +1548,7 @@ try {
             totalCotizacionSpan.textContent = '';
             modalidadSpan.textContent = '';
             categoriaSpan.textContent = '';
+            await updateFormFieldsForPaquetization();
         }
     });
 
@@ -1591,12 +1650,15 @@ try {
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            await loadPaquetizationCodes();
             allCargos = await loadCargos(user);
             await updateReferenciasWithLowerCase();
             populateDateFilters(allCargos);
             setupEventListeners();
             ingresoInput.value = getTodayDate();
             filterData();
+            const observer = new MutationObserver(updateFormFieldsForPaquetization);
+            observer.observe(codigoSpan, { childList: true, characterData: true, subtree: true });
         } else {
             tabla1Body.innerHTML = '<tr><td colspan="9" class="text-center">Por favor, inicia sesión.</td></tr>';
             tabla2Body.innerHTML = '<tr><td colspan="10" class="text-center">Por favor, inicia sesión.</td></tr>';
