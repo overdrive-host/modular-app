@@ -79,6 +79,13 @@ const submenuData = {
       js: 'module/implantes/cargosimp/cargosimp.js'
     },
     {
+      name: 'Cargos ing',
+      icon: 'fa-cog',
+      html: 'module/implantes/ingcargos/ingcargos.html',
+      css: 'module/implantes/ingcargos/ingcargos.css',
+      js: 'module/implantes/ingcargos/ingcargos.js'
+    },
+    {
       name: 'Pacientes Imp',
       icon: 'fa-user',
       html: 'module/implantes/pacientesimp/pacientesimp.html',
