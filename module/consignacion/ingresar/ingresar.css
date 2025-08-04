@@ -624,13 +624,20 @@ body.dark-mode #asignaciones-table .resize-handle.active {
 #asignaciones-table tr {
     height: 18px;
 }
-
 #asignaciones-table tr:hover {
-    background-color: var(--hover-bg);
+    background-color: rgba(49, 130, 206, 0.1); 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode #asignaciones-table tr:hover {
-    background-color: var(--dark-hover-bg);
+    background-color: rgba(99, 179, 237, 0.2); 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+#asignaciones-table tr:hover td {
+    color: #000000; 
+}
+body.dark-mode #asignaciones-table tr:hover td {
+    color: #c2ccd8; 
 }
 
 #asignaciones-table .action-icon {
