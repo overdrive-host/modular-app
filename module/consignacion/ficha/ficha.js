@@ -180,46 +180,53 @@ try {
     }
 
     function applyFilters() {
-        filteredFichas = fichas.filter(ficha => {
-            let columnMatch = true;
-            Object.entries(columnFilters).forEach(([column, value]) => {
-                if (value) {
-                    let cellValue = ficha[column] || '-';
-                    cellValue = cellValue.toString().toLowerCase();
-                    columnMatch = columnMatch && cellValue.includes(value.toLowerCase());
+        showModal(loadingModal, loadingProgress, 0); // Mostrar modal al iniciar el filtrado
+        try {
+            filteredFichas = fichas.filter(ficha => {
+                let columnMatch = true;
+                Object.entries(columnFilters).forEach(([column, value]) => {
+                    if (value) {
+                        let cellValue = ficha[column] || '-';
+                        cellValue = cellValue.toString().toLowerCase();
+                        columnMatch = columnMatch && cellValue.includes(value.toLowerCase());
+                    }
+                });
+                let dateMatch = true;
+                if (yearFilter || monthFilter) {
+                    if (!ficha.fechaCX) {
+                        return false;
+                    }
+                    let date;
+                    if (typeof ficha.fechaCX.toDate === 'function') {
+                        date = ficha.fechaCX.toDate();
+                    } else if (ficha.fechaCX instanceof Date) {
+                        date = ficha.fechaCX;
+                    } else {
+                        return false;
+                    }
+                    if (!date || isNaN(date.getTime())) {
+                        return false;
+                    }
+                    if (yearFilter) {
+                        const year = date.getFullYear().toString();
+                        dateMatch = dateMatch && year === yearFilter;
+                    }
+                    if (monthFilter) {
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        dateMatch = dateMatch && month === monthFilter;
+                    }
                 }
+                const stateMatch = !stateFilter || (ficha.estado && ficha.estado === stateFilter);
+                return columnMatch && dateMatch && stateMatch;
             });
-            let dateMatch = true;
-            if (yearFilter || monthFilter) {
-                if (!ficha.fechaCX) {
-                    return false;
-                }
-                let date;
-                if (typeof ficha.fechaCX.toDate === 'function') {
-                    date = ficha.fechaCX.toDate();
-                } else if (ficha.fechaCX instanceof Date) {
-                    date = ficha.fechaCX;
-                } else {
-                    return false;
-                }
-                if (!date || isNaN(date.getTime())) {
-                    return false;
-                }
-                if (yearFilter) {
-                    const year = date.getFullYear().toString();
-                    dateMatch = dateMatch && year === yearFilter;
-                }
-                if (monthFilter) {
-                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                    dateMatch = dateMatch && month === monthFilter;
-                }
-            }
-            const stateMatch = !stateFilter || (ficha.estado && ficha.estado === stateFilter);
-            return columnMatch && dateMatch && stateMatch;
-        });
-        currentPage = 1;
-        renderTable(filteredFichas);
-        updatePagination(filteredFichas.length);
+            currentPage = 1;
+            renderTable(filteredFichas);
+            updatePagination(filteredFichas.length);
+        } catch (error) {
+            showSuccessMessage('Error al aplicar filtros: ' + error.message, false);
+        } finally {
+            hideModal(loadingModal); // Ocultar modal al finalizar
+        }
     }
 
     function setupColumnFilters() {
@@ -235,7 +242,7 @@ try {
                 const column = icon.getAttribute('data-column');
                 const th = icon.closest('th');
                 let filterContainer = document.querySelector('.filter-input-container');
-                
+
                 if (filterContainer) {
                     filterContainer.remove();
                     if (columnFilters[column]) {
@@ -463,12 +470,12 @@ try {
         filterYear.addEventListener('change', () => {
             yearFilter = filterYear.value;
             updateMonthFilter(yearFilter);
-            applyFilters();
+            applyFilters(); // El modal se maneja dentro de applyFilters
         });
 
         filterMonth.addEventListener('change', () => {
             monthFilter = filterMonth.value;
-            applyFilters();
+            applyFilters(); // El modal se maneja dentro de applyFilters
         });
 
         showAllBtn.addEventListener('click', () => {
@@ -484,14 +491,14 @@ try {
                 icon.classList.remove('fa-filter-circle-xmark', 'active');
                 icon.classList.add('fa-filter');
             });
-            applyFilters();
+            applyFilters(); // El modal se maneja dentro de applyFilters
         });
     }
 
     function exportToExcel() {
-        const headers = ['OC', 'Guía', 'Factura', 'Despachado', 'Estado', 'Cargo', 'Fecha de Cargo', 'Admisión', 
-                        'Nombre Paciente', 'Médico', 'Fecha Cx', 'Proveedor', 'Código', 'Descripción', 
-                        'Cantidad', 'Precio', 'Modalidad', 'Total', 'Usuario'];
+        const headers = ['OC', 'Guía', 'Factura', 'Despachado', 'Estado', 'Cargo', 'Fecha de Cargo', 'Admisión',
+            'Nombre Paciente', 'Médico', 'Fecha Cx', 'Proveedor', 'Código', 'Descripción',
+            'Cantidad', 'Precio', 'Modalidad', 'Total', 'Usuario'];
         const data = filteredFichas.map(ficha => [
             ficha.OC || '-',
             ficha.Guia || '-',
@@ -535,7 +542,6 @@ try {
                 return;
             }
 
-            showModal(loadingModal, loadingProgress, 0);
             const fichasCollection = collection(db, 'cargosconsignacion');
             const historicoData = await fetchHistoricoData();
             const querySnapshot = await getDocs(fichasCollection);
@@ -543,8 +549,8 @@ try {
 
             querySnapshot.forEach((doc, index) => {
                 const data = doc.data();
-                let matchedHistorico = historicoData.find(h => 
-                    String(h.id_pacient) === String(data.admision) && 
+                let matchedHistorico = historicoData.find(h =>
+                    String(h.id_pacient) === String(data.admision) &&
                     String(h.codigo_clinica) === String(data.codigo)
                 );
                 const guiaValue = matchedHistorico ? matchedHistorico.numero_guia : '-';
@@ -574,17 +580,39 @@ try {
                 });
             });
 
+            // Nuevo ordenamiento: primero por fechaCX (descendente), luego por nombrePaciente (ascendente)
             fichas.sort((a, b) => {
+                // Convertir fechaCX a objeto Date
+                let dateA, dateB;
+                if (a.fechaCX && typeof a.fechaCX.toDate === 'function') {
+                    dateA = a.fechaCX.toDate();
+                } else if (a.fechaCX instanceof Date) {
+                    dateA = a.fechaCX;
+                } else if (typeof a.fechaCX === 'string' && a.fechaCX.trim()) {
+                    dateA = new Date(a.fechaCX);
+                } else {
+                    dateA = new Date(0); // Fecha muy antigua para valores inválidos
+                }
+
+                if (b.fechaCX && typeof b.fechaCX.toDate === 'function') {
+                    dateB = b.fechaCX.toDate();
+                } else if (b.fechaCX instanceof Date) {
+                    dateB = b.fechaCX;
+                } else if (typeof b.fechaCX === 'string' && b.fechaCX.trim()) {
+                    dateB = new Date(b.fechaCX);
+                } else {
+                    dateB = new Date(0); // Fecha muy antigua para valores inválidos
+                }
+
+                // Ordenar por fechaCX descendente (más reciente primero)
+                if (dateA.getTime() !== dateB.getTime()) {
+                    return dateB.getTime() - dateA.getTime(); // Descendente
+                }
+
+                // Si las fechas son iguales, ordenar por nombrePaciente ascendente
                 const nombreA = (a.nombrePaciente || '-').toLowerCase();
                 const nombreB = (b.nombrePaciente || '-').toLowerCase();
-                const codigoA = (a.codigo || '-').toLowerCase();
-                const codigoB = (b.codigo || '-').toLowerCase();
-                
-                if (nombreA < nombreB) return -1;
-                if (nombreA > nombreB) return 1;
-                if (codigoA < codigoB) return -1;
-                if (codigoA > codigoB) return 1;
-                return 0;
+                return nombreA.localeCompare(nombreB); // Ascendente
             });
 
             filteredFichas = [...fichas];
@@ -600,11 +628,9 @@ try {
             setupStateButtons();
             setupYearMonthFilters();
             exportExcelBtn.addEventListener('click', exportToExcel);
-            hideModal(loadingModal);
             applyFilters();
         } catch (error) {
             showSuccessMessage('Error al cargar datos: ' + error.message, false);
-            hideModal(loadingModal);
         }
     }
 
