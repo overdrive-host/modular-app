@@ -1201,44 +1201,84 @@ try {
                     if (saveEditBtn) {
                         saveEditBtn.addEventListener('click', async () => {
                             showLoadingModal();
-                            const fechaIngreso = editFechaIngresoInput?.value || today;
-                            const admision = editAdmisionInput?.value.trim() || '';
-                            const nombrePaciente = editNombrePacienteInput?.value.trim() || '';
-                            const fechaCX = editFechaCXInput?.value || '';
-                            const medico = editMedicoInput?.value.trim() || '';
-                            const descripcion = editDescripcionInput?.value.trim() || '';
-                            const cantidad = parseInt(editCantidadInput?.value) || 1;
-                            const estado = editEstadoSelect?.value || 'Reposición';
-                            const codigo = editCodigoInput?.value.trim() || '';
-                            const referencia = editReferenciaInput?.value.trim() || '';
-                            const proveedor = editProveedorInput?.value.trim() || '';
-                            const modalidad = editModalidadSelect?.value || 'Consignación';
-                            let precio = editPrecioInput?.value.replace(/[^0-9]/g, '') || '0';
-                            precio = parseInt(precio) || 0;
-                            const total = cantidad * precio;
-
-                            if (!admision || !nombrePaciente || !fechaCX || !medico || !descripcion || !proveedor || !precio || !modalidad) {
-                                showSuccessMessage('Complete todos los campos obligatorios', false);
-                                hideLoadingModal();
-                                return;
-                            }
-
-                            if (precio > 9999999) {
-                                showSuccessMessage('El precio no puede superar 9.999.999', false);
-                                hideLoadingModal();
-                                return;
-                            }
-
                             try {
+                                // Obtener valores del formulario
+                                const fechaIngreso = editFechaIngresoInput?.value || today;
+                                const admision = editAdmisionInput?.value.trim() || '';
+                                const nombrePaciente = editNombrePacienteInput?.value.trim() || '';
+                                const fechaCX = editFechaCXInput?.value || '';
+                                const medico = editMedicoInput?.value.trim() || '';
+                                const descripcion = editDescripcionInput?.value.trim() || '';
+                                const cantidad = parseInt(editCantidadInput?.value) || 1;
+                                const estado = editEstadoSelect?.value || 'Reposición';
+                                const codigo = editCodigoInput?.value.trim() || '';
+                                const referencia = editReferenciaInput?.value.trim() || '';
+                                const proveedor = editProveedorInput?.value.trim() || '';
+                                const modalidad = editModalidadSelect?.value || 'Consignación';
+                                let precio = editPrecioInput?.value.replace(/[^0-9]/g, '') || '0';
+                                precio = parseInt(precio) || 0;
+                                const total = cantidad * precio;
+
+                                // Validar campos obligatorios
+                                if (!admision || !nombrePaciente || !fechaCX || !medico || !descripcion || !proveedor || !precio || !modalidad) {
+                                    showSuccessMessage('Complete todos los campos obligatorios', false);
+                                    return;
+                                }
+
+                                // Validar precio
+                                if (precio > 9999999) {
+                                    showSuccessMessage('El precio no puede superar 9.999.999', false);
+                                    return;
+                                }
+
+                                // Validar y convertir fechaCX
+                                let fechaCXTimestamp;
+                                if (fechaCX) {
+                                    const [year, month, day] = fechaCX.split('-');
+                                    if (!year || !month || !day || year.length !== 4 || month.length !== 2 || day.length !== 2) {
+                                        showSuccessMessage('La fecha de cirugía (Fecha CX) no tiene un formato válido', false);
+                                        return;
+                                    }
+                                    const fechaCXDate = new Date(year, month - 1, day);
+                                    fechaCXDate.setHours(0, 0, 0, 0); // Normalizar la hora
+                                    if (isNaN(fechaCXDate)) {
+                                        showSuccessMessage('La fecha de cirugía (Fecha CX) es inválida', false);
+                                        return;
+                                    }
+                                    fechaCXTimestamp = Timestamp.fromDate(fechaCXDate);
+                                } else {
+                                    showSuccessMessage('La fecha de cirugía (Fecha CX) es obligatoria', false);
+                                    return;
+                                }
+
+                                // Convertir fechaIngreso a Timestamp
+                                const [year, month, day] = fechaIngreso.split('-');
+                                const fechaIngresoDate = new Date(year, month - 1, day);
+                                fechaIngresoDate.setHours(0, 0, 0, 0);
+                                if (isNaN(fechaIngresoDate)) {
+                                    showSuccessMessage('La fecha de ingreso es inválida', false);
+                                    return;
+                                }
+                                const fechaIngresoTimestamp = Timestamp.fromDate(fechaIngresoDate);
+
+                                // Verificar que currentEditId sea válido
+                                if (!currentEditId) {
+                                    showSuccessMessage('Error: ID de asignación no válido', false);
+                                    return;
+                                }
+
+                                // Obtener nombre del usuario
                                 const fullName = await getUserFullName();
                                 const now = Timestamp.fromDate(new Date());
+
+                                // Actualizar en Firestore
                                 const asignacionRef = doc(db, 'asignaciones', currentEditId);
                                 const batch = writeBatch(db);
                                 batch.update(asignacionRef, {
-                                    fechaIngreso: fechaIngreso ? Timestamp.fromDate(new Date(fechaIngreso)) : now,
+                                    fechaIngreso: fechaIngresoTimestamp,
                                     admision,
                                     nombrePaciente,
-                                    fechaCX,
+                                    fechaCX: fechaCXTimestamp,
                                     medico,
                                     descripcion,
                                     cantidad,
@@ -1253,6 +1293,8 @@ try {
                                     fechaActualizada: now,
                                     uid: currentUser.uid
                                 });
+
+                                // Registrar log
                                 const logRef = doc(collection(db, 'asignaciones', asignacionRef.id, 'logs'));
                                 batch.set(logRef, {
                                     action: `Actualizado: ${formatDate(new Date(now.toMillis()))}`,
@@ -1261,13 +1303,17 @@ try {
                                     user: fullName,
                                     uid: currentUser.uid
                                 });
+
+                                // Ejecutar batch
                                 await batch.commit();
+
+                                // Éxito
                                 hideModal(editModal);
                                 showSuccessMessage('Asignación actualizada correctamente');
                                 await loadAsignaciones();
                             } catch (error) {
-                                console.error('Error al actualizar:', error);
-                                showSuccessMessage('Error al actualizar: ' + error.message, false);
+                                console.error('Error al actualizar asignación:', error.code, error.message);
+                                showSuccessMessage(`Error al actualizar: ${error.message}`, false);
                             } finally {
                                 hideLoadingModal();
                             }
