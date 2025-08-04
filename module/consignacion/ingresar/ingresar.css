@@ -1,3 +1,4 @@
+
 :root {
     --bg-color: #fff;
     --border-color: #e2e8f0;
@@ -99,6 +100,10 @@ body.dark-mode .form-container {
     grid-template-columns: 6% 6% 20% 6% 20% 20% 6% 12%;
 }
 
+.form-row-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
 .form-group {
     margin-bottom: 0;
     position: relative;
@@ -125,6 +130,7 @@ body.dark-mode .form-group label {
     background-color: var(--input-bg);
     color: var(--text-color);
     box-sizing: border-box;
+    word-wrap: break-word;
 }
 
 body.dark-mode .form-group input,
@@ -539,7 +545,7 @@ body.dark-mode #success-modal.error #success-icon {
     height: 700px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
-    overflow-x: auto; /* Permitir desplazamiento horizontal si la tabla es muy ancha */
+    overflow-x: auto;
 }
 
 body.dark-mode .table-container {
@@ -587,8 +593,6 @@ body.dark-mode #asignaciones-table td {
     top: 0;
     z-index: 1;
     min-width: 50px;
-    /* Eliminado overflow-x: auto para quitar barras de desplazamiento */
-    /* Eliminadas reglas de scrollbar-width y ::-webkit-scrollbar */
 }
 
 body.dark-mode #asignaciones-table th {
@@ -710,77 +714,71 @@ body.dark-mode .btn:hover {
 }
 
 #edit-modal .modal-content {
-    max-width: 1400px;
-    padding: 20px;
+    max-width: 1000px;
+    padding: 25px;
 }
 
 #edit-modal .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 #edit-modal .modal-content h2 {
     font-size: 18px;
+    margin-bottom: 15px;
 }
 
 #edit-modal .form-group input,
 #edit-modal .form-group select {
-    font-size: 14px;
-    padding: 8px;
+    font-size: 12px;
+    padding: 6px;
+    word-wrap: break-word;
 }
 
-#edit-modal .form-actions {
-    margin-top: 15px;
+#edit-modal .form-group input[type="text"],
+#edit-modal .form-group input[type="number"],
+#edit-modal .form-group select {
+    min-height: 30px;
 }
 
 #edit-modal .form-group label {
     font-size: 12px;
 }
 
-@media (max-width: 768px) {
-    #edit-modal .modal-content {
-        max-width: 95%;
-        padding: 15px;
-    }
+#edit-modal .input-with-icon input {
+    padding-right: 60px;
 }
 
-#log-modal #log-content {
-    max-height: 250px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    text-align: left;
+#edit-modal .input-with-icon .fa-search,
+#edit-modal .input-with-icon .fa-toggle-on,
+#edit-modal .input-with-icon .fa-toggle-off {
+    right: 10px;
+    font-size: 12px;
 }
 
-#log-modal .log-entry {
-    margin-bottom: 5px;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-}
-
-body.dark-mode #log-modal .log-entry {
-    border-color: var(--dark-border-color);
-}
-
-#traspaso-modal select {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid var(--border-color);
-    font-size: 11px;
-    margin-bottom: 10px;
-}
-
-body.dark-mode #traspaso-modal select {
-    border-color: var(--dark-border-color);
-    background-color: var(--dark-input-bg);
-    color: var(--dark-text-color);
+#edit-modal .form-group-button {
+    align-self: center;
+    justify-content: center;
 }
 
 @media (max-width: 768px) {
-    .form-row-7 {
+    .form-row-7,
+    .form-row-5 {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
     }
 
-    .form-group-button {
+    #edit-modal .modal-content {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    #edit-modal .form-group input,
+    #edit-modal .form-group select {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    #edit-modal .form-group-button {
         justify-self: center;
         align-self: center;
     }
@@ -923,8 +921,6 @@ body.dark-mode #select-asignaciones-table td {
     top: 0;
     z-index: 1;
     min-width: 50px;
-    /* Eliminado overflow-x: auto para quitar barras de desplazamiento */
-    /* Eliminadas reglas de scrollbar-width y ::-webkit-scrollbar */
 }
 
 body.dark-mode #select-asignaciones-table th {
