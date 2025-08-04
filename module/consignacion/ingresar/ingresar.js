@@ -343,16 +343,17 @@ try {
     async function setupProveedorAutocomplete() {
         if (!proveedorInput || !proveedorSearch || !proveedorList) return;
         const empresas = await loadEmpresas();
-        proveedorInput.addEventListener('input', () =>
-            filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, false, 'nombre')
-        );
-        proveedorInput.addEventListener('focus', () => {
-            if (proveedorInput.value.trim())
-                filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, false, 'nombre');
+        proveedorInput.addEventListener('input', () => {
+            filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, false, 'nombre');
         });
-        proveedorSearch.addEventListener('click', () =>
-            filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, true, 'nombre')
-        );
+        proveedorInput.addEventListener('focus', () => {
+            if (proveedorInput.value.trim()) {
+                filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, false, 'nombre');
+            }
+        });
+        proveedorSearch.addEventListener('click', () => {
+            filterAndRenderSuggestions(proveedorInput, proveedorList, empresas, true, 'nombre');
+        });
         document.addEventListener('click', e => {
             if (!proveedorInput.contains(e.target) && !proveedorList.contains(e.target) && !proveedorSearch.contains(e.target)) {
                 proveedorList.innerHTML = '';
@@ -364,16 +365,17 @@ try {
     async function setupMedicoAutocomplete() {
         if (!medicoInput || !medicoList || !medicoSearch) return;
         const medicos = await loadMedicos();
-        medicoInput.addEventListener('input', () =>
-            filterAndRenderSuggestions(medicoInput, medicoList, medicos, false, 'nombreMedico')
-        );
-        medicoInput.addEventListener('focus', () => {
-            if (medicoInput.value.trim())
-                filterAndRenderSuggestions(medicoInput, medicoList, medicos, false, 'nombreMedico');
+        medicoInput.addEventListener('input', () => {
+            filterAndRenderSuggestions(medicoInput, medicoList, medicos, false, 'nombreMedico');
         });
-        medicoSearch.addEventListener('click', () =>
-            filterAndRenderSuggestions(medicoInput, medicoList, medicos, true, 'nombreMedico')
-        );
+        medicoInput.addEventListener('focus', () => {
+            if (medicoInput.value.trim()) {
+                filterAndRenderSuggestions(medicoInput, medicoList, medicos, false, 'nombreMedico');
+            }
+        });
+        medicoSearch.addEventListener('click', () => {
+            filterAndRenderSuggestions(medicoInput, medicoList, medicos, true, 'nombreMedico');
+        });
         document.addEventListener('click', e => {
             if (!medicoInput.contains(e.target) && !medicoList.contains(e.target) && !medicoSearch.contains(e.target)) {
                 medicoList.innerHTML = '';
@@ -385,16 +387,17 @@ try {
     async function setupEditMedicoAutocomplete() {
         if (!editMedicoInput || !editMedicoList || !editMedicoSearch) return;
         const medicos = await loadMedicos();
-        editMedicoInput.addEventListener('input', () =>
-            filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, false, 'nombreMedico')
-        );
-        editMedicoInput.addEventListener('focus', () => {
-            if (editMedicoInput.value.trim())
-                filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, false, 'nombreMedico');
+        editMedicoInput.addEventListener('input', () => {
+            filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, false, 'nombreMedico');
         });
-        editMedicoSearch.addEventListener('click', () =>
-            filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, true, 'nombreMedico')
-        );
+        editMedicoInput.addEventListener('focus', () => {
+            if (editMedicoInput.value.trim()) {
+                filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, false, 'nombreMedico');
+            }
+        });
+        editMedicoSearch.addEventListener('click', () => {
+            filterAndRenderSuggestions(editMedicoInput, editMedicoList, medicos, true, 'nombreMedico');
+        });
         document.addEventListener('click', e => {
             if (!editMedicoInput.contains(e.target) && !editMedicoList.contains(e.target) && !editMedicoSearch.contains(e.target)) {
                 editMedicoList.innerHTML = '';
@@ -639,7 +642,7 @@ try {
                 throw new Error('No hay usuario autenticado');
             }
             const fullName = await getUserFullName();
-            const now = Timestamp.fromDate(new Date()); // Usado solo para logs
+            const now = Timestamp.fromDate(new Date());
 
             if (!addDoc || !deleteDoc || !getDoc || !doc || !collection || !Timestamp || !setDoc) {
                 throw new Error('Una o más funciones de Firestore no están definidas. Verifica las importaciones.');
@@ -692,12 +695,12 @@ try {
                             fechaIngreso.setHours(0, 0, 0, 0);
                         } else {
                             console.warn(`FechaIngreso inválida en asignación ${id}:`, data.fechaIngreso);
-                            fechaIngreso = new Date('2025-01-01'); // Fallback a fecha predeterminada
+                            fechaIngreso = new Date('2025-01-01');
                             fechaIngreso.setHours(0, 0, 0, 0);
                         }
                     } else {
                         console.warn(`FechaIngreso no válida o ausente en asignación ${id}:`, data.fechaIngreso);
-                        fechaIngreso = new Date('2025-01-01'); // Fallback a fecha predeterminada
+                        fechaIngreso = new Date('2025-01-01');
                         fechaIngreso.setHours(0, 0, 0, 0);
                     }
 
@@ -727,7 +730,7 @@ try {
                         totalPaciente: 0,
                         modalidad: asignacion.modalidad || 'Consignación',
                         prevision: asignacion.prevision || 'Desconocido',
-                        estado: asignacion.estado || 'Regular',
+                        estado: asignacion.estado || 'Reposición',
                         fechaIngreso: asignacion.fechaIngreso ? Timestamp.fromDate(asignacion.fechaIngreso) : Timestamp.fromDate(new Date('2025-01-01')),
                         fechaCargo: asignacion.fechaIngreso ? Timestamp.fromDate(asignacion.fechaIngreso) : Timestamp.fromDate(new Date('2025-01-01')),
                         usuario: fullName,
@@ -766,7 +769,7 @@ try {
                         medico: asignacion.medico || '',
                         descripcion: asignacion.descripcion || '',
                         cantidad: asignacion.cantidad || 1,
-                        estado: asignacion.estado || 'Regular',
+                        estado: asignacion.estado || 'Reposición',
                         codigo: asignacion.codigo || '',
                         referencia: asignacion.referencia || '',
                         proveedor: asignacion.proveedor || '',
@@ -784,7 +787,7 @@ try {
                         'N° GUIA': 'Pendiente',
                         LOTE: 'Pendiente',
                         'FECHA DE VENCIMIENTO': Timestamp.fromDate(fechaVencimiento),
-                        CARGO: asignacion.estado || 'Regular'
+                        CARGO: asignacion.estado || 'Reposición'
                     });
                     await updateDoc(doc(db, 'cargosconsignacion', newCargo.id), { ID: newCargo.id });
                     console.debug('Cargo creado:', newCargo.id);
@@ -894,7 +897,7 @@ try {
                     field.setAttribute('readonly', true);
                 }
             } else if (field.tagName === 'SELECT') {
-                field.value = field.id.includes('estado') ? 'Regular' : field.id.includes('modalidad') ? 'Consignación' : '';
+                field.value = field.id.includes('estado') ? 'Reposición' : field.id.includes('modalidad') ? 'Consignación' : '';
                 if (field.id.includes('modalidad')) {
                     field.disabled = true;
                 }
@@ -933,7 +936,7 @@ try {
         editMedicoInput.value = asignacion.medico || '';
         editDescripcionInput.value = asignacion.descripcion || '';
         editCantidadInput.value = asignacion.cantidad || '1';
-        editEstadoSelect.value = asignacion.estado || 'Regular';
+        editEstadoSelect.value = asignacion.estado || 'Reposición';
         editCodigoInput.value = asignacion.codigo || '';
         editReferenciaInput.value = asignacion.referencia || '';
         editProveedorInput.value = asignacion.proveedor || '';
@@ -1014,9 +1017,7 @@ try {
 
         const ths = table.querySelectorAll('th');
         ths.forEach((th, index) => {
-            // Evitar agregar manejador a la última columna (acciones) de #asignaciones-table
             if (tableId === '#asignaciones-table' && index === ths.length - 1) return;
-            // Evitar agregar manejador a la primera columna (checkbox) de #select-asignaciones-table
             if (tableId === '#select-asignaciones-table' && index === 0) return;
 
             const resizeHandle = document.createElement('div');
@@ -1032,7 +1033,7 @@ try {
 
                 function onMouseMove(e) {
                     const newWidth = startWidth + (e.clientX - startX);
-                    if (newWidth >= 50) { // Ancho mínimo de 50px
+                    if (newWidth >= 50) {
                         th.style.width = `${newWidth}px`;
                         th.style.maxWidth = `${newWidth}px`;
                     }
@@ -1120,7 +1121,7 @@ try {
                             const medico = medicoInput?.value.trim() || '';
                             const descripcion = descripcionInput?.value || '';
                             const cantidad = parseInt(cantidadInput?.value) || 1;
-                            const estado = estadoSelect?.value || 'Regular';
+                            const estado = estadoSelect?.value || 'Reposición';
                             const codigo = codigoInput?.value.trim() || '';
                             const referencia = referenciaInput?.value.trim() || '';
                             const proveedor = proveedorInput?.value.trim() || '';
@@ -1207,7 +1208,7 @@ try {
                             const medico = editMedicoInput?.value.trim() || '';
                             const descripcion = editDescripcionInput?.value.trim() || '';
                             const cantidad = parseInt(editCantidadInput?.value) || 1;
-                            const estado = editEstadoSelect?.value || 'Regular';
+                            const estado = editEstadoSelect?.value || 'Reposición';
                             const codigo = editCodigoInput?.value.trim() || '';
                             const referencia = editReferenciaInput?.value.trim() || '';
                             const proveedor = editProveedorInput?.value.trim() || '';
