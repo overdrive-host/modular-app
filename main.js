@@ -166,14 +166,14 @@ const submenuData = {
   Consignacion: [
     {
       name: 'Asignación',
-      icon: 'fa-clipboard-list',
+      icon: 'fa-tasks',  // cambiado
       html: 'module/consignacion/asignacion/asignacion.html',
       css: 'module/consignacion/asignacion/asignacion.css',
       js: 'module/consignacion/asignacion/asignacion.js'
     },
     {
       name: 'Ficha',
-      icon: 'fa-file-alt',
+      icon: 'fa-id-card',  // cambiado
       html: 'module/consignacion/ficha/ficha.html',
       css: 'module/consignacion/ficha/ficha.css',
       js: 'module/consignacion/ficha/ficha.js'
@@ -187,7 +187,7 @@ const submenuData = {
     },
     {
       name: 'Guías',
-      icon: 'fa-file-invoice',
+      icon: 'fa-shipping-fast',  // cambiado
       html: 'module/consignacion/guias/guias.html',
       css: 'module/consignacion/guias/guias.css',
       js: 'module/consignacion/guias/guias.js'
@@ -199,7 +199,8 @@ const submenuData = {
       css: 'module/consignacion/ingresar/ingresar.css',
       js: 'module/consignacion/ingresar/ingresar.js'
     }
-  ],
+  ]
+  ,
   Historico: [
     {
       name: 'Historicos',
