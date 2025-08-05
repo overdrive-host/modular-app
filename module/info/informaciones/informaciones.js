@@ -102,8 +102,8 @@ export function initNotes(user) {
         const totalCell = document.getElementById(`total-${month}`);
         const pendingCell = document.getElementById(`pending-${month}`);
         if (totalCell && pendingCell) {
-          totalCell.textContent = summary2025[month]?.total || 0;
-          pendingCell.textContent = summary2025[month]?.pending || 0;
+          totalCell.textContent = summary2025[month]?.total > 0 ? summary2025[month].total : '';
+          pendingCell.textContent = summary2025[month]?.pending > 0 ? summary2025[month].pending : '';
           if (summary2025[month]?.pending > 0) {
             pendingCell.classList.add('pending-non-zero');
           } else {
@@ -152,8 +152,8 @@ export function initNotes(user) {
         const totalCell = document.getElementById(`implantes-total-${month}`);
         const pendingCell = document.getElementById(`implantes-pending-${month}`);
         if (totalCell && pendingCell) {
-          totalCell.textContent = implantesSummary2025[month]?.total || 0;
-          pendingCell.textContent = implantesSummary2025[month]?.pending || 0;
+          totalCell.textContent = implantesSummary2025[month]?.total > 0 ? implantesSummary2025[month].total : '';
+          pendingCell.textContent = implantesSummary2025[month]?.pending > 0 ? implantesSummary2025[month].pending : '';
           if (implantesSummary2025[month]?.pending > 0) {
             pendingCell.classList.add('pending-non-zero');
           } else {
