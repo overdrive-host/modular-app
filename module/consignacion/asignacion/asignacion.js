@@ -623,6 +623,7 @@ try {
                         prevision: asignacion.prevision || 'Desconocido',
                         estado: asignacion.estado || 'Reposición',
                         fechaIngreso: Timestamp.fromDate(asignacion.fechaIngreso),
+                        fechaCargo: null,
                         usuario: fullName,
                         uid: currentUser.uid
                     };
