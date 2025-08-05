@@ -108,6 +108,16 @@ body.dark-mode .summary-table td {
   font-weight: 600;
 }
 
+.summary-table td.pending-non-zero {
+  background-color: #e53e3e;
+  color: #ffffff;
+}
+
+body.dark-mode .summary-table td.pending-non-zero {
+  background-color: #f56565;
+  color: #ffffff;
+}
+
 .add-info-btn {
   background-color: #38a169;
   color: #ffffff;
