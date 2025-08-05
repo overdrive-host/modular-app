@@ -31,30 +31,7 @@ body.dark-mode .pacientesconsignacion-container h2 {
     flex-wrap: wrap;
 }
 
-.quick-filters select {
-    padding: 4px;
-    border: 1px solid #e2e8f0;
-    font-size: 12px;
-    background-color: #fff;
-    color: #2d3748;
-    cursor: pointer;
-}
-
-body.dark-mode .quick-filters select {
-    border: 1px solid #4a5568;
-    background-color: #3c4b64;
-    color: #e2e8f0;
-}
-
-.quick-filters select:focus {
-    outline: none;
-    border-color: #3182ce;
-}
-
-body.dark-mode .quick-filters select:focus {
-    border-color: #63b3ed;
-}
-
+.quick-filters select,
 .quick-filters button {
     padding: 4px 8px;
     border: none;
@@ -64,9 +41,21 @@ body.dark-mode .quick-filters select:focus {
     color: #2d3748;
 }
 
+body.dark-mode .quick-filters select,
 body.dark-mode .quick-filters button {
     background-color: #4a5568;
     color: #e2e8f0;
+}
+
+.quick-filters select:focus,
+.quick-filters button:focus {
+    outline: none;
+    border: 1px solid #3182ce;
+}
+
+body.dark-mode .quick-filters select:focus,
+body.dark-mode .quick-filters button:focus {
+    border-color: #63b3ed;
 }
 
 .quick-filters button:hover {
@@ -75,6 +64,23 @@ body.dark-mode .quick-filters button {
 
 body.dark-mode .quick-filters button:hover {
     background-color: #718096;
+}
+
+#massive-state-btn {
+    background-color: #3182ce;
+    color: #fff;
+}
+
+body.dark-mode #massive-state-btn {
+    background-color: #63b3ed;
+}
+
+#massive-state-btn:hover {
+    background-color: #2b6cb0;
+}
+
+body.dark-mode #massive-state-btn:hover {
+    background-color: #4299e1;
 }
 
 #state-buttons {
@@ -235,6 +241,7 @@ body.dark-mode #pacientesconsignacion-table {
     padding: 2px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0; /* Líneas verticales añadidas */
     color: #2d3748;
     position: relative;
     height: 15px;
@@ -244,7 +251,14 @@ body.dark-mode #pacientesconsignacion-table {
 body.dark-mode #pacientesconsignacion-table th,
 body.dark-mode #pacientesconsignacion-table td {
     border-bottom: 1px solid #4a5568;
+    border-right: 1px solid #4a5568; /* Líneas verticales para modo oscuro */
     color: #e2e8f0;
+}
+
+/* Eliminar el borde derecho de la última celda en cada fila */
+#pacientesconsignacion-table th:last-child,
+#pacientesconsignacion-table td:last-child {
+    border-right: none;
 }
 
 #pacientesconsignacion-table th {
