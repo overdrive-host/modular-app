@@ -6,7 +6,10 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  getDoc
+  getDoc,
+  query,
+  orderBy,
+  Timestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
 
@@ -20,6 +23,7 @@ export function initNotes(user) {
   const auth = getAuth();
   const infoList = document.querySelector('.info-list');
   let addInfoBtn = document.querySelector('.add-info-btn');
+  const summaryTableBody = document.querySelector('#summary-table-body');
 
   if (!infoList) {
     console.error('Elemento .info-list no encontrado');
@@ -28,6 +32,10 @@ export function initNotes(user) {
 
   if (!addInfoBtn) {
     console.error('Botón .add-info-btn no encontrado en el DOM');
+  }
+
+  if (!summaryTableBody) {
+    console.error('Elemento #summary-table-body no encontrado');
   }
 
   async function isAdmin() {
@@ -44,6 +52,57 @@ export function initNotes(user) {
     } catch (error) {
       console.error('Error al verificar si el usuario es administrador:', error);
       return false;
+    }
+  }
+
+  async function loadSummary() {
+    try {
+      if (!summaryTableBody) {
+        console.error('Elemento #summary-table-body no encontrado al cargar el resumen');
+        return;
+      }
+      const pacientesCollection = collection(db, 'pacientesconsignacion');
+      const q = query(pacientesCollection, orderBy('fechaCX', 'asc'));
+      const snapshot = await getDocs(q);
+
+      const summary2025 = {};
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        let fechaCX;
+        if (typeof data.fechaCX === 'string') {
+          fechaCX = new Date(data.fechaCX);
+        } else if (data.fechaCX instanceof Timestamp) {
+          fechaCX = data.fechaCX.toDate();
+        } else if (data.fechaCX instanceof Date) {
+          fechaCX = data.fechaCX;
+        } else {
+          return;
+        }
+
+        if (fechaCX && !isNaN(fechaCX) && fechaCX.getFullYear() === 2025) {
+          const month = (fechaCX.getMonth() + 1).toString().padStart(2, '0');
+          if (!summary2025[month]) {
+            summary2025[month] = { total: 0, pending: 0 };
+          }
+          summary2025[month].total += 1;
+          if (data.estado !== 'Cargado') {
+            summary2025[month].pending += 1;
+          }
+        }
+      });
+
+      // Actualizar las celdas de la tabla
+      ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].forEach(month => {
+        const totalCell = document.getElementById(`total-${month}`);
+        const pendingCell = document.getElementById(`pending-${month}`);
+        if (totalCell && pendingCell) {
+          totalCell.textContent = summary2025[month]?.total || 0;
+          pendingCell.textContent = summary2025[month]?.pending || 0;
+        }
+      });
+    } catch (error) {
+      console.error('Error al cargar el resumen:', error);
+      alert(`Error al cargar el resumen: ${error.message}. Intenta de nuevo.`);
     }
   }
 
@@ -275,9 +334,11 @@ export function initNotes(user) {
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     loadInfo();
+    loadSummary();
   } else {
     document.addEventListener('DOMContentLoaded', () => {
       loadInfo();
+      loadSummary();
     });
   }
 
