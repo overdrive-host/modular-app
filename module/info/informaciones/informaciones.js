@@ -98,6 +98,12 @@ export function initNotes(user) {
         if (totalCell && pendingCell) {
           totalCell.textContent = summary2025[month]?.total || 0;
           pendingCell.textContent = summary2025[month]?.pending || 0;
+          // Aplicar clase para resaltar celdas con pendientes > 0
+          if (summary2025[month]?.pending > 0) {
+            pendingCell.classList.add('pending-non-zero');
+          } else {
+            pendingCell.classList.remove('pending-non-zero');
+          }
         }
       });
     } catch (error) {
