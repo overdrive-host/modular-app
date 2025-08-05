@@ -67,6 +67,16 @@ body.dark-mode p {
   margin-top: 20px;
 }
 
+.divider {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
+
+body.dark-mode .divider {
+  border-top: 1px solid #4a5568;
+}
+
 .summary-table {
   width: 100%;
   border-collapse: collapse;
