@@ -1,4 +1,3 @@
-
 :root {
     --bg-color: #fff;
     --border-color: #e2e8f0;
@@ -104,9 +103,16 @@ body.dark-mode .form-container {
     grid-template-columns: repeat(5, 1fr);
 }
 
+.form-row-edit {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
 .form-group {
-    margin-bottom: 0;
+    margin-bottom: 10px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-group label {
@@ -168,20 +174,141 @@ body.dark-mode .form-group select:disabled {
     color: var(--dark-text-color);
 }
 
-.form-group input[type="date"] {
-    padding: 3px;
+.form-group input::placeholder {
+    color: #a0aec0;
+    opacity: 1;
+}
+
+body.dark-mode .form-group input::placeholder {
+    color: #718096;
+}
+
+#edit-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+#edit-modal .form-row-edit {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+#edit-modal .form-group {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#edit-modal .form-group input,
+#edit-modal .form-group select {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid var(--border-color);
     font-size: 11px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
 }
 
-.form-group input[type="date"]::-webkit-calendar-picker-indicator {
-    display: none;
-}
-
-body.dark-mode .form-group input[type="date"] {
+body.dark-mode #edit-modal .form-group input,
+body.dark-mode #edit-modal .form-group select {
+    border-color: var(--dark-border-color);
     background-color: var(--dark-input-bg);
+    color: var(--dark-text-color);
+}
+
+#edit-modal .form-group input:focus,
+#edit-modal .form-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 3px rgba(49, 130, 206, 0.3);
+}
+
+body.dark-mode #edit-modal .form-group input:focus,
+body.dark-mode #edit-modal .form-group select:focus {
+    border-color: var(--dark-primary);
+    box-shadow: 0 0 3px rgba(99, 179, 237, 0.3);
+}
+
+#edit-modal .form-group .search-icon,
+#edit-modal .form-group .icon-list {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 11px;
+}
+
+body.dark-mode #edit-modal .form-group .search-icon,
+body.dark-mode #edit-modal .form-group .icon-list {
+    color: var(--dark-text-color);
+}
+
+#edit-modal .form-group .search-icon:hover,
+#edit-modal .form-group .icon-list:hover {
+    color: var(--primary-hover);
+}
+
+body.dark-mode #edit-modal .form-group .search-icon:hover,
+body.dark-mode #edit-modal .form-group .icon-list:hover {
+    color: var(--dark-primary-hover);
+}
+
+#edit-modal .form-group i[id="edit-descripcion-mode-toggle"] {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--success);
+    font-size: 11px;
+}
+
+body.dark-mode #edit-modal .form-group i[id="edit-descripcion-mode-toggle"] {
+    color: var(--dark-success);
+}
+
+#edit-modal .form-group i[id="edit-descripcion-mode-toggle"]:hover {
+    color: var(--success-hover);
+}
+
+body.dark-mode #edit-modal .form-group i[id="edit-descripcion-mode-toggle"]:hover {
+    color: var(--dark-success-hover);
+}
+
+#edit-modal .form-group-button {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#edit-modal .modal-content {
+    max-width: 900px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--modal-bg);
+}
+
+body.dark-mode #edit-modal .modal-content {
+    border-color: var(--dark-border-color);
+    background-color: var(--dark-modal-bg);
+}
+
+#edit-modal .modal-content h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    text-align: center;
+}
+
+body.dark-mode #edit-modal .modal-content h2 {
     color: var(--dark-text-color);
 }
 
@@ -247,7 +374,8 @@ body.dark-mode .input-with-icon .fa-toggle-off:hover {
     color: var(--dark-success-hover);
 }
 
-.suggestions-list {
+.suggestions-list,
+.autocomplete-list {
     position: absolute;
     top: 100%;
     left: 0;
@@ -264,27 +392,32 @@ body.dark-mode .input-with-icon .fa-toggle-off:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-body.dark-mode .suggestions-list {
+body.dark-mode .suggestions-list,
+body.dark-mode .autocomplete-list {
     background-color: var(--dark-bg-color);
     border-color: var(--dark-border-color);
 }
 
-.suggestions-list li {
+.suggestions-list li,
+.autocomplete-list li {
     padding: 6px 8px;
     cursor: pointer;
     font-size: 11px;
     color: var(--text-color);
 }
 
-body.dark-mode .suggestions-list li {
+body.dark-mode .suggestions-list li,
+body.dark-mode .autocomplete-list li {
     color: var(--dark-text-color);
 }
 
-.suggestions-list li:hover {
+.suggestions-list li:hover,
+.autocomplete-list li:hover {
     background-color: var(--hover-bg);
 }
 
-body.dark-mode .suggestions-list li:hover {
+body.dark-mode .suggestions-list li:hover,
+body.dark-mode .autocomplete-list li:hover {
     background-color: var(--dark-hover-bg);
 }
 
@@ -624,20 +757,23 @@ body.dark-mode #asignaciones-table .resize-handle.active {
 #asignaciones-table tr {
     height: 18px;
 }
+
 #asignaciones-table tr:hover {
-    background-color: rgba(49, 130, 206, 0.1); 
+    background-color: rgba(49, 130, 206, 0.1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode #asignaciones-table tr:hover {
-    background-color: rgba(99, 179, 237, 0.2); 
+    background-color: rgba(99, 179, 237, 0.2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 #asignaciones-table tr:hover td {
-    color: #000000; 
+    color: #000000;
 }
+
 body.dark-mode #asignaciones-table tr:hover td {
-    color: #c2ccd8; 
+    color: #c2ccd8;
 }
 
 #asignaciones-table .action-icon {
@@ -714,80 +850,27 @@ body.dark-mode .btn:hover {
     background-color: var(--dark-primary-hover);
 }
 
-#edit-modal .form-container {
-    padding: 0;
-    border: none;
-    background: none;
-}
-
-#edit-modal .modal-content {
-    max-width: 1000px;
-    padding: 25px;
-}
-
-#edit-modal .form-group {
-    margin-bottom: 10px;
-}
-
-#edit-modal .modal-content h2 {
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-
-#edit-modal .form-group input,
-#edit-modal .form-group select {
-    font-size: 12px;
-    padding: 6px;
-    word-wrap: break-word;
-}
-
-#edit-modal .form-group input[type="text"],
-#edit-modal .form-group input[type="number"],
-#edit-modal .form-group select {
-    min-height: 30px;
-}
-
-#edit-modal .form-group label {
-    font-size: 12px;
-}
-
-#edit-modal .input-with-icon input {
-    padding-right: 60px;
-}
-
-#edit-modal .input-with-icon .fa-search,
-#edit-modal .input-with-icon .fa-toggle-on,
-#edit-modal .input-with-icon .fa-toggle-off {
-    right: 10px;
-    font-size: 12px;
-}
-
-#edit-modal .form-group-button {
-    align-self: center;
-    justify-content: center;
-}
-
 @media (max-width: 768px) {
     .form-row-7,
-    .form-row-5 {
+    .form-row-5,
+    .form-row-edit {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
     }
 
+    #edit-modal .form-group-button {
+        justify-content: center;
+    }
+
     #edit-modal .modal-content {
         max-width: 95%;
-        padding: 15px;
+        padding: 10px;
     }
 
     #edit-modal .form-group input,
     #edit-modal .form-group select {
-        font-size: 12px;
-        padding: 6px;
-    }
-
-    #edit-modal .form-group-button {
-        justify-self: center;
-        align-self: center;
+        font-size: 11px;
+        padding: 4px;
     }
 
     #registrar-btn,
@@ -864,13 +947,13 @@ body.dark-mode .btn:hover {
 @media (max-width: 640px) {
     #edit-modal .modal-content {
         max-width: 90%;
-        padding: 15px;
+        padding: 10px;
     }
 
     #edit-modal .form-group input,
     #edit-modal .form-group select {
-        font-size: 12px;
-        padding: 6px;
+        font-size: 11px;
+        padding: 4px;
     }
 }
 
@@ -915,7 +998,7 @@ body.dark-mode #select-asignaciones-table {
 }
 
 body.dark-mode #select-asignaciones-table th,
-body.dark-mode #select-asignaciones-table td {
+body.dark-mode .select-asignaciones-table td {
     border-color: var(--dark-border-color);
     color: var(--dark-text-color);
 }
