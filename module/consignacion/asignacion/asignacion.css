@@ -702,7 +702,8 @@ body.dark-mode #asignaciones-table {
 #asignaciones-table td {
     padding: 3px;
     text-align: left;
-    border-bottom: 1px solid #bbcadd;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color); /* Añadir líneas verticales */
     color: var(--text-color);
     position: relative;
     height: 18px;
@@ -712,10 +713,21 @@ body.dark-mode #asignaciones-table {
     text-overflow: ellipsis;
 }
 
+#asignaciones-table th:last-child,
+#asignaciones-table td:last-child {
+    border-right: none; /* Evitar borde derecho en la última columna */
+}
+
 body.dark-mode #asignaciones-table th,
 body.dark-mode #asignaciones-table td {
     border-bottom: 1px solid var(--dark-border-color);
+    border-right: 1px solid var(--dark-border-color); /* Líneas verticales en modo oscuro */
     color: var(--dark-text-color);
+}
+
+body.dark-mode #asignaciones-table th:last-child,
+body.dark-mode #asignaciones-table td:last-child {
+    border-right: none; /* Evitar borde derecho en la última columna en modo oscuro */
 }
 
 #asignaciones-table th {
@@ -888,12 +900,17 @@ body.dark-mode .btn:hover {
         font-size: 11px;
     }
 
-    #success-modal {
-        width: 90%;
-        max-width: 350px;
-        right: 5px;
-        top: 5px;
-    }
+#success-modal {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    left: auto;
+    width: 90%;
+    max-width: 350px;
+    height: auto;
+    background-color: transparent;
+    display: none !important;
+}
 
     .success-message-container {
         flex-direction: column;
@@ -989,6 +1006,7 @@ body.dark-mode #select-asignaciones-table {
 #select-asignaciones-table th,
 #select-asignaciones-table td {
     border: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color); /* Añadir líneas verticales */
     padding: 6px;
     text-align: left;
     color: var(--text-color);
@@ -997,10 +1015,21 @@ body.dark-mode #select-asignaciones-table {
     text-overflow: ellipsis;
 }
 
+#select-asignaciones-table th:last-child,
+#select-asignaciones-table td:last-child {
+    border-right: none; /* Evitar borde derecho en la última columna */
+}
+
 body.dark-mode #select-asignaciones-table th,
-body.dark-mode .select-asignaciones-table td {
-    border-color: var(--dark-border-color);
+body.dark-mode #select-asignaciones-table td {
+    border: 1px solid var(--dark-border-color);
+    border-right: 1px solid var(--dark-border-color); /* Líneas verticales en modo oscuro */
     color: var(--dark-text-color);
+}
+
+body.dark-mode #select-asignaciones-table th:last-child,
+body.dark-mode #select-asignaciones-table td:last-child {
+    border-right: none; /* Evitar borde derecho en la última columna en modo oscuro */
 }
 
 #select-asignaciones-table th {
