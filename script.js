@@ -141,6 +141,22 @@ passwordInput.addEventListener('keyup', (e) => {
 });
 
 const submenuData = {
+  Completar: [
+    {
+      name: 'Asignar',
+      icon: 'fa-tasks',
+      html: 'module/completar/asignar/asignar.html',
+      css: 'module/completar/asignar/asignar.css',
+      js: 'module/completar/asignar/asignar.js'
+    },
+        {
+      name: 'Implantes',
+      icon: 'fa-syringe',
+      html: 'module/completar/imp/imp.html',
+      css: 'module/completar/imp/imp.css',
+      js: 'module/completar/imp/imp.js'
+    }
+  ],
   Implantes: [
     {
       name: 'Cargos Imp',
@@ -149,9 +165,9 @@ const submenuData = {
       css: 'module/implantes/cargosimp/cargosimp.css',
       js: 'module/implantes/cargosimp/cargosimp.js'
     },
-      {
+    {
       name: 'Cargos ing',
-      icon: 'fa-tooth',
+      icon: 'fa-cog',
       html: 'module/implantes/ingcargos/ingcargos.html',
       css: 'module/implantes/ingcargos/ingcargos.css',
       js: 'module/implantes/ingcargos/ingcargos.js'
@@ -207,7 +223,7 @@ const submenuData = {
     },
     {
       name: 'Consumidos',
-      icon: 'fa-route',
+      icon: 'fa-box-open',
       html: 'module/implantes/consumidos/consumidos.html',
       css: 'module/implantes/consumidos/consumidos.css',
       js: 'module/implantes/consumidos/consumidos.js'
@@ -237,14 +253,14 @@ const submenuData = {
   Consignacion: [
     {
       name: 'Asignación',
-      icon: 'fa-clipboard-list',
+      icon: 'fa-tasks', 
       html: 'module/consignacion/asignacion/asignacion.html',
       css: 'module/consignacion/asignacion/asignacion.css',
       js: 'module/consignacion/asignacion/asignacion.js'
     },
     {
       name: 'Ficha',
-      icon: 'fa-file-alt',
+      icon: 'fa-id-card', 
       html: 'module/consignacion/ficha/ficha.html',
       css: 'module/consignacion/ficha/ficha.css',
       js: 'module/consignacion/ficha/ficha.js'
@@ -258,19 +274,13 @@ const submenuData = {
     },
     {
       name: 'Guías',
-      icon: 'fa-file-invoice',
+      icon: 'fa-shipping-fast', 
       html: 'module/consignacion/guias/guias.html',
       css: 'module/consignacion/guias/guias.css',
       js: 'module/consignacion/guias/guias.js'
-    },
-    {
-      name: 'Ingresar',
-      icon: 'fa-file-invoice',
-      html: 'module/consignacion/ingresar/ingresar.html',
-      css: 'module/consignacion/ingresar/ingresar.css',
-      js: 'module/consignacion/ingresar/ingresar.js'
     }
-  ],
+  ]
+  ,
   Historico: [
     {
       name: 'Historicos',
@@ -321,16 +331,16 @@ const submenuData = {
     {
       name: 'Pacientes',
       icon: 'fa-user-injured',
-      html: 'module/resumen/pacientes/pacientes.html',
-      css: 'module/resumen/pacientes/pacientes.css',
-      js: 'module/resumen/pacientes/pacientes.js'
+      html: 'module/vizualizacion/pacientes/pacientes.html',
+      css: 'module/vizualizacion/pacientes/pacientes.css',
+      js: 'module/vizualizacion/pacientes/pacientes.js'
     },
     {
       name: 'Generales',
       icon: 'fa-boxes-packing',
-      html: 'module/resumen/generales/generales.html',
-      css: 'module/resumen/generales/generales.css',
-      js: 'module/resumen/generales/generales.js'
+      html: 'module/vizualizacion/generales/generales.html',
+      css: 'module/vizualizacion/generales/generales.css',
+      js: 'module/vizualizacion/generales/generales.js'
     },
     {
       name: 'Consigna',
@@ -415,7 +425,6 @@ const submenuData = {
       css: 'module/importacion/reportepabellon/reportepabellon.css',
       js: 'module/importacion/reportepabellon/reportepabellon.js'
     },
-
     {
       name: 'OC',
       icon: 'fa-shopping-cart',
