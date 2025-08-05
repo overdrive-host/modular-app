@@ -1,4 +1,3 @@
-
 import { getFirestore, collection, addDoc, updateDoc, doc, getDocs, getDoc, deleteDoc, query, where, Timestamp, writeBatch, orderBy, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
 import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
 import { getApps, initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
@@ -624,7 +623,7 @@ try {
                         prevision: asignacion.prevision || 'Desconocido',
                         estado: asignacion.estado || 'Reposición',
                         fechaIngreso: Timestamp.fromDate(asignacion.fechaIngreso),
-                        fechaCargo: Timestamp.fromDate(asignacion.fechaIngreso),
+                        fechaCargo: null,
                         usuario: fullName,
                         uid: currentUser.uid
                     };
