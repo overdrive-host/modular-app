@@ -23,7 +23,7 @@
             <div class="form-group">
                 <label for="medico">Médico</label>
                 <div class="input-wrapper">
-                    <input type="text" id="medico" name="medico" required>
+                    <input type="text" id="medico" name="medico" autocomplete="off" required>
                     <button type="button" id="medico-search" class="search-icon"><i class="fas fa-search"></i></button>
                     <ul id="medico-list" class="suggestions-list"></ul>
                 </div>
@@ -114,7 +114,6 @@
         </table>
     </div>
 
-    <!-- Modal de Traspaso -->
     <div id="traspaso-modal" class="modal" hidden>
         <div class="modal-content">
             <h2>Traspasar Asignaciones</h2>
@@ -138,7 +137,6 @@
         </div>
     </div>
 
-    <!-- Modal de Selección de Asignaciones -->
     <div id="select-asignaciones-modal" class="modal" hidden>
         <div class="modal-content">
             <h2>Seleccionar Asignaciones para Traspaso</h2>
@@ -162,32 +160,35 @@
         </div>
     </div>
 
-    <!-- Modal de Edición -->
     <div id="edit-modal" class="modal" hidden>
         <div class="modal-content">
             <h2>Editar Asignación</h2>
-            <div class="form-container">
-                <div class="form-row form-row-7">
+            <form id="edit-form">
+                <div class="form-row form-row-edit">
                     <div class="form-group">
                         <label for="edit-fecha-ingreso">Fecha de Ingreso</label>
-                        <input type="date" id="edit-fecha-ingreso" autocomplete="off" required>
+                        <input type="date" id="edit-fecha-ingreso" required>
                     </div>
                     <div class="form-group">
                         <label for="edit-admisión">Admisión</label>
-                        <input type="text" id="edit-admisión" autocomplete="off">
+                        <input type="text" id="edit-admisión" placeholder="Ingrese la admisión" autocomplete="off"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="edit-nombrePaciente">Nombre del Paciente</label>
-                        <input type="text" id="edit-nombrePaciente" autocomplete="off">
+                        <input type="text" id="edit-nombrePaciente" placeholder="Nombre del paciente" autocomplete="off"
+                            required>
                     </div>
                     <div class="form-group">
-                        <label for="edit-fechaCX">Fecha de CX</label>
-                        <input type="date" id="edit-fechaCX">
+                        <label for="edit-fechaCX">Fecha de Cirugía</label>
+                        <input type="date" id="edit-fechaCX" required>
                     </div>
+                </div>
+                <div class="form-row form-row-edit">
                     <div class="form-group">
                         <label for="edit-medico">Médico</label>
                         <div class="input-wrapper">
-                            <input type="text" id="edit-medico" name="edit-medico" required>
+                            <input type="text" id="edit-medico" autocomplete="off" required>
                             <button type="button" id="edit-medico-search" class="search-icon"><i
                                     class="fas fa-search"></i></button>
                             <ul id="edit-medico-list" class="suggestions-list"></ul>
@@ -196,11 +197,11 @@
                     <div class="form-group">
                         <label for="edit-descripcion">Descripción</label>
                         <div class="input-with-icon">
-                            <input type="text" id="edit-descripcion" autocomplete="off">
+                            <input type="text" id="edit-descripcion" placeholder="Descripción" autocomplete="off">
                             <i id="edit-descripcion-search" class="fas fa-search"></i>
                             <i id="edit-descripcion-mode-toggle" class="fas fa-toggle-on" title="Consignación"></i>
+                            <ul id="edit-descripcion-list" class="suggestions-list"></ul>
                         </div>
-                        <ul id="edit-descripcion-list" class="suggestions-list"></ul>
                     </div>
                     <div class="form-group">
                         <label for="edit-cantidad">Cantidad</label>
@@ -214,18 +215,23 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-row form-row-7">
+                <div class="form-row form-row-edit">
                     <div class="form-group">
                         <label for="edit-codigo">Código</label>
-                        <input type="text" id="edit-codigo" autocomplete="off" readonly>
+                        <input type="text" id="edit-codigo" placeholder="Código" autocomplete="off" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-referencia">Referencia</label>
-                        <input type="text" id="edit-referencia" autocomplete="off" readonly>
+                        <input type="text" id="edit-referencia" placeholder="Referencia" autocomplete="off" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-proveedor">Proveedor</label>
-                        <input type="text" id="edit-proveedor" autocomplete="off" readonly>
+                        <div class="input-with-icon">
+                            <input type="text" id="edit-proveedor" placeholder="Seleccione proveedor" autocomplete="off"
+                                readonly>
+                            <i class="fas fa-list icon-list" id="edit-proveedor-search"></i>
+                            <ul id="edit-proveedor-list" class="suggestions-list"></ul>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="edit-modalidad">Modalidad</label>
@@ -234,24 +240,25 @@
                             <option value="Cotización">Cotización</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-row form-row-edit">
                     <div class="form-group">
                         <label for="edit-precio">Precio ($)</label>
-                        <input type="text" id="edit-precio" autocomplete="off" readonly>
+                        <input type="text" id="edit-precio" placeholder="0" autocomplete="off" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-total">Total ($)</label>
                         <input type="text" id="edit-total" readonly>
                     </div>
                     <div class="form-group form-group-button">
-                        <button id="save-edit-btn">Guardar</button>
-                        <button id="cancel-edit-btn">Cancelar</button>
+                        <button type="button" id="save-edit-btn" class="btn">Guardar</button>
+                        <button type="button" id="cancel-edit-btn" class="btn btn-cancel">Cancelar</button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- Modal de Eliminación -->
     <div id="delete-modal" class="modal" hidden>
         <div class="modal-content">
             <h2>Confirmar Eliminación</h2>
@@ -263,7 +270,6 @@
         </div>
     </div>
 
-    <!-- Modal de Éxito -->
     <div id="success-modal" class="modal" hidden>
         <div class="modal-content success">
             <div class="success-message-container">
@@ -273,7 +279,6 @@
         </div>
     </div>
 
-    <!-- Modal de Logs -->
     <div id="log-modal" class="modal" hidden>
         <div class="modal-content">
             <h2>Historial de Cambios</h2>
@@ -284,7 +289,6 @@
         </div>
     </div>
 
-    <!-- Modal de Carga (Spinner) -->
     <div id="loading-modal" class="modal" hidden>
         <div class="modal-content loading">
             <div class="spinner"></div>
