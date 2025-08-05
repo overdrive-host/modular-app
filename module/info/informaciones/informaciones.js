@@ -23,7 +23,8 @@ export function initNotes(user) {
   const auth = getAuth();
   const infoList = document.querySelector('.info-list');
   let addInfoBtn = document.querySelector('.add-info-btn');
-  const summaryTableBody = document.querySelector('#summary-table-body');
+  const consignacionTableBody = document.querySelector('#summary-table-body');
+  const implantesTableBody = document.querySelector('#implantes-summary-table-body');
 
   if (!infoList) {
     console.error('Elemento .info-list no encontrado');
@@ -34,8 +35,12 @@ export function initNotes(user) {
     console.error('Botón .add-info-btn no encontrado en el DOM');
   }
 
-  if (!summaryTableBody) {
+  if (!consignacionTableBody) {
     console.error('Elemento #summary-table-body no encontrado');
+  }
+
+  if (!implantesTableBody) {
+    console.error('Elemento #implantes-summary-table-body no encontrado');
   }
 
   async function isAdmin() {
@@ -55,18 +60,19 @@ export function initNotes(user) {
     }
   }
 
-  async function loadSummary() {
+  async function loadSummaries() {
     try {
-      if (!summaryTableBody) {
-        console.error('Elemento #summary-table-body no encontrado al cargar el resumen');
+      // Resumen de Cirugías Consignadas
+      if (!consignacionTableBody) {
+        console.error('Elemento #summary-table-body no encontrado al cargar el resumen de consignaciones');
         return;
       }
-      const pacientesCollection = collection(db, 'pacientesconsignacion');
-      const q = query(pacientesCollection, orderBy('fechaCX', 'asc'));
-      const snapshot = await getDocs(q);
+      const consignacionCollection = collection(db, 'pacientesconsignacion');
+      const consignacionQuery = query(consignacionCollection, orderBy('fechaCX', 'asc'));
+      const consignacionSnapshot = await getDocs(consignacionQuery);
 
       const summary2025 = {};
-      snapshot.forEach(doc => {
+      consignacionSnapshot.forEach(doc => {
         const data = doc.data();
         let fechaCX;
         if (typeof data.fechaCX === 'string') {
@@ -91,14 +97,13 @@ export function initNotes(user) {
         }
       });
 
-      // Actualizar las celdas de la tabla
+      // Actualizar tabla de consignaciones
       ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].forEach(month => {
         const totalCell = document.getElementById(`total-${month}`);
         const pendingCell = document.getElementById(`pending-${month}`);
         if (totalCell && pendingCell) {
           totalCell.textContent = summary2025[month]?.total || 0;
           pendingCell.textContent = summary2025[month]?.pending || 0;
-          // Aplicar clase para resaltar celdas con pendientes > 0
           if (summary2025[month]?.pending > 0) {
             pendingCell.classList.add('pending-non-zero');
           } else {
@@ -106,9 +111,59 @@ export function initNotes(user) {
           }
         }
       });
+
+      // Resumen de Cargas Implantes
+      if (!implantesTableBody) {
+        console.error('Elemento #implantes-summary-table-body no encontrado al cargar el resumen de implantes');
+        return;
+      }
+      const implantesCollection = collection(db, 'pacientesimplantes');
+      const implantesQuery = query(implantesCollection, orderBy('fechaCX', 'asc'));
+      const implantesSnapshot = await getDocs(implantesQuery);
+
+      const implantesSummary2025 = {};
+      implantesSnapshot.forEach(doc => {
+        const data = doc.data();
+        let fechaCX;
+        if (typeof data.fechaCX === 'string') {
+          fechaCX = new Date(data.fechaCX);
+        } else if (data.fechaCX instanceof Timestamp) {
+          fechaCX = data.fechaCX.toDate();
+        } else if (data.fechaCX instanceof Date) {
+          fechaCX = data.fechaCX;
+        } else {
+          return;
+        }
+
+        if (fechaCX && !isNaN(fechaCX) && fechaCX.getFullYear() === 2025) {
+          const month = (fechaCX.getMonth() + 1).toString().padStart(2, '0');
+          if (!implantesSummary2025[month]) {
+            implantesSummary2025[month] = { total: 0, pending: 0 };
+          }
+          implantesSummary2025[month].total += 1;
+          if (data.estado !== 'Cargado') {
+            implantesSummary2025[month].pending += 1;
+          }
+        }
+      });
+
+      // Actualizar tabla de implantes
+      ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].forEach(month => {
+        const totalCell = document.getElementById(`implantes-total-${month}`);
+        const pendingCell = document.getElementById(`implantes-pending-${month}`);
+        if (totalCell && pendingCell) {
+          totalCell.textContent = implantesSummary2025[month]?.total || 0;
+          pendingCell.textContent = implantesSummary2025[month]?.pending || 0;
+          if (implantesSummary2025[month]?.pending > 0) {
+            pendingCell.classList.add('pending-non-zero');
+          } else {
+            pendingCell.classList.remove('pending-non-zero');
+          }
+        }
+      });
     } catch (error) {
-      console.error('Error al cargar el resumen:', error);
-      alert(`Error al cargar el resumen: ${error.message}. Intenta de nuevo.`);
+      console.error('Error al cargar los resúmenes:', error);
+      alert(`Error al cargar los resúmenes: ${error.message}. Intenta de nuevo.`);
     }
   }
 
@@ -340,11 +395,11 @@ export function initNotes(user) {
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     loadInfo();
-    loadSummary();
+    loadSummaries();
   } else {
     document.addEventListener('DOMContentLoaded', () => {
       loadInfo();
-      loadSummary();
+      loadSummaries();
     });
   }
 
