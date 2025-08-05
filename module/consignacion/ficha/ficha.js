@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, onSnapshot, doc, getDoc, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDmAf-vi7PhzzQkPZh89q9p3Mz4vGGPtd0",
@@ -75,6 +75,10 @@ try {
     let monthFilter = '';
     let stateFilter = '';
     let isInitialized = false;
+    let lastSnapshot = null;
+    let lastUpdateTime = 0;
+    const debounceDelay = 30000; // 30 segundos
+    let historicoDataCache = null; // Caché para datos_historico
 
     function generateStateColor(state) {
         let hash = 0;
@@ -132,7 +136,7 @@ try {
         modal.removeAttribute('hidden');
         modal.style.display = 'flex';
         if (progressElement && percentage !== null) {
-            progressElement.textContent = `${percentage}%`;
+            progressElement.textContent = `${Math.round(percentage)}%`;
         }
     }
 
@@ -157,6 +161,9 @@ try {
     }
 
     async function fetchHistoricoData() {
+        if (historicoDataCache) {
+            return historicoDataCache;
+        }
         try {
             const historicoCollection = collection(db, 'datos_historico');
             const querySnapshot = await getDocs(historicoCollection);
@@ -172,6 +179,7 @@ try {
                     estado: data.estado || '-'
                 });
             });
+            historicoDataCache = historicoData;
             return historicoData;
         } catch (error) {
             showSuccessMessage('Error al cargar datos históricos: ' + error.message, false);
@@ -180,7 +188,7 @@ try {
     }
 
     function applyFilters() {
-        showModal(loadingModal, loadingProgress, 0); // Mostrar modal al iniciar el filtrado
+        showModal(loadingModal, loadingProgress, 0);
         try {
             filteredFichas = fichas.filter(ficha => {
                 let columnMatch = true;
@@ -225,7 +233,7 @@ try {
         } catch (error) {
             showSuccessMessage('Error al aplicar filtros: ' + error.message, false);
         } finally {
-            hideModal(loadingModal); // Ocultar modal al finalizar
+            hideModal(loadingModal);
         }
     }
 
@@ -391,91 +399,54 @@ try {
 
     function setupYearMonthFilters() {
         const currentYear = new Date().getFullYear().toString();
-        const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-        const years = new Set();
-        const yearMonthMap = new Map();
         const monthNames = [
             'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
             'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
         ];
 
-        fichas.forEach(ficha => {
-            const fechaCX = ficha.fechaCX;
-            let date;
-            if (fechaCX && typeof fechaCX.toDate === 'function') {
-                date = ficha.fechaCX.toDate();
-            } else if (fechaCX instanceof Date) {
-                date = ficha.fechaCX;
-            } else {
-                return;
-            }
-            if (!date || isNaN(date.getTime())) {
-                return;
-            }
-            const year = date.getFullYear().toString();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            years.add(year);
-            if (!yearMonthMap.has(year)) {
-                yearMonthMap.set(year, new Set());
-            }
-            yearMonthMap.get(year).add(month);
-        });
-
-        const sortedYears = Array.from(years).sort((a, b) => b - a);
         filterYear.innerHTML = '<option value="">Todos los años</option>';
-        sortedYears.forEach(year => {
+        const years = [];
+        for (let i = parseInt(currentYear) - 5; i <= parseInt(currentYear); i++) {
+            years.push(i.toString());
+        }
+        years.sort((a, b) => b - a).forEach(year => {
             const option = document.createElement('option');
             option.value = year;
             option.textContent = year;
             filterYear.appendChild(option);
         });
 
+        filterMonth.innerHTML = '<option value="">Seleccione un mes</option>';
+        monthNames.forEach((name, index) => {
+            const monthValue = (index + 1).toString().padStart(2, '0');
+            const option = document.createElement('option');
+            option.value = monthValue;
+            option.textContent = name;
+            filterMonth.appendChild(option);
+        });
+
         yearFilter = currentYear;
         filterYear.value = currentYear;
-        monthFilter = currentMonth;
-
-        function updateMonthFilter(selectedYear) {
-            filterMonth.innerHTML = '<option value="">Todos los meses</option>';
-            if (selectedYear && yearMonthMap.has(selectedYear)) {
-                const months = Array.from(yearMonthMap.get(selectedYear)).sort();
-                months.forEach(month => {
-                    const option = document.createElement('option');
-                    option.value = month;
-                    option.textContent = monthNames[parseInt(month) - 1];
-                    filterMonth.appendChild(option);
-                });
-                if (selectedYear === currentYear && months.includes(currentMonth)) {
-                    filterMonth.value = currentMonth;
-                    monthFilter = currentMonth;
-                } else {
-                    filterMonth.value = '';
-                    if (selectedYear === currentYear) {
-                        monthFilter = currentMonth;
-                    } else {
-                        monthFilter = '';
-                    }
-                }
-            } else {
-                filterMonth.value = '';
-                if (selectedYear === currentYear) {
-                    monthFilter = currentMonth;
-                } else {
-                    monthFilter = '';
-                }
-            }
-        }
-
-        updateMonthFilter(currentYear);
 
         filterYear.addEventListener('change', () => {
             yearFilter = filterYear.value;
-            updateMonthFilter(yearFilter);
-            applyFilters(); // El modal se maneja dentro de applyFilters
+            if (monthFilter) {
+                loadFichas();
+            }
         });
 
         filterMonth.addEventListener('change', () => {
             monthFilter = filterMonth.value;
-            applyFilters(); // El modal se maneja dentro de applyFilters
+            if (monthFilter) {
+                loadFichas();
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="19" style="text-align: center;">Seleccione un mes para cargar los registros.</td></tr>';
+                totalRecords.textContent = '0 registros';
+                updatePagination(0);
+                stateButtonsContainer.innerHTML = '';
+                lastSnapshot = null;
+                historicoDataCache = null;
+            }
         });
 
         showAllBtn.addEventListener('click', () => {
@@ -485,13 +456,17 @@ try {
             columnFilters = {};
             filterYear.value = '';
             filterMonth.value = '';
-            updateMonthFilter('');
             document.querySelectorAll('.state-button').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.filter-icon').forEach(icon => {
                 icon.classList.remove('fa-filter-circle-xmark', 'active');
                 icon.classList.add('fa-filter');
             });
-            applyFilters(); // El modal se maneja dentro de applyFilters
+            tableBody.innerHTML = '<tr><td colspan="19" style="text-align: center;">Seleccione un mes para cargar los registros.</td></tr>';
+            totalRecords.textContent = '0 registros';
+            updatePagination(0);
+            stateButtonsContainer.innerHTML = '';
+            lastSnapshot = null;
+            historicoDataCache = null;
         });
     }
 
@@ -542,11 +517,33 @@ try {
                 return;
             }
 
-            const fichasCollection = collection(db, 'cargosconsignacion');
+            const now = Date.now();
+            if (now - lastUpdateTime < debounceDelay) {
+                return;
+            }
+            lastUpdateTime = now;
+
+            showModal(loadingModal, loadingProgress, 0);
+
             const historicoData = await fetchHistoricoData();
-            const querySnapshot = await getDocs(fichasCollection);
+            setTimeout(() => showModal(loadingModal, loadingProgress, 20), 0);
+
+            const fichasCollection = collection(db, 'cargosconsignacion');
+            let fichasQuery = fichasCollection;
+            if (yearFilter && monthFilter) {
+                const startDate = Timestamp.fromDate(new Date(parseInt(yearFilter), parseInt(monthFilter) - 1, 1));
+                const endDate = Timestamp.fromDate(new Date(parseInt(yearFilter), parseInt(monthFilter), 0));
+                fichasQuery = query(fichasCollection, 
+                    where('fechaCX', '>=', startDate),
+                    where('fechaCX', '<=', endDate)
+                );
+            }
+            const querySnapshot = await getDocs(fichasQuery);
+            const totalDocs = querySnapshot.size;
+            const previousFichasLength = fichas.length;
             fichas = [];
 
+            let processedDocs = 0;
             querySnapshot.forEach((doc, index) => {
                 const data = doc.data();
                 let matchedHistorico = historicoData.find(h =>
@@ -578,11 +575,12 @@ try {
                     total: data.total || '-',
                     usuario: data.usuario || '-'
                 });
+                processedDocs++;
+                const progress = 20 + (processedDocs / totalDocs) * 60;
+                setTimeout(() => showModal(loadingModal, loadingProgress, progress), 0);
             });
 
-            // Nuevo ordenamiento: primero por fechaCX (descendente), luego por nombrePaciente (ascendente)
             fichas.sort((a, b) => {
-                // Convertir fechaCX a objeto Date
                 let dateA, dateB;
                 if (a.fechaCX && typeof a.fechaCX.toDate === 'function') {
                     dateA = a.fechaCX.toDate();
@@ -591,7 +589,7 @@ try {
                 } else if (typeof a.fechaCX === 'string' && a.fechaCX.trim()) {
                     dateA = new Date(a.fechaCX);
                 } else {
-                    dateA = new Date(0); // Fecha muy antigua para valores inválidos
+                    dateA = new Date(0);
                 }
 
                 if (b.fechaCX && typeof b.fechaCX.toDate === 'function') {
@@ -601,45 +599,89 @@ try {
                 } else if (typeof b.fechaCX === 'string' && b.fechaCX.trim()) {
                     dateB = new Date(b.fechaCX);
                 } else {
-                    dateB = new Date(0); // Fecha muy antigua para valores inválidos
+                    dateB = new Date(0);
                 }
 
-                // Ordenar por fechaCX descendente (más reciente primero)
                 if (dateA.getTime() !== dateB.getTime()) {
-                    return dateB.getTime() - dateA.getTime(); // Descendente
+                    return dateB.getTime() - dateA.getTime();
                 }
 
-                // Si las fechas son iguales, ordenar por nombrePaciente ascendente
                 const nombreA = (a.nombrePaciente || '-').toLowerCase();
                 const nombreB = (b.nombrePaciente || '-').toLowerCase();
-                return nombreA.localeCompare(nombreB); // Ascendente
+                return nombreA.localeCompare(nombreB);
             });
+            setTimeout(() => showModal(loadingModal, loadingProgress, 90), 0);
+
+            if (fichas.length === previousFichasLength && fichas.every((ficha, i) => {
+                const prevFicha = filteredFichas[i];
+                return prevFicha && Object.keys(ficha).every(key => ficha[key] === prevFicha[key]);
+            })) {
+                setTimeout(() => hideModal(loadingModal), 100);
+                return;
+            }
 
             filteredFichas = [...fichas];
             totalRecords.textContent = `${fichas.length} registros`;
             totalPages = Math.ceil(fichas.length / recordsPerPage);
 
-            yearFilter = '2025';
-            monthFilter = '07';
-
             renderTable(filteredFichas);
             updatePagination(filteredFichas.length);
             setupColumnFilters();
             setupStateButtons();
-            setupYearMonthFilters();
-            exportExcelBtn.addEventListener('click', exportToExcel);
             applyFilters();
+            setTimeout(() => showModal(loadingModal, loadingProgress, 100), 0);
         } catch (error) {
             showSuccessMessage('Error al cargar datos: ' + error.message, false);
+        } finally {
+            setTimeout(() => hideModal(loadingModal), 200);
         }
     }
 
     function setupRealtimeUpdates() {
         const fichasCollection = collection(db, 'cargosconsignacion');
-        onSnapshot(fichasCollection, (snapshot) => {
-            if (snapshot.docChanges().length > 0) {
-                currentPage = 1;
-                loadFichas();
+        let fichasQuery = fichasCollection;
+        if (yearFilter && monthFilter) {
+            const startDate = Timestamp.fromDate(new Date(parseInt(yearFilter), parseInt(monthFilter) - 1, 1));
+            const endDate = Timestamp.fromDate(new Date(parseInt(yearFilter), parseInt(monthFilter), 0));
+            fichasQuery = query(fichasCollection, 
+                where('fechaCX', '>=', startDate),
+                where('fechaCX', '<=', endDate)
+            );
+        }
+        onSnapshot(fichasQuery, (snapshot) => {
+            if (!monthFilter) return;
+            if (snapshot.metadata.hasPendingWrites) return;
+            const changes = snapshot.docChanges();
+            if (changes.length === 0) return;
+
+            let relevantChange = false;
+            changes.forEach(change => {
+                const data = change.doc.data();
+                if (data.fechaCX) {
+                    let date;
+                    if (typeof data.fechaCX.toDate === 'function') {
+                        date = data.fechaCX.toDate();
+                    } else if (data.fechaCX instanceof Date) {
+                        date = data.fechaCX;
+                    } else if (typeof data.fechaCX === 'string' && data.fechaCX.trim()) {
+                        date = new Date(data.fechaCX);
+                    }
+                    if (date && !isNaN(date.getTime())) {
+                        const year = date.getFullYear().toString();
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        if (year === yearFilter && month === monthFilter) {
+                            relevantChange = true;
+                        }
+                    }
+                }
+            });
+
+            if (relevantChange) {
+                const now = Date.now();
+                if (now - lastUpdateTime >= debounceDelay) {
+                    currentPage = 1;
+                    loadFichas();
+                }
             }
         }, error => {
             showSuccessMessage('Error en actualización en tiempo real: ' + error.message, false);
@@ -723,6 +765,10 @@ try {
             return;
         }
 
+        tableBody.innerHTML = '<tr><td colspan="19" style="text-align: center;">Seleccione un mes para cargar los registros.</td></tr>';
+        totalRecords.textContent = '0 registros';
+        updatePagination(0);
+
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
                 if (currentPage > 1) {
@@ -742,6 +788,8 @@ try {
                 }
             });
         }
+
+        setupYearMonthFilters();
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -776,8 +824,7 @@ try {
                 }
 
                 currentUser = user;
-                await loadFichas();
-                setupRealtimeUpdates();
+                exportExcelBtn.addEventListener('click', exportToExcel);
             } catch (error) {
                 container.innerHTML = `<p>Error al inicializar: ${error.message}</p>`;
             }
