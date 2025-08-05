@@ -423,8 +423,10 @@ body.dark-mode .autocomplete-list li:hover {
 
 .form-group-button {
     display: flex;
+    flex-direction: row; /* Asegurar que los botones estén en la misma fila */
     align-items: center;
-    gap: 5px;
+    gap: 10px; /* Aumentar el espacio entre botones para mejor apariencia */
+    flex-wrap: nowrap; /* Evitar que los botones se envuelvan en pantallas pequeñas */
 }
 
 #registrar-btn,
@@ -442,6 +444,8 @@ body.dark-mode .autocomplete-list li:hover {
     border: none;
     cursor: pointer;
     font-size: 12px;
+    flex: 1; /* Hacer que los botones ocupen el mismo ancho en la fila */
+    max-width: 100px; /* Limitar el ancho máximo para mantener proporciones */
 }
 
 #registrar-btn,
@@ -576,7 +580,8 @@ body.dark-mode .modal-content h2 {
     top: 15px;
     right: 15px;
     left: auto;
-    width: 350px;
+    width: 90%;
+    max-width: 350px; /* Corrección para responsividad */
     height: auto;
     background-color: transparent;
     display: none !important;
@@ -703,7 +708,7 @@ body.dark-mode #asignaciones-table {
     padding: 3px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color); /* Añadir líneas verticales */
+    border-right: 1px solid var(--border-color);
     color: var(--text-color);
     position: relative;
     height: 18px;
@@ -715,19 +720,19 @@ body.dark-mode #asignaciones-table {
 
 #asignaciones-table th:last-child,
 #asignaciones-table td:last-child {
-    border-right: none; /* Evitar borde derecho en la última columna */
+    border-right: none;
 }
 
 body.dark-mode #asignaciones-table th,
 body.dark-mode #asignaciones-table td {
     border-bottom: 1px solid var(--dark-border-color);
-    border-right: 1px solid var(--dark-border-color); /* Líneas verticales en modo oscuro */
+    border-right: 1px solid var(--dark-border-color);
     color: var(--dark-text-color);
 }
 
 body.dark-mode #asignaciones-table th:last-child,
 body.dark-mode #asignaciones-table td:last-child {
-    border-right: none; /* Evitar borde derecho en la última columna en modo oscuro */
+    border-right: none;
 }
 
 #asignaciones-table th {
@@ -898,19 +903,21 @@ body.dark-mode .btn:hover {
     #cancel-select-btn {
         padding: 6px;
         font-size: 11px;
+        max-width: 80px; /* Reducir el ancho en pantallas pequeñas */
     }
 
-#success-modal {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    left: auto;
-    width: 90%;
-    max-width: 350px;
-    height: auto;
-    background-color: transparent;
-    display: none !important;
-}
+    .form-group-button {
+        flex-direction: row; /* Mantener botones en la misma fila incluso en pantallas pequeñas */
+        gap: 8px; /* Ajustar espacio para pantallas pequeñas */
+        justify-content: center; /* Centrar los botones */
+    }
+
+    #success-modal {
+        width: 90%;
+        max-width: 350px;
+        right: 5px;
+        top: 5px;
+    }
 
     .success-message-container {
         flex-direction: column;
@@ -1006,7 +1013,7 @@ body.dark-mode #select-asignaciones-table {
 #select-asignaciones-table th,
 #select-asignaciones-table td {
     border: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color); /* Añadir líneas verticales */
+    border-right: 1px solid var(--border-color);
     padding: 6px;
     text-align: left;
     color: var(--text-color);
@@ -1017,19 +1024,19 @@ body.dark-mode #select-asignaciones-table {
 
 #select-asignaciones-table th:last-child,
 #select-asignaciones-table td:last-child {
-    border-right: none; /* Evitar borde derecho en la última columna */
+    border-right: none;
 }
 
 body.dark-mode #select-asignaciones-table th,
 body.dark-mode #select-asignaciones-table td {
     border: 1px solid var(--dark-border-color);
-    border-right: 1px solid var(--dark-border-color); /* Líneas verticales en modo oscuro */
+    border-right: 1px solid var(--dark-border-color);
     color: var(--dark-text-color);
 }
 
 body.dark-mode #select-asignaciones-table th:last-child,
 body.dark-mode #select-asignaciones-table td:last-child {
-    border-right: none; /* Evitar borde derecho en la última columna en modo oscuro */
+    border-right: none;
 }
 
 #select-asignaciones-table th {
