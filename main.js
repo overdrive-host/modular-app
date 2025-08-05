@@ -194,7 +194,7 @@ const submenuData = {
     },
     {
       name: 'Ingresar',
-      icon: 'fa-file-invoice',
+      icon: 'fa-cog',
       html: 'module/consignacion/ingresar/ingresar.html',
       css: 'module/consignacion/ingresar/ingresar.css',
       js: 'module/consignacion/ingresar/ingresar.js'
