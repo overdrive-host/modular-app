@@ -33,6 +33,10 @@ setPersistence(auth, browserLocalPersistence).catch(error => {
 });
 
 const submenuData = {
+  Completar: [
+    { name: 'Asignar' },
+    { name: 'Implantes' }
+  ],
   Implantes: [
     { name: 'Cargos Imp' },
     { name: 'Pacientes Imp' },
@@ -50,8 +54,7 @@ const submenuData = {
     { name: 'Asignación' },
     { name: 'Ficha' },
     { name: 'Lotes' },
-    { name: 'Guías' },
-    { name: 'Ingresar' }
+    { name: 'Guías' }
   ],
   Historico: [
     { name: 'Historicos' },
