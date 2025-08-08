@@ -70,36 +70,44 @@ const cancelLogout = document.getElementById('cancelLogout');
 const content = document.querySelector('.content');
 
 const submenuData = {
-  Completar: [
-    {
-      name: 'Asignar',
-      icon: 'fa-tasks',
-      html: 'module/completar/asignar/asignar.html',
-      css: 'module/completar/asignar/asignar.css',
-      js: 'module/completar/asignar/asignar.js'
-    },
-        {
-      name: 'Implantes',
-      icon: 'fa-syringe',
-      html: 'module/completar/imp/imp.html',
-      css: 'module/completar/imp/imp.css',
-      js: 'module/completar/imp/imp.js'
-    }
-  ],
+Completar: [
+  {
+    name: 'Asignar',
+    icon: 'fa-clipboard-check',
+    html: 'module/completar/asignar/asignar.html',
+    css: 'module/completar/asignar/asignar.css',
+    js: 'module/completar/asignar/asignar.js'
+  },
+  {
+    name: 'Cargar',
+    icon: 'fa-upload',
+    html: 'module/completar/cargar/cargar.html',
+    css: 'module/completar/cargar/cargar.css',
+    js: 'module/completar/cargar/cargar.js'
+  },
+  {
+    name: 'Actualizar',
+    icon: 'fa-upload',
+    html: 'module/completar/actualizar/actualizar.html',
+    css: 'module/completar/actualizar/actualizar.css',
+    js: 'module/completar/actualizar/actualizar.js'
+  },
+  {
+    name: 'Implantes',
+    icon: 'fa-syringe', 
+    html: 'module/completar/imp/imp.html',
+    css: 'module/completar/imp/imp.css',
+    js: 'module/completar/imp/imp.js'
+  }
+],
+
   Implantes: [
     {
-      name: 'Cargos Imp',
+      name: 'Cargar Imp',
       icon: 'fa-tooth',
       html: 'module/implantes/cargosimp/cargosimp.html',
       css: 'module/implantes/cargosimp/cargosimp.css',
       js: 'module/implantes/cargosimp/cargosimp.js'
-    },
-    {
-      name: 'Cargos ing',
-      icon: 'fa-cog',
-      html: 'module/implantes/ingcargos/ingcargos.html',
-      css: 'module/implantes/ingcargos/ingcargos.css',
-      js: 'module/implantes/ingcargos/ingcargos.js'
     },
     {
       name: 'Pacientes Imp',
@@ -182,14 +190,14 @@ const submenuData = {
   Consignacion: [
     {
       name: 'Asignación',
-      icon: 'fa-tasks', 
+      icon: 'fa-tasks',
       html: 'module/consignacion/asignacion/asignacion.html',
       css: 'module/consignacion/asignacion/asignacion.css',
       js: 'module/consignacion/asignacion/asignacion.js'
     },
     {
       name: 'Ficha',
-      icon: 'fa-id-card', 
+      icon: 'fa-id-card',
       html: 'module/consignacion/ficha/ficha.html',
       css: 'module/consignacion/ficha/ficha.css',
       js: 'module/consignacion/ficha/ficha.js'
@@ -203,7 +211,7 @@ const submenuData = {
     },
     {
       name: 'Guías',
-      icon: 'fa-shipping-fast', 
+      icon: 'fa-shipping-fast',
       html: 'module/consignacion/guias/guias.html',
       css: 'module/consignacion/guias/guias.css',
       js: 'module/consignacion/guias/guias.js'
@@ -357,9 +365,9 @@ const submenuData = {
     {
       name: 'OC',
       icon: 'fa-shopping-cart',
-      html: 'module/laboratorio/ordenes-compra/ordenes-compra.html',
-      css: 'module/laboratorio/ordenes-compra/ordenes-compra.css',
-      js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
+      html: 'module/importacion/ordenes-compra/ordenes-compra.html',
+      css: 'module/importacion/ordenes-compra/ordenes-compra.css',
+      js: 'module/importacion/ordenes-compra/ordenes-compra.js'
     },
     {
       name: 'Medtronic',
