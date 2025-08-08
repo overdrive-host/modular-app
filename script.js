@@ -428,9 +428,9 @@ const submenuData = {
     {
       name: 'OC',
       icon: 'fa-shopping-cart',
-      html: 'module/laboratorio/ordenes-compra/ordenes-compra.html',
-      css: 'module/laboratorio/ordenes-compra/ordenes-compra.css',
-      js: 'module/laboratorio/ordenes-compra/ordenes-compra.js'
+      html: 'module/importacion/ordenes-compra/ordenes-compra.html',
+      css: 'module/importacion/ordenes-compra/ordenes-compra.css',
+      js: 'module/importacion/ordenes-compra/ordenes-compra.js'
     },
     {
       name: 'Medtronic',
