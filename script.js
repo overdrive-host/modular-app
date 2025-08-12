@@ -141,22 +141,6 @@ passwordInput.addEventListener('keyup', (e) => {
 });
 
 const submenuData = {
- Migración: [
-    {
-      name: 'Asignar',
-      icon: 'fa-tasks',
-      html: 'module/completar/asignar/asignar.html',
-      css: 'module/completar/asignar/asignar.css',
-      js: 'module/completar/asignar/asignar.js'
-    },
-        {
-      name: 'Implantes',
-      icon: 'fa-syringe',
-      html: 'module/completar/imp/imp.html',
-      css: 'module/completar/imp/imp.css',
-      js: 'module/completar/imp/imp.js'
-    }
-  ],
   Implantes: [
     {
       name: 'Cargos Imp',
@@ -253,14 +237,14 @@ const submenuData = {
   Consignacion: [
     {
       name: 'Asignación',
-      icon: 'fa-tasks', 
+      icon: 'fa-tasks',
       html: 'module/consignacion/asignacion/asignacion.html',
       css: 'module/consignacion/asignacion/asignacion.css',
       js: 'module/consignacion/asignacion/asignacion.js'
     },
     {
       name: 'Ficha',
-      icon: 'fa-id-card', 
+      icon: 'fa-id-card',
       html: 'module/consignacion/ficha/ficha.html',
       css: 'module/consignacion/ficha/ficha.css',
       js: 'module/consignacion/ficha/ficha.js'
@@ -274,7 +258,7 @@ const submenuData = {
     },
     {
       name: 'Guías',
-      icon: 'fa-shipping-fast', 
+      icon: 'fa-shipping-fast',
       html: 'module/consignacion/guias/guias.html',
       css: 'module/consignacion/guias/guias.css',
       js: 'module/consignacion/guias/guias.js'
@@ -464,6 +448,43 @@ const submenuData = {
       css: 'module/usuarios/registros/registros.css',
       js: 'module/usuarios/registros/registros.js'
     }
+  ],
+  Migración: [
+    {
+      name: 'Base de implantes',
+      icon: 'fa-upload',
+      html: 'module/completar/cargar/cargar.html',
+      css: 'module/completar/cargar/cargar.css',
+      js: 'module/completar/cargar/cargar.js'
+    },
+    {
+      name: 'Historial de pacientes',
+      icon: 'fa-upload',
+      html: 'module/completar/actualizar/actualizar.html',
+      css: 'module/completar/actualizar/actualizar.css',
+      js: 'module/completar/actualizar/actualizar.js'
+    },
+    {
+      name: 'Base de Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/integrar/integrar.html',
+      css: 'module/completar/integrar/integrar.css',
+      js: 'module/completar/integrar/integrar.js'
+    },
+    {
+      name: 'Pacientes de Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/iniciar/iniciar.html',
+      css: 'module/completar/iniciar/iniciar.css',
+      js: 'module/completar/iniciar/iniciar.js'
+    },
+    {
+      name: 'Traspasar Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/asignar/asignar.html',
+      css: 'module/completar/asignar/asignar.css',
+      js: 'module/completar/asignar/asignar.js'
+    }
   ]
 };
 
@@ -578,4 +599,3 @@ loginForm.addEventListener('submit', async (e) => {
     modalLoginButton.textContent = 'Ingresar';
   }
 });
-
