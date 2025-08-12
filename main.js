@@ -73,7 +73,7 @@ const submenuData = {
 Completar: [
   {
     name: 'Asignar',
-    icon: 'fa-clipboard-check',
+    icon: 'fa-upload',
     html: 'module/completar/asignar/asignar.html',
     css: 'module/completar/asignar/asignar.css',
     js: 'module/completar/asignar/asignar.js'
@@ -91,16 +91,8 @@ Completar: [
     html: 'module/completar/actualizar/actualizar.html',
     css: 'module/completar/actualizar/actualizar.css',
     js: 'module/completar/actualizar/actualizar.js'
-  },
-  {
-    name: 'Implantes',
-    icon: 'fa-syringe', 
-    html: 'module/completar/imp/imp.html',
-    css: 'module/completar/imp/imp.css',
-    js: 'module/completar/imp/imp.js'
   }
 ],
-
   Implantes: [
     {
       name: 'Cargar Imp',
@@ -178,13 +170,6 @@ Completar: [
       html: 'module/implantes/catalogo/catalogo.html',
       css: 'module/implantes/catalogo/catalogo.css',
       js: 'module/implantes/catalogo/catalogo.js'
-    },
-    {
-      name: 'Exportar',
-      icon: 'fa-file-export',
-      html: 'module/implantes/exportar/exportar.html',
-      css: 'module/implantes/exportar/exportar.css',
-      js: 'module/implantes/exportar/exportar.js'
     }
   ],
   Consignacion: [
@@ -278,13 +263,6 @@ Completar: [
       html: 'module/vizualizacion/generales/generales.html',
       css: 'module/vizualizacion/generales/generales.css',
       js: 'module/vizualizacion/generales/generales.js'
-    },
-    {
-      name: 'Consigna',
-      icon: 'fa-clipboard-check',
-      html: 'module/resumen/consigna/consigna.html',
-      css: 'module/resumen/consigna/consigna.css',
-      js: 'module/resumen/consigna/consigna.js'
     }
   ],
   Prestaciones: [
