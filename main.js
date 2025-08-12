@@ -70,7 +70,7 @@ const cancelLogout = document.getElementById('cancelLogout');
 const content = document.querySelector('.content');
 
 const submenuData = {
-Completar: [
+Migración: [
   {
     name: 'Asignar',
     icon: 'fa-upload',
@@ -720,3 +720,4 @@ if (logoutModal) {
     }
   });
 }
+
