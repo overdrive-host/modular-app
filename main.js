@@ -70,29 +70,7 @@ const cancelLogout = document.getElementById('cancelLogout');
 const content = document.querySelector('.content');
 
 const submenuData = {
-Migración: [
-  {
-    name: 'Asignar',
-    icon: 'fa-upload',
-    html: 'module/completar/asignar/asignar.html',
-    css: 'module/completar/asignar/asignar.css',
-    js: 'module/completar/asignar/asignar.js'
-  },
-  {
-    name: 'Cargar',
-    icon: 'fa-upload',
-    html: 'module/completar/cargar/cargar.html',
-    css: 'module/completar/cargar/cargar.css',
-    js: 'module/completar/cargar/cargar.js'
-  },
-  {
-    name: 'Actualizar',
-    icon: 'fa-upload',
-    html: 'module/completar/actualizar/actualizar.html',
-    css: 'module/completar/actualizar/actualizar.css',
-    js: 'module/completar/actualizar/actualizar.js'
-  }
-],
+  
   Implantes: [
     {
       name: 'Cargar Imp',
@@ -378,6 +356,43 @@ Migración: [
       html: 'module/usuarios/registros/registros.html',
       css: 'module/usuarios/registros/registros.css',
       js: 'module/usuarios/registros/registros.js'
+    }
+  ],
+  Migración: [
+    {
+      name: 'Base de implantes',
+      icon: 'fa-upload',
+      html: 'module/completar/cargar/cargar.html',
+      css: 'module/completar/cargar/cargar.css',
+      js: 'module/completar/cargar/cargar.js'
+    },
+    {
+      name: 'Historial de pacientes',
+      icon: 'fa-upload',
+      html: 'module/completar/actualizar/actualizar.html',
+      css: 'module/completar/actualizar/actualizar.css',
+      js: 'module/completar/actualizar/actualizar.js'
+    },
+    {
+      name: 'Base de Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/integrar/integrar.html',
+      css: 'module/completar/integrar/integrar.css',
+      js: 'module/completar/integrar/integrar.js'
+    },
+    {
+      name: 'Pacientes de Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/iniciar/iniciar.html',
+      css: 'module/completar/iniciar/iniciar.css',
+      js: 'module/completar/iniciar/iniciar.js'
+    },
+    {
+      name: 'Traspasar Consignación',
+      icon: 'fa-upload',
+      html: 'module/completar/asignar/asignar.html',
+      css: 'module/completar/asignar/asignar.css',
+      js: 'module/completar/asignar/asignar.js'
     }
   ]
 };
@@ -720,4 +735,3 @@ if (logoutModal) {
     }
   });
 }
-
