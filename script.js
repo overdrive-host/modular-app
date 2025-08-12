@@ -141,7 +141,7 @@ passwordInput.addEventListener('keyup', (e) => {
 });
 
 const submenuData = {
-  Completar: [
+ Migración: [
     {
       name: 'Asignar',
       icon: 'fa-tasks',
@@ -578,3 +578,4 @@ loginForm.addEventListener('submit', async (e) => {
     modalLoginButton.textContent = 'Ingresar';
   }
 });
+
