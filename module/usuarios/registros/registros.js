@@ -32,9 +32,12 @@ setPersistence(auth, browserLocalPersistence).catch(error => {
 });
 
 const submenuData = {
-  Completar: [
-    { name: 'Asignar' },
-    { name: 'Implantes' }
+  Migración: [
+    { name: 'Base de implantes' },
+    { name: 'Historial de pacientes' },
+    { name: 'Base de Consignación' },
+    { name: 'Pacientes de Consignación' },
+    { name: 'Traspasar Consignación' }
   ],
   Implantes: [
     { name: 'Cargos Imp' },
