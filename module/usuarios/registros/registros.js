@@ -259,6 +259,9 @@ function validateRUT(rut) {
 
 function validateForm(data, isEditing = false) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  console.log('Validating username:', `"${data.username}"`, 'Length:', data.username.length); // Para debug
+
   if (!data.adminPassword) {
     showModal('error', 'La contraseña del administrador es obligatoria.');
     return false;
@@ -283,12 +286,21 @@ function validateForm(data, isEditing = false) {
     showModal('error', 'El correo electrónico no es válido.');
     return false;
   }
-  
-  if (!data.username || data.username.trim().length === 0) {
+
+  // Validación mejorada del username
+  if (!data.username) {
+    console.log('Username is falsy:', data.username); // Para debug
     showModal('error', 'El nombre de usuario es obligatorio.');
     return false;
   }
-  
+
+  // Verificar si solo contiene espacios
+  if (data.username.trim().length === 0) {
+    console.log('Username is only whitespace'); // Para debug
+    showModal('error', 'El nombre de usuario no puede estar vacío.');
+    return false;
+  }
+
   if (!isEditing) {
     if (!data.password || data.password.length < 6) {
       showModal('error', 'La contraseña debe tener al menos 6 caracteres.');
@@ -707,17 +719,25 @@ async function init() {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       toggleLoading(true);
+
+      // Captura mejorada de datos con verificación
+      const usernameElement = document.getElementById('username');
+      console.log('Username element:', usernameElement); // Para debug
+      console.log('Username value:', usernameElement ? usernameElement.value : 'ELEMENT NOT FOUND'); // Para debug
+
       const data = {
-        adminPassword: document.getElementById('adminPassword').value || '',
-        fullName: document.getElementById('fullName').value.trim() || '',
-        rut: document.getElementById('rut').value || '',
-        gender: document.getElementById('gender').value || '',
-        birthDate: document.getElementById('birthDate').value || '',
-        email: document.getElementById('email').value.trim() || '',
-        password: document.getElementById('password').value || '',
-        confirmPassword: document.getElementById('confirmPassword').value || '',
-        role: document.getElementById('role').value || ''
+        adminPassword: document.getElementById('adminPassword')?.value || '',
+        fullName: document.getElementById('fullName')?.value.trim() || '',
+        rut: document.getElementById('rut')?.value || '',
+        gender: document.getElementById('gender')?.value || '',
+        birthDate: document.getElementById('birthDate')?.value || '',
+        email: document.getElementById('email')?.value.trim() || '',
+        username: usernameElement?.value.trim() || '', // Captura directa y más segura
+        password: document.getElementById('password')?.value || '',
+        confirmPassword: document.getElementById('confirmPassword')?.value || '',
+        role: document.getElementById('role')?.value || ''
       };
+      console.log('Datos capturados:', data);
       if (!validateForm(data, false)) {
         toggleLoading(false);
         return;
