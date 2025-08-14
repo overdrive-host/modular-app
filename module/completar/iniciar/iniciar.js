@@ -51,7 +51,8 @@ const elements = {
     errorCount: document.getElementById('error-count'),
     errorDetails: document.getElementById('error-details'),
     errorList: document.getElementById('error-list'),
-    closeImportBtn: document.getElementById('close-import-btn')
+    closeImportBtn: document.getElementById('close-import-btn'),
+    deleteAllBtn: document.getElementById('delete-all-btn')
 };
 
 const monthNames = {
@@ -498,7 +499,7 @@ function parseExcelDate(value) {
 }
 
 async function importExcel(file) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
         
         reader.onload = async (e) => {
@@ -651,6 +652,53 @@ async function importExcel(file) {
         reader.readAsArrayBuffer(file);
     });
 }
+
+async function deleteAllRecords() {
+    if (!confirm('¿Está seguro de que desea eliminar todos los registros en la colección? Esta acción no se puede deshacer y eliminará solo los documentos principales (subcolecciones como logs permanecerán huérfanas).')) {
+        return;
+    }
+
+    showSpinner();
+
+    try {
+        const collectionRef = collection(db, 'pacientesconsignacion');
+        const querySnapshot = await getDocs(collectionRef);
+
+        if (querySnapshot.empty) {
+            showSuccessMessage('No hay registros para eliminar.');
+            hideSpinner();
+            return;
+        }
+
+        let batch = writeBatch(db);
+        let count = 0;
+
+        for (const docSnap of querySnapshot.docs) {
+            batch.delete(docSnap.ref);
+            count++;
+
+            if (count >= 500) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
+
+        if (count > 0) {
+            await batch.commit();
+        }
+
+        showSuccessMessage('Todos los registros han sido eliminados exitosamente.');
+        await loadPacientes();
+
+    } catch (error) {
+        console.error('Error al eliminar registros:', error);
+        showSuccessMessage('Error al eliminar registros: ' + error.message, false);
+    } finally {
+        hideSpinner();
+    }
+}
+
 function setupFilters() {
     const filterIcons = document.querySelectorAll('.filter-icon');
     console.debug('Configurando filtros:', { count: filterIcons.length });
@@ -818,6 +866,10 @@ async function init() {
             });
         }
 
+        if (elements.deleteAllBtn) {
+            elements.deleteAllBtn.addEventListener('click', deleteAllRecords);
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 console.error('No hay usuario autenticado');
@@ -866,6 +918,7 @@ async function init() {
                 e.target.id === 'prev-btn' ||
                 e.target.id === 'next-btn' ||
                 e.target.id === 'export-excel-btn' ||
+                e.target.id === 'delete-all-btn' ||
                 e.target.classList.contains('state-button') ||
                 e.target.classList.contains('filter-icon')
             ) {
