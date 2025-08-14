@@ -283,10 +283,12 @@ function validateForm(data, isEditing = false) {
     showModal('error', 'El correo electrónico no es válido.');
     return false;
   }
-  if (!data.username || data.username.length < 3) {
-    showModal('error', 'El nombre de usuario debe tener al menos 3 caracteres.');
+  
+  if (!data.username || data.username.trim().length === 0) {
+    showModal('error', 'El nombre de usuario es obligatorio.');
     return false;
   }
+  
   if (!isEditing) {
     if (!data.password || data.password.length < 6) {
       showModal('error', 'La contraseña debe tener al menos 6 caracteres.');
