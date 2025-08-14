@@ -260,8 +260,6 @@ function validateRUT(rut) {
 function validateForm(data, isEditing = false) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  console.log('Validating username:', `"${data.username}"`, 'Length:', data.username.length); // Para debug
-
   if (!data.adminPassword) {
     showModal('error', 'La contraseña del administrador es obligatoria.');
     return false;
@@ -287,16 +285,12 @@ function validateForm(data, isEditing = false) {
     return false;
   }
 
-  // Validación mejorada del username
   if (!data.username) {
-    console.log('Username is falsy:', data.username); // Para debug
     showModal('error', 'El nombre de usuario es obligatorio.');
     return false;
   }
 
-  // Verificar si solo contiene espacios
   if (data.username.trim().length === 0) {
-    console.log('Username is only whitespace'); // Para debug
     showModal('error', 'El nombre de usuario no puede estar vacío.');
     return false;
   }
@@ -368,12 +362,12 @@ function applyFilters(users) {
   const visibleRows = users.filter(user => {
     const rowData = [
       user.id.slice(0, 8) + '...',
-      '', // Acciones no se filtran
+      '', 
       user.fullName || 'Sin nombre',
       user.rut || 'Sin RUT',
       user.email || 'Sin correo',
       user.gender || 'Sin género',
-      '', // Ícono no se filtra
+      '', 
       user.username || 'Sin usuario',
       user.role || 'Sin rol',
       formatDateForDisplay(user.birthDate)
@@ -487,11 +481,10 @@ function createFilterContainer(columnIndex, th, icon) {
   const container = document.createElement('div');
   container.className = 'filter-container';
 
-  // Crear botón "Borrar Filtro"
   const clearButton = document.createElement('button');
   clearButton.className = 'clear-filter-button';
   clearButton.textContent = 'Borrar Filtro';
-  clearButton.disabled = !filters[columnIndex]; // Deshabilitar si no hay filtro
+  clearButton.disabled = !filters[columnIndex]; 
   clearButton.addEventListener('click', () => {
     filters[columnIndex] = '';
     currentPage = 1;
@@ -500,20 +493,17 @@ function createFilterContainer(columnIndex, th, icon) {
   });
   container.appendChild(clearButton);
 
-  // Crear label "Filtrar por:"
   const label = document.createElement('label');
   label.className = 'filter-label';
   label.textContent = 'Filtrar por:';
   container.appendChild(label);
 
-  // Crear campo de texto para búsqueda
   const input = document.createElement('input');
   input.type = 'text';
   input.value = filters[columnIndex];
   input.placeholder = `Filtrar ${th.textContent.trim()}...`;
   container.appendChild(input);
 
-  // Posicionar el contenedor
   const iconRect = icon.getBoundingClientRect();
   const tableRect = tableContainer.getBoundingClientRect();
   const thRect = th.getBoundingClientRect();
@@ -523,7 +513,6 @@ function createFilterContainer(columnIndex, th, icon) {
   container.style.left = `${leftPosition}px`;
   container.style.width = `${Math.min(thRect.width - 12, 200)}px`;
 
-  // Configurar eventos del campo de texto
   let timeout;
   input.addEventListener('input', () => {
     clearTimeout(timeout);
@@ -586,7 +575,6 @@ async function loadUsers(page = 1, pageSize = 10) {
     applyFilters(users);
     tableContainer.style.display = 'block';
 
-    // Redimensionamiento de columnas
     const resizeHandles = document.querySelectorAll('.resize-handle');
     resizeHandles.forEach(handle => {
       handle.addEventListener('mousedown', function (e) {
@@ -613,18 +601,15 @@ async function loadUsers(page = 1, pageSize = 10) {
       });
     });
 
-    // Filtrado por columnas
     filterIcons.forEach(icon => {
-      icon.removeEventListener('click', icon._clickHandler); // Eliminar cualquier manejador previo
+      icon.removeEventListener('click', icon._clickHandler);
       icon._clickHandler = (e) => {
         e.stopPropagation();
         const columnIndex = parseInt(icon.getAttribute('data-column'));
         const th = icon.parentElement;
 
-        // Cerrar cualquier contenedor de filtro existente
         closeAllFilters();
 
-        // Crear y mostrar un nuevo contenedor de filtro
         const container = createFilterContainer(columnIndex, th, icon);
         tableContainer.appendChild(container);
         container.style.display = 'block';
@@ -633,7 +618,7 @@ async function loadUsers(page = 1, pageSize = 10) {
       icon.addEventListener('click', icon._clickHandler);
     });
 
-    document.removeEventListener('click', document._clickHandler); // Eliminar manejador previo
+    document.removeEventListener('click', document._clickHandler); 
     document._clickHandler = (e) => {
       if (!e.target.closest('.filter-container') && !e.target.classList.contains('filter-icon')) {
         closeAllFilters();
@@ -720,10 +705,7 @@ async function init() {
       e.preventDefault();
       toggleLoading(true);
 
-      // Captura mejorada de datos con verificación
       const usernameElement = document.getElementById('username');
-      console.log('Username element:', usernameElement); // Para debug
-      console.log('Username value:', usernameElement ? usernameElement.value : 'ELEMENT NOT FOUND'); // Para debug
 
       const data = {
         adminPassword: document.getElementById('adminPassword')?.value || '',
@@ -732,12 +714,11 @@ async function init() {
         gender: document.getElementById('gender')?.value || '',
         birthDate: document.getElementById('birthDate')?.value || '',
         email: document.getElementById('email')?.value.trim() || '',
-        username: usernameElement?.value.trim() || '', // Captura directa y más segura
+        username: usernameElement?.value.trim() || '', 
         password: document.getElementById('password')?.value || '',
         confirmPassword: document.getElementById('confirmPassword')?.value || '',
         role: document.getElementById('role')?.value || ''
       };
-      console.log('Datos capturados:', data);
       if (!validateForm(data, false)) {
         toggleLoading(false);
         return;
