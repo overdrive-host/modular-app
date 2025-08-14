@@ -521,8 +521,8 @@ async function importExcel(file) {
                 elements.progressText.textContent = 'Validando datos...';
                 elements.progressBar.style.width = '20%';
                 
-const fullName = await getUserFullName(); // Solo para logs
-const now = Timestamp.fromDate(new Date());
+                const fullName = await getUserFullName();
+                const now = Timestamp.fromDate(new Date());
                 
                 let successImports = 0;
                 let errorImports = 0;
@@ -564,35 +564,35 @@ const now = Timestamp.fromDate(new Date());
                         }
                         
                         const docRef = doc(collection(db, 'pacientesconsignacion'));
-const pacienteData = {
-    fechaIngreso: fechaIngreso,
-    modalidad: row['Modalidad']?.toString().trim() || '',
-    prevision: row['Previsión']?.toString().trim() || '',
-    admision: row['Admisión'].toString().trim(),
-    nombrePaciente: row['Nombre del Paciente'].toString().trim(),
-    medico: row['Médico'].toString().trim(),
-    fechaCX: fechaCX,
-    proveedor: row['Proveedor'].toString().trim(),
-    estado: row['Estado']?.toString().trim() || 'Actualizar Precio',
-    fechaCargo: fechaCargo,
-    totalPaciente: totalPaciente,
-    usuario: usuarioImportado, // <-- USAR EL USUARIO DEL ARCHIVO
-    fechaCreada: now,
-    fechaActualizada: now,
-    uid: currentUser.uid
-};
+                        const pacienteData = {
+                            fechaIngreso: fechaIngreso,
+                            modalidad: row['Modalidad']?.toString().trim() || '',
+                            prevision: row['Previsión']?.toString().trim() || '',
+                            admision: row['Admisión'].toString().trim(),
+                            nombrePaciente: row['Nombre del Paciente'].toString().trim(),
+                            medico: row['Médico'].toString().trim(),
+                            fechaCX: fechaCX,
+                            proveedor: row['Proveedor'].toString().trim(),
+                            estado: row['Estado']?.toString().trim() || 'Actualizar Precio',
+                            fechaCargo: fechaCargo,
+                            totalPaciente: totalPaciente,
+                            usuario: fullName,
+                            fechaCreada: now,
+                            fechaActualizada: now,
+                            uid: currentUser.uid
+                        };
                         
                         batch.set(docRef, pacienteData);
                         batchCount++;
                         
-const logRef = doc(collection(db, 'pacientesconsignacion', docRef.id, 'logs'));
-batch.set(logRef, {
-    action: `Creado: ${formatDate(new Date(now.toMillis()))}`,
-    details: `Paciente ${pacienteData.nombrePaciente} importado desde Excel por ${fullName}. Usuario asignado: ${usuarioImportado}`,
-    timestamp: now,
-    user: fullName, // Quién hizo la importación
-    uid: currentUser.uid
-});
+                        const logRef = doc(collection(db, 'pacientesconsignacion', docRef.id, 'logs'));
+                        batch.set(logRef, {
+                            action: `Creado: ${formatDate(new Date(now.toMillis()))}`,
+                            details: `Paciente ${pacienteData.nombrePaciente} importado desde Excel`,
+                            timestamp: now,
+                            user: fullName,
+                            uid: currentUser.uid
+                        });
                         batchCount++;
                         
                         successImports++;
