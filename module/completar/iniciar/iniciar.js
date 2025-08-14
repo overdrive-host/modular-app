@@ -18,10 +18,10 @@ let pacientes = [];
 let currentPage = 1;
 const recordsPerPage = 50;
 let filters = {};
-let quickFilters = { 
-    year: new Date().getFullYear().toString(), 
-    month: (new Date().getMonth() + 1).toString().padStart(2, '0'), 
-    state: null 
+let quickFilters = {
+    year: new Date().getFullYear().toString(),
+    month: (new Date().getMonth() + 1).toString().padStart(2, '0'),
+    state: null
 };
 
 const elements = {
@@ -55,16 +55,16 @@ const elements = {
 };
 
 const monthNames = {
-    '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril', 
-    '05': 'Mayo', '06': 'Junio', '07': 'Julio', '08': 'Agosto', 
+    '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril',
+    '05': 'Mayo', '06': 'Junio', '07': 'Julio', '08': 'Agosto',
     '09': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre'
 };
 
 function formatDate(date) {
     if (!date || isNaN(new Date(date))) return '-';
-    return new Date(date).toLocaleString('es-CL', { 
-        day: '2-digit', month: '2-digit', year: 'numeric', 
-        hour: '2-digit', minute: '2-digit', hour12: false 
+    return new Date(date).toLocaleString('es-CL', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false
     });
 }
 
@@ -81,7 +81,7 @@ function formatDateOnly(date) {
     }
 
     let parsedDate;
-    
+
     if (typeof date === 'string') {
         const [year, month, day] = date.split('-');
         if (year && month && day && year.length === 4 && month.length === 2 && day.length === 2) {
@@ -98,17 +98,17 @@ function formatDateOnly(date) {
         console.warn('Formato de fecha no reconocido:', date, 'Tipo:', typeof date);
         return '';
     }
-    
+
     if (!parsedDate || isNaN(parsedDate.getTime())) {
         console.warn('Fecha parseada inválida:', date, 'Parsed:', parsedDate);
         return '';
     }
-    
+
     const day = parsedDate.getUTCDate().toString().padStart(2, '0');
     const month = (parsedDate.getUTCMonth() + 1).toString().padStart(2, '0');
     const year = parsedDate.getUTCFullYear();
     const formattedDate = `${day}-${month}-${year}`;
-    
+
     console.debug('Fecha formateada:', formattedDate);
     return formattedDate;
 }
@@ -144,7 +144,7 @@ function showSuccessMessage(message, isSuccess = true) {
         alert(message);
         return;
     }
-    
+
     console.debug('Mostrando mensaje de éxito:', { message, isSuccess });
     elements.successIcon.className = `fas fa-${isSuccess ? 'check-circle' : 'exclamation-circle'}`;
     elements.successMessage.textContent = message;
@@ -190,7 +190,7 @@ function applyFilters(data) {
 function applyQuickFilters(data) {
     return data.filter(item => {
         if (!item.fechaCX) return false;
-        
+
         let fechaCX;
         if (typeof item.fechaCX === 'string') {
             fechaCX = new Date(item.fechaCX);
@@ -199,7 +199,7 @@ function applyQuickFilters(data) {
         } else if (item.fechaCX instanceof Date) {
             fechaCX = item.fechaCX;
         }
-        
+
         if (!fechaCX || isNaN(fechaCX)) return false;
 
         const year = fechaCX.getUTCFullYear().toString();
@@ -215,7 +215,7 @@ function applyQuickFilters(data) {
 
 function updateYearFilter(data) {
     if (!elements.filterYearSelect) return;
-    
+
     const years = [...new Set(data
         .filter(p => p.fechaCX)
         .map(p => {
@@ -235,7 +235,7 @@ function updateYearFilter(data) {
 
 function updateMonthFilter(data) {
     if (!elements.filterMonthSelect) return;
-    
+
     let months = [];
     if (quickFilters.year) {
         months = [...new Set(data
@@ -265,7 +265,7 @@ function updateMonthFilter(data) {
 
 function updateStateButtons(data) {
     if (!elements.stateButtonsContainer) return;
-    
+
     const filteredData = applyQuickFilters(data);
     const states = [...new Set(filteredData
         .map(p => p.estado)
@@ -292,7 +292,7 @@ function updateStateButtons(data) {
 function updatePagination(totalRecordsCount) {
     const { pageInfo, totalRecords, prevBtn, nextBtn } = elements;
     if (!pageInfo || !totalRecords || !prevBtn || !nextBtn) return;
-    
+
     const totalPages = Math.ceil(totalRecordsCount / recordsPerPage);
     pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
     totalRecords.textContent = `Total de registros: ${totalRecordsCount}`;
@@ -318,11 +318,11 @@ async function loadPacientes() {
             orderBy('nombrePaciente', 'asc'),
             orderBy('proveedor', 'asc')
         );
-        
+
         const querySnapshot = await getDocs(q);
         elements.iniciarTableBody.innerHTML = '';
         pacientes = [];
-        
+
         querySnapshot.forEach(doc => {
             const data = doc.data();
             console.debug('Documento cargado:', {
@@ -361,7 +361,7 @@ async function loadPacientes() {
                 const estado = paciente.estado || '';
                 const estadoClass = estado ? `state-${estado.toLowerCase().replace(/\s+/g, '-')}` : '';
                 tr.className = estadoClass;
-                
+
                 tr.innerHTML = `
                     <td>${formatDateOnly(paciente.fechaIngreso)}</td>
                     <td>${paciente.modalidad || '-'}</td>
@@ -376,7 +376,7 @@ async function loadPacientes() {
                     <td>${formatPrice(paciente.totalPaciente)}</td>
                     <td>${paciente.usuario || '-'}</td>
                 `;
-                
+
                 elements.iniciarTableBody.appendChild(tr);
             });
         }
@@ -394,7 +394,7 @@ async function loadPacientes() {
 async function downloadTemplate() {
     try {
         const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
-        
+
         const templateData = [{
             'Fecha de Ingreso': '15-01-2024',
             'Modalidad': 'Ambulatorio',
@@ -409,14 +409,14 @@ async function downloadTemplate() {
             'Total Paciente': '100000',
             'Usuario': 'Sistema'
         }];
-        
+
         const worksheet = XLSX.utils.json_to_sheet(templateData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Plantilla');
-        
+
         XLSX.writeFile(workbook, 'plantilla_pacientes_consignacion.xlsx');
         showSuccessMessage('Plantilla descargada correctamente');
-        
+
     } catch (error) {
         console.error('Error al descargar plantilla:', error);
         showSuccessMessage('Error al descargar la plantilla: ' + error.message, false);
@@ -426,15 +426,15 @@ async function downloadTemplate() {
 async function exportToExcel() {
     try {
         const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
-        
+
         if (!pacientes.length) {
             showSuccessMessage('No hay datos para exportar', false);
             return;
         }
-        
+
         let filteredPacientes = applyQuickFilters(pacientes);
         filteredPacientes = applyFilters(filteredPacientes);
-        
+
         const data = filteredPacientes.map(p => ({
             'Fecha de Ingreso': formatDateOnly(p.fechaIngreso),
             'Modalidad': p.modalidad || '-',
@@ -449,14 +449,14 @@ async function exportToExcel() {
             'Total Paciente': formatPrice(p.totalPaciente),
             'Usuario': p.usuario || '-'
         }));
-        
+
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'PacientesConsignacion');
-        
+
         XLSX.writeFile(workbook, 'pacientes_consignacion_iniciar.xlsx');
         showSuccessMessage('Datos exportados correctamente');
-        
+
     } catch (error) {
         console.error('Error al exportar a Excel:', error);
         showSuccessMessage('Error al exportar los datos: ' + error.message, false);
@@ -465,25 +465,25 @@ async function exportToExcel() {
 
 function parseExcelDate(value) {
     if (!value) return null;
-    
+
     if (typeof value === 'number') {
         const date = new Date((value - 25569) * 86400 * 1000);
         return Timestamp.fromDate(date);
     }
-    
+
     if (typeof value === 'string') {
         const formats = [
-            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/, 
+            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/,
             /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/,
         ];
-        
+
         for (const format of formats) {
             const match = value.match(format);
             if (match) {
                 let day, month, year;
-                if (format === formats[0]) { 
+                if (format === formats[0]) {
                     [, day, month, year] = match;
-                } else { 
+                } else {
                     [, year, month, day] = match;
                 }
                 const date = new Date(Date.UTC(year, month - 1, day));
@@ -493,7 +493,7 @@ function parseExcelDate(value) {
             }
         }
     }
-    
+
     return null;
 }
 
@@ -521,8 +521,9 @@ async function importExcel(file) {
                 elements.progressText.textContent = 'Validando datos...';
                 elements.progressBar.style.width = '20%';
                 
-const fullName = await getUserFullName(); // Solo para logs
-const now = Timestamp.fromDate(new Date());
+                // Solo obtener el nombre del usuario autenticado para los logs
+                const authenticatedUserName = await getUserFullName();
+                const now = Timestamp.fromDate(new Date());
                 
                 let successImports = 0;
                 let errorImports = 0;
@@ -563,36 +564,41 @@ const now = Timestamp.fromDate(new Date());
                             totalPaciente = parseInt(totalStr) || 0;
                         }
                         
+                        // AQUÍ ESTÁ LA CORRECCIÓN PRINCIPAL:
+                        // Usar el usuario que viene en el archivo Excel, no el autenticado
+                        const usuarioDelArchivo = row['Usuario'] ? row['Usuario'].toString().trim() : 'Sistema';
+                        
                         const docRef = doc(collection(db, 'pacientesconsignacion'));
-const pacienteData = {
-    fechaIngreso: fechaIngreso,
-    modalidad: row['Modalidad']?.toString().trim() || '',
-    prevision: row['Previsión']?.toString().trim() || '',
-    admision: row['Admisión'].toString().trim(),
-    nombrePaciente: row['Nombre del Paciente'].toString().trim(),
-    medico: row['Médico'].toString().trim(),
-    fechaCX: fechaCX,
-    proveedor: row['Proveedor'].toString().trim(),
-    estado: row['Estado']?.toString().trim() || 'Actualizar Precio',
-    fechaCargo: fechaCargo,
-    totalPaciente: totalPaciente,
-    usuario: usuarioImportado, // <-- USAR EL USUARIO DEL ARCHIVO
-    fechaCreada: now,
-    fechaActualizada: now,
-    uid: currentUser.uid
-};
+                        const pacienteData = {
+                            fechaIngreso: fechaIngreso,
+                            modalidad: row['Modalidad']?.toString().trim() || '',
+                            prevision: row['Previsión']?.toString().trim() || '',
+                            admision: row['Admisión'].toString().trim(),
+                            nombrePaciente: row['Nombre del Paciente'].toString().trim(),
+                            medico: row['Médico'].toString().trim(),
+                            fechaCX: fechaCX,
+                            proveedor: row['Proveedor'].toString().trim(),
+                            estado: row['Estado']?.toString().trim() || 'Actualizar Precio',
+                            fechaCargo: fechaCargo,
+                            totalPaciente: totalPaciente,
+                            usuario: usuarioDelArchivo, // <-- USAR EL USUARIO DEL ARCHIVO EXCEL
+                            fechaCreada: now,
+                            fechaActualizada: now,
+                            uid: currentUser.uid
+                        };
                         
                         batch.set(docRef, pacienteData);
                         batchCount++;
                         
-const logRef = doc(collection(db, 'pacientesconsignacion', docRef.id, 'logs'));
-batch.set(logRef, {
-    action: `Creado: ${formatDate(new Date(now.toMillis()))}`,
-    details: `Paciente ${pacienteData.nombrePaciente} importado desde Excel por ${fullName}. Usuario asignado: ${usuarioImportado}`,
-    timestamp: now,
-    user: fullName, // Quién hizo la importación
-    uid: currentUser.uid
-});
+                        // Log mostrando quién importó y qué usuario se asignó
+                        const logRef = doc(collection(db, 'pacientesconsignacion', docRef.id, 'logs'));
+                        batch.set(logRef, {
+                            action: `Creado: ${formatDate(new Date(now.toMillis()))}`,
+                            details: `Paciente ${pacienteData.nombrePaciente} importado desde Excel por ${authenticatedUserName}. Usuario asignado: ${usuarioDelArchivo}`,
+                            timestamp: now,
+                            user: authenticatedUserName, // Quién hizo la importación
+                            uid: currentUser.uid
+                        });
                         batchCount++;
                         
                         successImports++;
@@ -654,7 +660,7 @@ batch.set(logRef, {
 function setupFilters() {
     const filterIcons = document.querySelectorAll('.filter-icon');
     console.debug('Configurando filtros:', { count: filterIcons.length });
-    
+
     filterIcons.forEach(icon => {
         icon.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -677,13 +683,13 @@ function setupFilters() {
             const input = document.createElement('input');
             input.type = 'text';
             input.value = filters[column] || '';
-            
+
             input.addEventListener('input', () => {
                 filters[column] = input.value.trim();
                 currentPage = 1;
                 loadPacientes();
             });
-            
+
             inputContainer.appendChild(input);
             th.appendChild(inputContainer);
             input.focus();
@@ -802,7 +808,7 @@ async function init() {
                     } catch (error) {
                         console.error('Error en importación:', error);
                     } finally {
-                        e.target.value = ''; 
+                        e.target.value = '';
                     }
                 }
             });
@@ -841,7 +847,7 @@ async function init() {
                 const userData = userDoc.data();
                 const hasAccess = userData.role === 'Administrador' ||
                     (userData.permissions && userData.permissions.includes('Consignacion:PacientesConsignacion'));
-                
+
                 if (!hasAccess) {
                     console.error('Acceso denegado');
                     elements.container.innerHTML = '<p>Acceso denegado. No tienes permisos para este módulo.</p>';
@@ -871,7 +877,7 @@ async function init() {
             ) {
                 return;
             }
-            
+
             if (elements.successModal && !elements.successModal.hasAttribute('hidden')) {
                 hideModal(elements.successModal);
             }
