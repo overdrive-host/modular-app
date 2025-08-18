@@ -115,7 +115,7 @@ try {
     }
 
     let currentPage = 1;
-    const recordsPerPage = 100;
+    const recordsPerPage = 500;
     let totalPages = 1;
     let referencias = [];
     let allReferencias = [];
@@ -1113,4 +1113,5 @@ try {
 } catch (error) {
     showSuccessMessage('Error crítico al inicializar Firebase: ' + error.message, false);
     document.querySelector('.referencias-container').innerHTML = '<p>Error crítico al cargar la aplicación. Contacta al administrador.</p>';
+
 }
